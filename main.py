@@ -27,17 +27,6 @@ class User:
     def get_id(self):
         return str(self.id)
 
-def connect_db():
-    conn = pymysql.connect(
-        host="db.steamcenter.tech",
-        user="cogboe",
-        password = config.password,
-        database="cogboe_heekaudio",
-        autocommit= True,
-        cursorclass= pymysql.cursors.DictCursor
-    )
-    return conn
-
 
 @app.route("/")
 def index():
