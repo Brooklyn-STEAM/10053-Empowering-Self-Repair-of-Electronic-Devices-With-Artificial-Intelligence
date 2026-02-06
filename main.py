@@ -30,9 +30,9 @@ class User:
 def connect_db():
     conn = pymysql.connect(
         host="db.steamcenter.tech",
-        user="cogboe",
+        user=config.user,
         password = config.password,
-        database="cogboe_heekaudio",
+        database="blueprint",
         autocommit= True,
         cursorclass= pymysql.cursors.DictCursor
     )
