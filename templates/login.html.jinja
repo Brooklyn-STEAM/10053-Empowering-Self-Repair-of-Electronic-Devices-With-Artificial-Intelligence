@@ -16,9 +16,9 @@
 
 {% include "components/navbar.html.jinja"%}
 
-<div class="flex-grow flex items-center justify-center px-4 py-6 sm:py-10 mt-9">
-    <div class="bg-white w-full max-w-md p-8 border rounded-xl shadow-2xl mb-2">
-            <h2 class="text-xl lg:text-2xl font-bold text-gray-800 mb-6 text-center">
+<div class="flex items-center justify-center mt-9">
+    <div class="bg-white w-full max-w-md p-8 border-1 shadow-2xl mb-2">
+            <h2 class="text-2xl font-bold text-gray-800 mb-6 text-center">
                 Sign In
             </h2>
 
@@ -29,22 +29,22 @@
         <form method="post" class="flex flex-col gap-4">
 
             <div>
-                <label class="block text-sm font-medium text-black mb-1">Email</label>
+                <label class="block text-sm font-medium text-gray-600 mb-1">Email</label>
                     <input
                         required
                         type="email"
                         name="email"
-                        class="w-full px-4 py-2 border rounded-lg text-black focus:ring-2 focus:ring-indigo-500 focus:outline-none"
+                        class="w-full px-4 py-2 border rounded-lg focus:ring-2 focus:ring-indigo-500 focus:outline-none"
                     >
             </div>
 
             <div>
-                <label class="block text-sm font-medium text-black mb-1">Password</label>
+                <label class="block text-sm font-medium text-black-500 mb-1">Password</label>
                 <input
                     required
                     type="password"
                     name="password"
-                    class="w-full px-4 py-2 border rounded-lg text-black focus:ring-2 focus:ring-indigo-500 focus:outline-none"
+                    class="w-full px-4 py-2 border rounded-lg focus:ring-2 focus:ring-indigo-500 focus:outline-none"
                 >
             </div>
 
@@ -56,7 +56,7 @@
                 Login
             </button>
 
-            <p class="text-center text-sm lg:text-base text-black font-sm gap-2"> Don't Have an account?
+            <p class="flex items-center justify-center font-sm gap-2"> Don't Have an account?
             <br> 
             <a href="/signup" class="flex items-center justify-center font-sm text-blue-600 underline decoration-blue-700"> Create One</a>
             </p>
