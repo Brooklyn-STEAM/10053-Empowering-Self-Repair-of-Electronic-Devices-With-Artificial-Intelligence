@@ -3,153 +3,138 @@
 <head>
     <meta charset="UTF-8">
     <title>Self Repair AI</title>
+    <link href="/static/style.css" rel="stylesheet">
+    <script src="https://cdn.jsdelivr.net/npm/@tailwindcss/browser@4"></script>
+
 </head>
 
-<body style="
-    margin:0;
-    font-family:'Courier New', monospace;
-    background-color:#0b2c4d;
-    color:#d6ecff;
-">
 
-<!-- NAVBAR -->
-{% include "components/navbar.html.jinja" %}
+  <!-- NAVBAR -->
+  {% include "components/navbar.html.jinja" %}
 
-<!-- HERO SECTION -->
-<div style="
-    display:flex;
-    align-items:center;
-    justify-content:space-between;
-    padding:80px;
-    background-color:#0e3a63;
-    border-bottom:2px dashed #6fb7ff;
-">
+  <!-- HERO SECTION -->
+  <div style="
+      display:flex;
+      align-items:center;
+      justify-content:space-between;
+      padding:80px;
+      background-color:#0e3a63;
+      border-bottom:2px dashed #6fb7ff;
+  ">
 
-    <!-- LEFT PANEL -->
-    <div style="
-        width:30%;
-        border:2px dashed #6fb7ff;
-        padding:25px;
-    ">
-        <h1 style="
-            font-size:28px;
-            margin-bottom:15px;
-            text-transform:uppercase;
-            letter-spacing:2px;
-        ">
-            Project Overview
-        </h1>
-        <p style="line-height:1.6;">
-            AI-powered repair guides designed to help users safely
-            diagnose and repair electronic devices while reducing
-            electronic waste.
-        </p>
-    </div>
+      <!-- LEFT PANEL -->
+      <div style="
+          width:30%;
+          border:2px dashed #6fb7ff;
+          padding:25px;
+      ">
+          <h1 style="
+              font-size:28px;
+              margin-bottom:15px;
+              text-transform:uppercase;
+              letter-spacing:2px;
+          ">
+              Project Overview
+          </h1>
+          <p style="line-height:1.6;">
+              AI-powered repair guides designed to help users safely
+              diagnose and repair electronic devices while reducing
+              electronic waste.
+          </p>
+      </div>
 
-    <!-- CENTER VIDEO -->
-    <div style="
-        width:160px;
-        height:160px;
-        border:3px solid #6fb7ff;
-        display:flex;
-        align-items:center;
-        justify-content:center;
-        font-size:60px;
-        cursor:pointer;
-        background-color:#0b2c4d;
-    ">
-        ▶
-    </div>
+      <!-- CENTER VIDEO -->
+      <div style="
+          width:160px;
+          height:160px;
+          border:3px solid #6fb7ff;
+          display:flex;
+          align-items:center;
+          justify-content:center;
+          font-size:60px;
+          cursor:pointer;
+          background-color:#0b2c4d;
+      ">
+          ▶
+      </div>
 
-    <!-- RIGHT PANEL -->
-    <div style="
-        width:30%;
-        border:2px dashed #6fb7ff;
-        padding:25px;
-    ">
-        <h1 style="
-            font-size:28px;
-            margin-bottom:15px;
-            text-transform:uppercase;
-            letter-spacing:2px;
-        ">
-            System Goal
-        </h1>
-        <p style="line-height:1.6;">
-            Enable users to repair devices independently using
-            step-by-step visual instructions and intelligent diagnostics.
-        </p>
-    </div>
+      <!-- RIGHT PANEL -->
+      <div style="
+          width:30%;
+          border:2px dashed #6fb7ff;
+          padding:25px;
+      ">
+          <h1 style="
+              font-size:28px;
+              margin-bottom:15px;
+              text-transform:uppercase;
+              letter-spacing:2px;
+          ">
+              System Goal
+          </h1>
+          <p style="line-height:1.6;">
+              Enable users to repair devices independently using
+              step-by-step visual instructions and intelligent diagnostics.
+          </p>
+      </div>
 
-</div>
+  </div>
 
-<!-- SECTION LABEL -->
-<div style="
-    padding:18px;
-    background-color:#0b2c4d;
-    border-top:2px dashed #6fb7ff;
-    border-bottom:2px dashed #6fb7ff;
-    text-align:center;
-    letter-spacing:3px;
-    font-size:18px;
-">
-    POPULAR FIXES — MODULE VIEW
-</div>
+  <!-- SECTION LABEL -->
+  <div style="
+      padding:18px;
+      background-color:#0b2c4d;
+      border-top:2px dashed #6fb7ff;
+      border-bottom:2px dashed #6fb7ff;
+      text-align:center;
+      letter-spacing:3px;
+      font-size:18px;
+  ">
+      POPULAR FIXES — MODULE VIEW
+  </div>
 
-<!-- POPULAR FIXES GRID -->
-<div style="
-    background-color:#0e3a63;
-    display:flex;
-    justify-content:center;
-    gap:50px;
-    padding:60px;
-">
+  <!-- POPULAR FIXES GRID -->
+  <div style="
+      background-color:#0e3a63;
+      display:flex;
+      justify-content:center;
+      gap:50px;
+      padding:60px;
+  ">
 
-    <div style="
-        border:2px solid #6fb7ff;
-        padding:20px;
-        text-align:center;
-        width:220px;
-    ">
-        <img src="https://via.placeholder.com/200x150" style="margin-bottom:10px;">
-        <p>PHONE SCREEN</p>
-    </div>
+      <div style="
+          border:2px solid #6fb7ff;
+          padding:20px;
+          text-align:center;
+          width:220px;
+      ">
+          <img src="https://via.placeholder.com/200x150" style="margin-bottom:10px;">
+          <p>PHONE SCREEN</p>
+      </div>
 
-    <div style="
-        border:2px solid #6fb7ff;
-        padding:20px;
-        text-align:center;
-        width:220px;
-    ">
-        <img src="https://via.placeholder.com/200x150" style="margin-bottom:10px;">
-        <p>BATTERY UNIT</p>
-    </div>
+      <div style="
+          border:2px solid #6fb7ff;
+          padding:20px;
+          text-align:center;
+          width:220px;
+      ">
+          <img src="https://via.placeholder.com/200x150" style="margin-bottom:10px;">
+          <p>BATTERY UNIT</p>
+      </div>
 
-    <div style="
-        border:2px solid #6fb7ff;
-        padding:20px;
-        text-align:center;
-        width:220px;
-    ">
-        <img src="https://via.placeholder.com/200x150" style="margin-bottom:10px;">
-        <p>CAMERA MODULE</p>
-    </div>
+      <div style="
+          border:2px solid #6fb7ff;
+          padding:20px;
+          text-align:center;
+          width:220px;
+      ">
+          <img src="https://via.placeholder.com/200x150" style="margin-bottom:10px;">
+          <p>CAMERA MODULE</p>
+      </div>
 
-</div>
+  </div>
 
-<!-- FOOTER -->
-<div style="
-    background-color:#081f36;
-    border-top:2px dashed #6fb7ff;
-    padding:30px;
-    text-align:center;
-    font-size:14px;
-    letter-spacing:1px;
-">
-    © 2026 SELF REPAIR AI  
-    <br>
-    TECHNICAL BLUEPRINT INTERFACE v1.0
-</div>
+{% include "components/footer.html.jinja"%}
 
 </body>
 </html>
