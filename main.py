@@ -63,7 +63,6 @@ def index():
 @app.route("/about_us")
 def about_us():
     return render_template("about_us.html.jinja")
-    return render_template("about_us.html.jinja")
 @app.route("/login", methods=["POST","GET"])
 def login_page():
     if request.method == 'POST':
@@ -126,12 +125,3 @@ def signup_page():
 
 
     return render_template("signup.html.jinja")
-
-@app.route("/logout")
-@login_required
-def logout():
-    session.pop("has_seen_greeting", None)
-    logout_user()
-    flash("You have been Logged Out")
-
-    return redirect("/")
