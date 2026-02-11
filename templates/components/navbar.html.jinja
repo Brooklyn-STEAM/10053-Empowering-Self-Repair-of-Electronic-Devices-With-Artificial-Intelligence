@@ -1,23 +1,37 @@
-<nav class="bg-[#081f36] border-b border-[#6fb7ff]">
+<nav class="bg-[#081f36] border-b border-[#6fb7ff] shadow-md">
   <div class="max-w-7xl mx-auto px-8">
     <div class="flex justify-between items-center h-14">
 
       <!-- Logo -->
-      <div class="font-bold tracking-widest text-sm">
+      <div class="font-bold tracking-widest text-sm text-white">
         BluePrint
       </div>
 
       <!-- Links -->
-      <div class="flex space-x-8 text-sm">
-        <a href="/" class="hover:text-[#6fb7ff] transition">Home</a>
-        <a href="/browse" class="hover:text-[#6fb7ff] transition">Product</a>
-        <a href="/cart" class="hover:text-[#6fb7ff] transition">Cart</a>
-        <a href="/repairs" class="hover:text-[#6fb7ff] transition">Repairs</a>
-        <a href="/about" class="hover:text-[#6fb7ff] transition">About</a>
+      <div class="flex space-x-8 text-sm items-center">
+        <a href="/" class="relative text-white hover:text-[#6fb7ff] transition-all duration-300">
+          Home
+          <span class="absolute left-0 -bottom-1 w-0 h-0.5 bg-[#6fb7ff] transition-all duration-300 group-hover:w-full"></span>
+        </a>
+        <a href="/browse" class="relative text-white hover:text-[#6fb7ff] transition-all duration-300">
+          Product
+          <span class="absolute left-0 -bottom-1 w-0 h-0.5 bg-[#6fb7ff] transition-all duration-300 group-hover:w-full"></span>
+        </a>
+        <a href="/cart" class="relative text-white hover:text-[#6fb7ff] transition-all duration-300">
+          Cart
+          <span class="absolute left-0 -bottom-1 w-0 h-0.5 bg-[#6fb7ff] transition-all duration-300 group-hover:w-full"></span>
+        </a>
+        <a href="/repairs" class="relative text-white hover:text-[#6fb7ff] transition-all duration-300">
+          Repairs
+          <span class="absolute left-0 -bottom-1 w-0 h-0.5 bg-[#6fb7ff] transition-all duration-300 group-hover:w-full"></span>
+        </a>
+        <a href="/about" class="relative text-white hover:text-[#6fb7ff] transition-all duration-300">
+          About
+          <span class="absolute left-0 -bottom-1 w-0 h-0.5 bg-[#6fb7ff] transition-all duration-300 group-hover:w-full"></span>
+        </a>
 
-
-        <a href="/login"
-           class="bg-[#6fb7ff] text-[#0b2c4d] px-4 py-1 rounded font-semibold hover:opacity-90 transition">
+        <!-- Login Button -->
+        <a href="/login" class="bg-[#6fb7ff] text-[#0b2c4d] px-4 py-1 rounded font-semibold hover:shadow-[0_0_15px_#6fb7ff] transition-all duration-300">
           Login
         </a>
       </div>
