@@ -1,11 +1,40 @@
-<nav class="bg-blue-600 text-white shadow-md">
-  <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-    <div class="flex justify-center space-x-8 h-20 items-center text-xl">
-      <a href="homepage.html.jinja" class="hover:text-gray-200">Home</a>
-      <a href="#" class="hover:text-gray-200">Product</a>
-      <a href="#" class="hover:text-gray-200">Signup/Login</a>
-      <a href="#" class="hover:text-gray-200">Repairs</a>
-        <a href="#" class="hover:text-gray-200">About Us</a>
+<nav class="bg-[#081f36] border-b border-[#6fb7ff] shadow-md">
+  <div class="max-w-7xl mx-auto px-8">
+    <div class="flex justify-between items-center h-14">
+
+      <!-- Logo -->
+      <div class="font-bold tracking-widest text-sm text-white">
+        BluePrint
+      </div>
+
+      <!-- Links -->
+      <div class="flex space-x-8 text-sm items-center">
+        <a href="/" class="relative text-white hover:text-[#6fb7ff] transition-all duration-300">
+          Home
+          <span class="absolute left-0 -bottom-1 w-0 h-0.5 bg-[#6fb7ff] transition-all duration-300 group-hover:w-full"></span>
+        </a>
+        <a href="/browse" class="relative text-white hover:text-[#6fb7ff] transition-all duration-300">
+          Product
+          <span class="absolute left-0 -bottom-1 w-0 h-0.5 bg-[#6fb7ff] transition-all duration-300 group-hover:w-full"></span>
+        </a>
+        <a href="/cart" class="relative text-white hover:text-[#6fb7ff] transition-all duration-300">
+          Cart
+          <span class="absolute left-0 -bottom-1 w-0 h-0.5 bg-[#6fb7ff] transition-all duration-300 group-hover:w-full"></span>
+        </a>
+        <a href="/repairs" class="relative text-white hover:text-[#6fb7ff] transition-all duration-300">
+          Repairs
+          <span class="absolute left-0 -bottom-1 w-0 h-0.5 bg-[#6fb7ff] transition-all duration-300 group-hover:w-full"></span>
+        </a>
+        <a href="/about" class="relative text-white hover:text-[#6fb7ff] transition-all duration-300">
+          About
+          <span class="absolute left-0 -bottom-1 w-0 h-0.5 bg-[#6fb7ff] transition-all duration-300 group-hover:w-full"></span>
+        </a>
+
+        <!-- Login Button -->
+        <a href="/login" class="bg-[#6fb7ff] text-[#0b2c4d] px-4 py-1 rounded font-semibold hover:shadow-[0_0_15px_#6fb7ff] transition-all duration-300">
+          Login
+        </a>
+      </div>
 
     </div>
   </div>
