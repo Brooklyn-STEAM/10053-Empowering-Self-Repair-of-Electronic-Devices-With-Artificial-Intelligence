@@ -12,6 +12,7 @@ app.secret_key = config.secret_key
 
 login_manager = LoginManager(app)
 
+login_manager.login_view = "/login"
 
 class User:
     is_authenticated = True
@@ -46,7 +47,7 @@ def load_user(user_id):
 def connect_db():
     conn = pymysql.connect(
         host="db.steamcenter.tech",
-        user=config.user,
+        user = config.USER,
         password = config.password,
         database="blueprint",
         autocommit= True,
@@ -62,3 +63,65 @@ def index():
 @app.route("/about_us")
 def about_us():
     return render_template("about_us.html.jinja")
+@app.route("/login", methods=["POST","GET"])
+def login_page():
+    if request.method == 'POST':
+        email = request.form['email']
+        password = request.form['password']
+
+
+        connection = connect_db()
+        cursor = connection.cursor()
+
+        cursor.execute("SELECT * FROM `User`  WHERE `Email` = %s", (email))
+        result = cursor.fetchone()
+        connection.close()
+
+        if result is None:
+            flash("No user found. The email address and/or password you entered are invalid.")
+        elif password != result["Password"]:
+            flash("Incorrect Password")
+        else:
+            login_user(User(result))
+            
+            if "has_seen_greeting"  not in session:
+                session["has_seen_greeting"] = False
+            
+            
+            return redirect("/")
+
+    return render_template("login.html.jinja")
+
+
+@app.route("/signup", methods=["POST", "GET"])
+def signup_page():
+
+    if request.method == "POST":
+        name = request.form["full_name"]
+        email = request.form["email"]
+        password = request.form["password"]
+        confirm_password = request.form["confirm_password"]
+        address = request.form["address"]
+        
+        if password != confirm_password:
+            flash("Passwords do not match")
+        elif len(password) < 8:
+            flash("Password is too short")
+        else:
+            connection = connect_db()
+
+            cursor = connection.cursor()
+            try:
+                cursor.execute("""
+                    INSERT INTO `User` (`Name`, `Email`, `Password`,  `Address`)
+                    VALUES (%s, %s, %s, %s)
+                """, (name, email, password, address))
+                connection.close()
+            except pymysql.err.IntegrityError:
+                flash("Email is already in use")
+                connection.close()
+            else:
+                return redirect("/login")
+
+
+    return render_template("signup.html.jinja")
