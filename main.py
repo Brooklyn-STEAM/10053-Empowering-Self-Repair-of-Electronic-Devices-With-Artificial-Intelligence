@@ -139,3 +139,11 @@ def logout():
 @app.route("/repairs")
 def repair_page():
     return render_template("repairs.html.jinja")
+
+@app.route("/about_us")
+def about_us():
+    return render_template("about_us.html.jinja")
+
+@app.route("/404")
+def error():
+    return render_template("404.html.jinja")
