@@ -122,3 +122,12 @@ def signup_page():
 
 
     return render_template("signup.html.jinja")
+
+@app.route("/logout")
+@login_required
+def logout():
+    session.pop("has_seen_greeting", None)
+    logout_user()
+    flash("You have been Logged Out")
+
+    return redirect("/")
