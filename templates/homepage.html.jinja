@@ -16,8 +16,24 @@
 <body class="min-h-screen flex flex-col">
   <main class="flex-grow">
 
-      <!-- HERO SECTION -->
-      <div class="flex flex-col lg:flex-row items-center justify-between px-6 py-12 lg:px-20 lg:py-20 space-y-6 lg:space-y-0 lg:space-x-10
+<!-- Navbar -->
+{% include "components/navbar.html.jinja" %}
+
+  <!-- HERO SECTION -->
+  <div style="
+      display:flex;
+      align-items:center;
+      justify-content:space-between;
+      padding:80px;
+      background-color:#0e3a63;
+      border-bottom:2px dashed #6fb7ff;
+  ">
+
+      <!-- LEFT PANEL -->
+      <div style="
+          width:30%;
+          border:2px dashed #6fb7ff;
+          padding:25px;
       ">
 
           <!-- LEFT PANEL -->
