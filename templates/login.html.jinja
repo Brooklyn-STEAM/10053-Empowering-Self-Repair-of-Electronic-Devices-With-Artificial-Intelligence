@@ -1,0 +1,66 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Login</title>
+    <link href="/static/style.css" rel="stylesheet">
+    <script src="https://cdn.jsdelivr.net/npm/@tailwindcss/browser@4"></script>
+
+</head>
+
+<body>
+
+{% include "components/navbar.html.jinja"%}
+
+<div class="flex items-center justify-center mt-9">
+    <div class="bg-white w-full max-w-md p-8 border-1 shadow-2xl mb-2">
+            <h2 class="text-2xl font-bold text-gray-800 mb-6 text-center">
+                Sign In
+            </h2>
+
+        {% for message in get_flashed_messages()%}
+                <p class="bg-red-300 w-full text-sm p-3 shadow-sm font-bold text-black rounded-lg">{{ message}} </p>
+          {% endfor%}
+
+        <form method="post" class="flex flex-col gap-4">
+
+            <div>
+                <label class="block text-sm font-medium text-black mb-1">Email</label>
+                    <input
+                        required
+                        type="email"
+                        name="email"
+                        class="w-full px-4 py-2 border rounded-lg text-black focus:ring-2 focus:ring-indigo-500 focus:outline-none"
+                    >
+            </div>
+
+            <div>
+                <label class="block text-sm font-medium text-black mb-1">Password</label>
+                <input
+                    required
+                    type="password"
+                    name="password"
+                    class="w-full px-4 py-2 border rounded-lg text-black focus:ring-2 focus:ring-indigo-500 focus:outline-none"
+                >
+            </div>
+
+            <button
+                type="submit"
+                class="mt-4 bg-indigo-600 text-white py-2 rounded-lg font-semibold
+                            hover:bg-indigo-700 transition duration-300"
+            >
+                Login
+            </button>
+
+            <p class="flex items-center justify-center text-black font-sm gap-2"> Don't Have an account?
+            <br> 
+            <a href="/signup" class="flex items-center justify-center font-sm text-blue-600 underline decoration-blue-700"> Create One</a>
+            </p>
+
+
+        </form>
+
+    </div>
+</div>
+</body>
+</html>
