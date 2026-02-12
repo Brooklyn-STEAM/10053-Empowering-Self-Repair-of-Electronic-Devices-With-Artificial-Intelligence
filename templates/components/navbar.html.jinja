@@ -28,34 +28,33 @@
     </form>
 
       <!-- Links -->
-      <div class="hidden lg:flex space-x-8 text-sm items-center">
-      
-        <a href="/" class="hover:text-[#6fb7ff] transition">Home</a>
-        <a href="/browse" class="hover:text-[#6fb7ff] transition">Product</a>
-        <a href="/cart" class="hover:text-[#6fb7ff] transition">Cart</a>
-        <a href="/repairs" class="hover:text-[#6fb7ff] transition">Repairs</a>
-        <a href="/about_us" class="hover:text-[#6fb7ff] transition">About Us</a>
+      <div class="flex space-x-8 text-sm items-center">
+        <a href="/" class="relative text-white hover:text-[#6fb7ff] transition-all duration-300">
+          Home
+          <span class="absolute left-0 -bottom-1 w-0 h-0.5 bg-[#6fb7ff] transition-all duration-300 group-hover:w-full"></span>
+        </a>
+        <a href="/browse" class="relative text-white hover:text-[#6fb7ff] transition-all duration-300">
+          Product
+          <span class="absolute left-0 -bottom-1 w-0 h-0.5 bg-[#6fb7ff] transition-all duration-300 group-hover:w-full"></span>
+        </a>
+        <a href="/cart" class="relative text-white hover:text-[#6fb7ff] transition-all duration-300">
+          Cart
+          <span class="absolute left-0 -bottom-1 w-0 h-0.5 bg-[#6fb7ff] transition-all duration-300 group-hover:w-full"></span>
+        </a>
+        <a href="/repairs" class="relative text-white hover:text-[#6fb7ff] transition-all duration-300">
+          Repairs
+          <span class="absolute left-0 -bottom-1 w-0 h-0.5 bg-[#6fb7ff] transition-all duration-300 group-hover:w-full"></span>
+        </a>
+        <a href="/about" class="relative text-white hover:text-[#6fb7ff] transition-all duration-300">
+          About Us
+          <span class="absolute left-0 -bottom-1 w-0 h-0.5 bg-[#6fb7ff] transition-all duration-300 group-hover:w-full"></span>
+        </a>
 
-
-                        {% if  not current_user.is_authenticated %}
-                        <div class="">
-                            <a href="/login"
-                                class="bg-[#6fb7ff] text-[#0b2c4d] px-4 py-1 rounded font-semibold hover:text-white hover:bg-blue-700 transition">
-                                    Login
-                                </a>
-                        </div>
-                        {% else %}
-                            <div class="flex space-x-2 items-center">
-                                {% if  not current_user.is_authenticated %}
-                                    <span id="greeting" class=""> Hi, {{current_user.name}} <br> </span>
-                                {%endif%}
-                            <div class="">
-                                    <a href="/logout"
-                                            class="bg-[#6fb7ff] text-[#0b2c4d] px-4 py-1 rounded font-semibold hover:text-white hover:bg-red-700  transition">
-                                        Logout
-                                    </a>
-                            </div> 
-                            </div>
+        <!-- Login Button -->
+        <a href="/login" class="bg-[#6fb7ff] text-[#0b2c4d] px-4 py-1 rounded font-semibold hover:shadow-[0_0_15px_#6fb7ff] transition-all duration-300">
+          Login
+        </a>
+      </div>
 
                         {% endif %}
                     
