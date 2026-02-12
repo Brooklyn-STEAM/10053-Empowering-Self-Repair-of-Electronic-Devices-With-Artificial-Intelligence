@@ -1,0 +1,64 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <script src="https://cdn.tailwindcss.com"></script>
+
+    <title>About Us</title>
+</head>
+
+<body class="bg-[#0b2c4d] text-[#d6ecff] font-mono">
+
+<!-- NAVBAR -->
+{% include "components/navbar.html.jinja" %}
+
+<!-- HERO SECTION -->
+<div class="py-[90px] px-[80px] bg-[#0e3a63] border-b-2 border-dashed border-[#6fb7ff]">
+
+<h1 class="text-[44px] mb-[20px] tracking-[1px]">About BluePrint</h1>
+
+<p class="max-w-[700px] text-lg leading-relaxed mb-10">
+        BluePrint gives you clear, step-by-step repair guides powered by
+        artificial intelligence — helping you save money and reduce electronic waste.
+</p>
+
+    
+
+<!--  -->
+<div class="py-[70px] px-[80px] bg-[#0b2c4d]">
+
+
+    <h2 class="text-3xl mb-10 border-b-2 border-dashed border-[#6fb7ff] inline-block pb-[10px]"> The People </h2>
+
+   <div class="flex gap-[50px] mt-10">
+
+
+        <div style="max-width:300px;">
+            <h3>Jason Geban </h3>
+            <p>Jason is the team leader. His roles are team leadership, sprint planning, stakeholder and communication</p>
+        </div>
+
+        <div style="max-width:300px;">
+            <h3>Caleb Ogboe</h3>
+            <p>Caleb is the backend developer. His roles are UI/UX design, and responsive design
+
+</p>
+        </div>
+
+        <div style="max-width:300px;">
+            <h3>Jayson Ramirez</h3>
+            <p>Jayson is the frontend developer. His roles are API development, database management, security</p>
+        </div>
+
+    </div>
+
+</div>
+
+
+<!-- FOOTER -->
+{% include "components/footer.html.jinja" %}
+
+</body>
+</html>
+

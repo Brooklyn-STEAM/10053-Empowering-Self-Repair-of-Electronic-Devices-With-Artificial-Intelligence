@@ -1,39 +1,27 @@
-<!doctype html>
-<html>
-<head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <script src="https://cdn.jsdelivr.net/npm/@tailwindcss/browser@4"></script>
-  <title>Login</title>
-</head>
+<nav class="bg-[#081f36] border-b border-[#6fb7ff]">
+  <div class="max-w-7xl mx-auto px-8">
+    <div class="flex justify-between items-center h-14">
 
-<body class="bg-gray-100 flex items-center justify-center min-h-screen">
-{% include "components/navbar.html.jinja" %}
+      <!-- Logo -->
+      <div class="font-bold tracking-widest text-sm">
+        BluePrint
+      </div>
+
+      <!-- Links -->
+      <div class="flex space-x-8 text-sm">
+        <a href="/" class="hover:text-[#6fb7ff] transition">Home</a>
+        <a href="/browse" class="hover:text-[#6fb7ff] transition">Product</a>
+        <a href="/cart" class="hover:text-[#6fb7ff] transition">Cart</a>
+        <a href="/repairs" class="hover:text-[#6fb7ff] transition">Repairs</a>
+        <a href="/about_us" class="hover:text-[#6fb7ff] transition">About</a>
 
 
-  <form method="POST"
-        class="bg-white p-8 rounded-2xl shadow-xl w-full max-w-md space-y-5">
+        <a href="/login"
+           class="bg-[#6fb7ff] text-[#0b2c4d] px-4 py-1 rounded font-semibold hover:opacity-90 transition">
+          Login
+        </a>
+      </div>
 
-    <h1 class="text-2xl font-bold text-center text-gray-800">Login</h1>
-
-    <input type="email" name="email" placeholder="Email" required
-           class="w-full p-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-400">
-
-    <input type="password" name="password" placeholder="Password" required
-           class="w-full p-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-400">
-
-    <button type="submit"
-            class="w-full bg-blue-600 text-white font-semibold py-3 rounded-xl hover:bg-blue-700 transition">
-      Login
-    </button>
-
-    <!-- Sign Up link -->
-    <a href="/register"
-       class="block text-center text-blue-600 font-medium hover:underline">
-      Don't have an account? Sign up
-    </a>
-
-  </form>
-
-</body>
-</html>
+    </div>
+  </div>
+</nav>

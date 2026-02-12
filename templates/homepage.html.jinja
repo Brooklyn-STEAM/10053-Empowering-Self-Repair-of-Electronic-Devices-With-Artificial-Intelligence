@@ -10,7 +10,7 @@
 <body class="bg-[#0b2c4d] text-[#d6ecff] font-mono">
 
 <!-- Navbar -->
-{% include 'components/navbar.html.jinja' %}
+{% include "components/navbar.html.jinja" %}
 
 <!-- HERO SECTION -->
 <section class="flex flex-col lg:flex-row items-center justify-between bg-[#0e3a63] border-b-2 border-dashed border-[#6fb7ff] p-10 lg:p-20 gap-8">
@@ -66,11 +66,9 @@
 
 </section>
 
+
 <!-- FOOTER -->
-<footer class="bg-[#081f36] border-t-2 border-dashed border-[#6fb7ff] p-8 text-center text-sm tracking-wide">
-    © 2026 BluePrint <br>
-    TECHNICAL BLUEPRINT INTERFACE v1.0
-</footer>
+{% include "components/footer.html.jinja" %}
 
 </body>
 </html>
