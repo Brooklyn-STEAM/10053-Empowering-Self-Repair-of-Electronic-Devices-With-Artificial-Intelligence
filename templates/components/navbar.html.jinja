@@ -30,11 +30,32 @@
           <span class="absolute left-0 -bottom-1 w-0 h-0.5 bg-[#6fb7ff] transition-all duration-300 group-hover:w-full"></span>
         </a>
 
+        <!-- Login Button -->
+        
+            <div class="flex items-center">
+                <div class="flex space-x-300">
+                    {% if  not current_user.is_authenticated %}
+                    <div class="">
+                        <a href="/login"
+                            class="block text-md px-4 py-2 rounded text-white ml-2 font-bold hover:text-white mt-4 hover:bg-blue-700 lg:mt-0">Login
+                            </a>
+                    </div>
+                    {% else %}
+                        <div class="flex space-x-2 items-center">
+                            {% if  not current_user.is_authenticated %}
+                                <span id="greeting" class=""> Hi, {{current_user.name}} <br> </span>
+                            {%endif%}
+                        <div class="block text-md px-4 py-2 rounded text-blue-700 ml-2 font-bold hover:text-white mt-4 hover:bg-blue-700 lg:mt-0">
+                                <a href="/logout" class="bg-[#6fb7ff] text-[#0b2c4d] px-4 py-1 rounded font-semibold hover:shadow-[0_0_15px_#6fb7ff] transition-all duration-300">
+                                        Logout
+                                </a>
+                        </div> 
+                        </div>
 
-        <a href="/login"
-           class="bg-[#6fb7ff] text-[#0b2c4d] px-4 py-1 rounded font-semibold hover:opacity-90 transition">
-          Login
-        </a>
+                    {% endif %}
+                </div>
+            </div>
+        
       </div>
 
     </div>
