@@ -134,3 +134,7 @@ def logout():
     flash("You have been Logged Out")
 
     return redirect("/")
+
+@app.route("/repairs")
+def repair_page():
+    return render_template("repairs.html.jinja")

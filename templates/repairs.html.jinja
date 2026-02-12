@@ -1,0 +1,57 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <script src="https://cdn.tailwindcss.com"></script>
+    <title>Repair Page</title>
+</head>
+
+<body class="bg-[#0b2c4d] text-[#d6ecff] font-mono min-h-screen flex flex-col">
+
+<!-- NAVBAR -->
+{% include "components/navbar.html.jinja" %}
+
+<header class="py-[70px] px-[80px] bg-[#0e3a63] border-b-2 border-dashed border-[#6fb7ff] text-center">
+    <h1 class="text-4xl mb-6 border-b-2 border-dashed border-[#6fb7ff] inline-block pb-[10px]">
+        Welcome to the Repair Page
+    </h1>
+    <p class="max-w-[700px] mx-auto text-lg leading-relaxed">
+        Step-by-step guides and tools to help you repair your device safely and correctly.
+    </p>
+</header>
+
+<div class="grid grid-cols-1 md:grid-cols-2 gap-10 items-center">
+
+    <!-- Images -->
+    <div class="grid grid-cols-2 gap-4">
+        <img src="/static/img/step1.jpg" class="w-full rounded-lg shadow-md" alt="Step 1">
+        <img src="/static/img/step2.jpg" class="w-full rounded-lg shadow-md" alt="Step 2">
+    </div>
+
+    <!-- Text -->
+    <div>
+        <h2 class="text-3xl mb-6 border-b-2 border-dashed border-[#6fb7ff] inline-block pb-[10px]">
+            Repair Steps
+        </h2>
+
+        <p class="text-lg leading-relaxed mb-4">
+            Follow these step-by-step images to safely repair your device. Each image shows the correct tool placement and part removal order.
+        </p>
+
+        <ul class="list-disc pl-6 space-y-2 text-base">
+            <li>Turn off the device first</li>
+            <li>Use the correct screwdriver size</li>
+            <li>Keep screws organized</li>
+            <li>Follow steps in order</li>
+        </ul>
+    </div>
+
+</div>
+
+
+<!-- FOOTER -->
+{% include "components/footer.html.jinja" %}
+
+</body>
+</html>
