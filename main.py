@@ -60,10 +60,6 @@ def connect_db():
 def index():
     return render_template("homepage.html.jinja")
 
-@app.route("/about_us")
-def about_us():
-    return render_template("about_us.html.jinja")
-    return render_template("about_us.html.jinja")
 @app.route("/login", methods=["POST","GET"])
 def login_page():
     if request.method == 'POST':
