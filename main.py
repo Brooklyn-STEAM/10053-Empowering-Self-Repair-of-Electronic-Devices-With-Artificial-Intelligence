@@ -143,3 +143,7 @@ def about_us():
 @app.route("/404")
 def error():
     return render_template("404.html.jinja")
+
+@app.route("/products")
+def products():
+    return render_template("products.html.jinja")
