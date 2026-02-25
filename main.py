@@ -147,3 +147,13 @@ def error():
 @app.route("/products")
 def products():
     return render_template("products.html.jinja")
+
+@app.route("/search", methods=["GET"])
+def search_results():
+
+    connection = connect_db()
+    cursor = connection.cursor(pymysql.cursors.DictCursor)
+
+    results = cursor.fetchall()
+    
+    return render_template("search_results.html.jinja")
