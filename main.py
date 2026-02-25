@@ -152,3 +152,13 @@ def products():
 @login_required
 def cart():
     return render_template("cart.html.jinja")
+
+@app.route("/search", methods=["GET"])
+def search_results():
+
+    connection = connect_db()
+    cursor = connection.cursor(pymysql.cursors.DictCursor)
+
+    results = cursor.fetchall()
+    
+    return render_template("search_results.html.jinja")
