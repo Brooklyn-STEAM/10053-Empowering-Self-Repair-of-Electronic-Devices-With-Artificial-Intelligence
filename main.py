@@ -147,3 +147,8 @@ def error():
 @app.route("/products")
 def products():
     return render_template("products.html.jinja")
+
+@app.route("/cart")
+@login_required
+def cart():
+    return render_template("cart.html.jinja")
