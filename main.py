@@ -148,6 +148,11 @@ def error():
 def products():
     return render_template("products.html.jinja")
 
+@app.route("/cart")
+@login_required
+def cart():
+    return render_template("cart.html.jinja")
+
 @app.route("/search", methods=["GET"])
 def search_results():
 
