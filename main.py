@@ -155,10 +155,24 @@ def cart():
 
 @app.route("/search", methods=["GET"])
 def search_results():
+    query = request.args.get("q", "").strip()
 
     connection = connect_db()
     cursor = connection.cursor(pymysql.cursors.DictCursor)
 
-    results = cursor.fetchall()
+    results = []
+
+    if query:
+        sql = """
+            SELECT *
+            From Product
+            WHERE Name LIKE %s
+                OR Description LIKE %s
+        """
+        params = [f"%{query}%", f"%{query}%"]
+        cursor.execute(sql, params)
+        results = cursor. fetchall()
     
-    return render_template("search_results.html.jinja")
+    connection.close()
+
+    return render_template("search_results.html.jinja", query=query, results = results)
