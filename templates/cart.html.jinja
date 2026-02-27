@@ -32,7 +32,7 @@
     {% for x in cart %}
       {% set ns.total = ns.total + (x['Price'] * x['Quantity']) %}
 
-      <div class="grid grid-cols-6 items-center bg-cyan-900 rounded-lg shadow p-4 mb-4 gap-4">
+      <div class="grid grid-cols-6 items-center bg-white rounded-lg shadow p-4 mb-4 gap-4">
 
         <!-- Product Image -->
         <img src="{{ x['Image'] }}" class="h-24 w-24 object-contain rounded border">
@@ -42,7 +42,7 @@
           {{ x['Name'] }}
         </div>
 
-       <!-- Quantity Update -->
+        <!-- Quantity Update -->
         <div class="text-center">
           <form method="post" action="/cart/{{ x['ProductID'] }}/update_qty"
                 class="flex items-center gap-2 justify-center">
@@ -67,7 +67,6 @@
           </form>
         </div>
 
-
         <!-- Price + Subtotal -->
         <div class="text-right">
           <div class="font-semibold">
@@ -84,12 +83,12 @@
     <!-- TOTAL -->
     <div class="flex justify-end mt-6">
       <div class="bg-white rounded-lg shadow p-4 w-64 text-right">
-        <h2 class="text-xl font-bold text-gray-800">
+        <h2 class="text-xl font-bold">
           Total: ${{ ns.total }}
         </h2>
 
         <a href="{{ url_for('checkout') }}"
-           class="block mt-4 bg-blue-500 hover:bg-black text-white font-bold
+           class="block mt-4 bg-yellow-500 hover:bg-yellow-600 text-white font-bold
                   px-4 py-3 rounded-lg text-center transition">
           Proceed to Checkout
         </a>
@@ -98,9 +97,6 @@
 
   {% endif %}
 
-<a href="{{ url_for('browse') }}">
-    <button class="bg-black font-bold text-white  mt-4 rounded-lg px-4 py-2">⬅ Go Back</button>
-</a>
 </main>
     <!-- FOOTER -->
     {% include "components/footer.html.jinja" %}
