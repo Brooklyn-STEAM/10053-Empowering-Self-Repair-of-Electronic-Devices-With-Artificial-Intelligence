@@ -144,6 +144,80 @@ def about_us():
 def error():
     return render_template("404.html.jinja")
 
+@app.route("/products")
+def products():
+    return render_template("products.html.jinja")
+
 @app.route("/cart")
+@login_required
 def cart():
     return render_template("cart.html.jinja")
+
+@app.route("/search", methods=["GET"])
+def search_results():
+    query = request.args.get("q", "").strip()
+
+    connection = connect_db()
+    cursor = connection.cursor(pymysql.cursors.DictCursor)
+
+    results = []
+
+    if query:
+        sql = """
+            SELECT *
+            From Product
+            WHERE Name LIKE %s
+                OR Description LIKE %s
+        """
+        params = [f"%{query}%", f"%{query}%"]
+        cursor.execute(sql, params)
+        results = cursor. fetchall()
+    
+    connection.close()
+
+    return render_template("search_results.html.jinja", query=query, results = results)
+
+@app.route("/repairs")
+def repair_page():
+    return render_template("repairs.html.jinja")
+
+@app.route("/about_us")
+def about_us():
+    return render_template("about_us.html.jinja")
+
+@app.route("/404")
+def error():
+    return render_template("404.html.jinja")
+
+@app.route("/products")
+def products():
+    return render_template("products.html.jinja")
+
+@app.route("/cart")
+@login_required
+def cart():
+    return render_template("cart.html.jinja")
+
+@app.route("/search", methods=["GET"])
+def search_results():
+    query = request.args.get("q", "").strip()
+
+    connection = connect_db()
+    cursor = connection.cursor(pymysql.cursors.DictCursor)
+
+    results = []
+
+    if query:
+        sql = """
+            SELECT *
+            From Product
+            WHERE Name LIKE %s
+                OR Description LIKE %s
+        """
+        params = [f"%{query}%", f"%{query}%"]
+        cursor.execute(sql, params)
+        results = cursor. fetchall()
+    
+    connection.close()
+
+    return render_template("search_results.html.jinja", query=query, results = results)

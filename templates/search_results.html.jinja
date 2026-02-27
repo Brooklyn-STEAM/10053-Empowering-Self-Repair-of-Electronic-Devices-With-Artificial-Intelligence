@@ -1,0 +1,72 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+   <meta charset="UTF-8">
+   <meta name="viewport" content="width=device-width, initial-scale=1.0">
+   <script src="https://cdn.tailwindcss.com"></script>
+   <title>Home</title>
+   <link href="/static/style.css" rel="stylesheet">
+   <script src="https://cdn.jsdelivr.net/npm/@tailwindcss/browser@4"></script>
+
+
+</head>
+
+
+<body class="min-h-screen flex flex-col">
+   {%include "components/navbar.html.jinja"%}
+   <main class="flex-grow">
+       <div class="max-w-6xl mx-auto px-6 py-8">
+            <h2 class="text-2xl font-bold mb-6">
+                Search results for "{{query}}"
+            </h2>
+
+                 {% if results %}
+            <div class="space-y-4">
+
+                {% for products in results %}
+                    <a href="/product/{{ products['ID'] }}"
+                       class="flex items-center gap-4 bg-white border border-gray-200 rounded-2xl p-4 transition-all duration-200 hover:shadow-lg hover:-translate-y-0.5 hover:border-gray-300">
+
+                        <!-- Image -->
+                        <div class="w-20 h-20 flex-shrink-0">
+                            <img src="{{ products['Image'] }}"
+                                 alt="{{ products['Name'] }}"
+                                 class="w-full h-full object-contain rounded-lg">
+                        </div>
+
+                        <!-- Text Content -->
+                        <div class="flex-1">
+                            <h3 class="text-lg font-semibold hover:text-blue-600 transition">
+                                {{ products["Name"] }}
+                            </h3>
+
+                            <p class="text-gray-600 text-sm mt-1">
+                                {{ products["Description"][:120] }}...
+                            </p>
+
+                            <p class="text-blue-600 font-medium mt-2">
+                                ${{ products["Price"] }}
+                            </p>
+                        </div>
+
+                        <!-- Right Side -->
+                        <div class="text-gray-400 text-sm">
+                            →
+                        </div>
+
+                    </a>
+                {% endfor %}
+
+            </div>
+
+        {% else %}
+            <p class="text-gray-500">
+                No products found.
+            </p>
+        {% endif %}
+        </div>
+
+   </main>
+   {%include "components/footer.html.jinja"%}
+</body>
+</html>
