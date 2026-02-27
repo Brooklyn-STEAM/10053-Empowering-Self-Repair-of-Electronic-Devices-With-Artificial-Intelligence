@@ -1,0 +1,89 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Cart</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+</head>
+<body class="bg-[#0b2c4d] text-[#d6ecff] font-mono">
+   <!-- Navbar -->
+    {% include "components/navbar.html.jinja" %}
+
+ {% if cart|length == 0 %}
+    <p class="text-gray-600 text-lg">
+      Your cart is empty.
+    </p>
+  {% else %}
+
+    {% set ns = namespace(total=0) %}
+
+    {% for x in cart %}
+      {% set ns.total = ns.total + (x['Price'] * x['Quantity']) %}
+
+
+  <!-- Product Image -->
+        <img src="{{ x['Image'] }}" class="h-24 w-24 object-contain rounded border">
+
+        <!-- Product Name -->
+        <div class="col-span-2 font-semibold">
+          {{ x['Name'] }}
+        </div>
+
+        <!-- Quantity Update -->
+        <div class="text-center">
+          <form method="post" action="/cart/{{ x['ProductID'] }}/update_qty"
+                class="flex items-center gap-2 justify-center">
+            <input
+              name="Quantity" type="number" value="{{ x['Quantity'] }}" min="1"
+              class="w-16 border rounded px-2 py-1 text-center">
+            <button type="submit"
+              class="bg-blue-500 hover:bg-blue-600 text-white px-3 py-1 rounded text-sm">
+              Update
+            </button>
+          </form>
+        </div>
+
+        <!-- Remove Button -->
+        <div class="text-center">
+          <form method="post" action="/cart/{{ x['ProductID'] }}/remove">
+            <button
+              type="submit"
+              class="bg-red-500 hover:bg-red-600 text-white px-4 py-2 rounded text-sm">
+              Remove
+            </button>
+          </form>
+        </div>
+
+        <!-- Price + Subtotal -->
+        <div class="text-right">
+          <div class="font-semibold">
+            ${{ x['Price'] }}
+          </div>
+          <div class="text-sm text-gray-600">
+            Subtotal: ${{ x['Price'] * x['Quantity'] }}
+          </div>
+        </div>
+
+      </div>
+    {% endfor %}
+
+    <!-- TOTAL -->
+    <div class="flex justify-end mt-6">
+      <div class="bg-white rounded-lg shadow p-4 w-64 text-right">
+        <h2 class="text-xl font-bold">
+          Total: ${{ ns.total }}
+        </h2>
+
+        <a href="{{ url_for('checkout') }}"
+           class="block mt-4 bg-yellow-500 hover:bg-yellow-600 text-white font-bold
+                  px-4 py-3 rounded-lg text-center transition">
+          Proceed to Checkout
+        </a>
+      </div>
+    </div>
+
+  {% endif %}
+
+</body>
+</html>

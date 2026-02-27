@@ -143,3 +143,7 @@ def about_us():
 @app.route("/404")
 def error():
     return render_template("404.html.jinja")
+
+@app.route("/cart")
+def cart():
+    return render_template("cart.html.jinja")
