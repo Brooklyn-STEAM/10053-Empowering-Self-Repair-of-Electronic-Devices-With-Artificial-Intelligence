@@ -16,59 +16,58 @@
 
 <body class="min-h-screen flex flex-col">
    {%include "components/navbar.html.jinja"%}
-   <main class="flex-grow">
-       <div class="max-w-6xl mx-auto px-6 py-8">
-            <h2 class="text-2xl font-bold mb-6">
-                Search results for "{{query}}"
-            </h2>
+   <main class="flex-grow bg-[#0f2f4f]">
 
-                 {% if results %}
-            <div class="space-y-4">
+    <div class="max-w-6xl mx-auto px-6 py-10">
+
+        <!-- Title -->
+        <h2 class="text-2xl font-bold text-white mb-8">
+            Search results for "{{ query }}"
+        </h2>
+
+        <!-- Results wrapper -->
+        <div class="max-w-2xl">
+
+            {% if results %}
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-8">
 
                 {% for products in results %}
                     <a href="/product/{{ products['ID'] }}"
-                       class="flex items-center gap-4 bg-white border border-gray-200 rounded-2xl p-4 transition-all duration-200 hover:shadow-lg hover:-translate-y-0.5 hover:border-gray-300">
+                    class="flex items-center gap-6 bg-gray-100 border border-gray-300 rounded-3xl p-4 transition hover:shadow-lg hover:border-gray-400">
 
-                        <!-- Image -->
-                        <div class="w-20 h-20 flex-shrink-0">
+                        <!-- Image container -->
+                        <div class="w-29 h-29 bg-white rounded-2xl flex items-center justify-center border border-gray-200">
                             <img src="{{ products['Image'] }}"
-                                 alt="{{ products['Name'] }}"
-                                 class="w-full h-full object-contain rounded-lg">
+                                alt="{{ products['Name'] }}"
+                                class="max-h-25 object-contain">
                         </div>
 
-                        <!-- Text Content -->
+                        <!-- Text content -->
                         <div class="flex-1">
-                            <h3 class="text-lg font-semibold hover:text-blue-600 transition">
+                            <h3 class="text-lg font-semibold text-gray-800">
                                 {{ products["Name"] }}
                             </h3>
 
-                            <p class="text-gray-600 text-sm mt-1">
-                                {{ products["Description"][:120] }}...
-                            </p>
-
-                            <p class="text-blue-600 font-medium mt-2">
+                            <p class="text-gray-700 mt-2 font-medium">
                                 ${{ products["Price"] }}
                             </p>
-                        </div>
-
-                        <!-- Right Side -->
-                        <div class="text-gray-400 text-sm">
-                            →
                         </div>
 
                     </a>
                 {% endfor %}
 
             </div>
+            {% else %}
+                <p class="text-gray-300">
+                    No products found.
+                </p>
+            {% endif %}
 
-        {% else %}
-            <p class="text-gray-500">
-                No products found.
-            </p>
-        {% endif %}
         </div>
 
-   </main>
+    </div>
+
+</main>
    {%include "components/footer.html.jinja"%}
 </body>
 </html>
