@@ -132,12 +132,18 @@ def logout():
 
     return redirect("/")
 
+
+    return render_template("repairs.html.jinja")
+
+    return render_template("404.html.jinja")
+
+
 @app.route("/repairs")
-def repair_page():
+def repairPage():
     return render_template("repairs.html.jinja")
 
 @app.route("/about_us")
-def about_us():
+def aboutus():
     return render_template("about_us.html.jinja")
 
 @app.route("/404")
