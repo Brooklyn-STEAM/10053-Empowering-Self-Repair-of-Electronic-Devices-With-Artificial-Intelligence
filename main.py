@@ -167,9 +167,8 @@ def search_results():
             SELECT *
             From Product
             WHERE Name LIKE %s
-                OR Description LIKE %s
         """
-        params = [f"%{query}%", f"%{query}%"]
+        params = [f"%{query}%"]
         cursor.execute(sql, params)
         results = cursor. fetchall()
     
