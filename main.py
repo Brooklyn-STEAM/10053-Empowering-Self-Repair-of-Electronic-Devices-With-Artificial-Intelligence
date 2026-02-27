@@ -135,12 +135,14 @@ def logout():
 
     return redirect("/")
 
+
+
 @app.route("/repairs")
-def repair_page():
+def repairPage():
     return render_template("repairs.html.jinja")
 
 @app.route("/about_us")
-def about_us():
+def aboutus():
     return render_template("about_us.html.jinja")
 
 @app.errorhandler(404)
