@@ -162,6 +162,10 @@ def products():
     connection.close() 
     return render_template("products.html.jinja" , products = result)
   
+@app.route("/cart")
+@login_required
+def cart():
+    return render_template("cart.html.jinja")
 
 @app.route("/search", methods=["GET"])
 def search():
@@ -293,6 +297,7 @@ def add_to_cart(product_id):
             return redirect("/products")
     except ValueError:
         return redirect("/products")
+    quantity = int(request.form["qty"])
 
     connection = connect_db()
     cursor = connection.cursor()
