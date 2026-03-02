@@ -152,7 +152,15 @@ def error():
 
 @app.route("/products")
 def products():
-    return render_template("products.html.jinja")
+    connection = connect_db()
+
+    cursor = connection.cursor()
+
+    cursor.execute("SELECT * FROM `Product` ") 
+
+    result = cursor.fetchall()
+    connection.close() 
+    return render_template("products.html.jinja" , products = result)
 
 @app.route("/cart")
 @login_required
