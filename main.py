@@ -150,18 +150,6 @@ def aboutus():
 def error():
     return render_template("404.html.jinja")
 
-@app.route("/products")
-def products():
-    connection = connect_db()
-
-    cursor = connection.cursor()
-
-    cursor.execute("SELECT * FROM `Product` ") 
-
-    result = cursor.fetchall()
-    connection.close() 
-    return render_template("products.html.jinja" , products = result)
-
 @app.route("/cart")
 @login_required
 def cart():
@@ -189,3 +177,74 @@ def search_results():
     connection.close()
 
     return render_template("search_results.html.jinja", query=query, results = results)
+
+@app.route("/browse")
+def browse():
+    connection = connect_db()
+
+    cursor = connection.cursor()
+
+    cursor.execute("SELECT * FROM `Product` ") 
+
+    result = cursor.fetchall()
+    connection.close() 
+    return render_template("browse.html.jinja" , products = result)
+
+
+@app.route("/product/<product_id>")
+def product_page(product_id):
+ 
+    connection = connect_db()
+
+    cursor = connection.cursor()
+
+    cursor.execute("SELECT * FROM `Product` WHERE `ID` = %s", (product_id,) )
+
+    result = cursor.fetchone()
+
+    cursor.close()
+
+    connection = connect_db()
+
+    cursor = connection.cursor()
+
+    cursor.execute("""
+    SELECT * FROM `Review`
+    
+    JOIN `User` ON `Review`.`UserID` = `User`.`ID` 
+                   
+    WHERE `ProductID` = %s
+    
+    """, (product_id,) )
+
+    review = cursor.fetchall()
+
+    connection.close() 
+
+    if result is None:
+        abort(404)
+    return render_template("product.html.jinja", product=result , review=review)
+
+
+@app.route("/product/<product_id>/add_to_cart", methods=["POST"])
+@login_required
+def add_to_cart(product_id):
+
+    quantity = int(request.form["qty"])
+
+    connection = connect_db()
+    cursor = connection.cursor()
+
+    cursor.execute("""
+        INSERT INTO `Cart` (`quantity`, `ProductID`, `UserID`)
+        VALUES (%s, %s, %s)
+        ON DUPLICATE KEY UPDATE
+        `Quantity` = `Quantity` + %s
+    """ , (quantity, product_id, current_user.id, quantity) )
+    
+    connection.commit()
+    connection.close()
+
+
+
+    return redirect('/cart')
