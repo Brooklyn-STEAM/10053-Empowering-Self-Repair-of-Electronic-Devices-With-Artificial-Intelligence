@@ -243,11 +243,11 @@ def add_to_cart(product_id):
     cursor = connection.cursor()
 
     cursor.execute("""
-        INSERT INTO `Cart` (`Quantity`, `ProductID`, `UserID`)
+        INSERT INTO `Cart` (`quantity`, `ProductID`, `UserID`)
         VALUES (%s, %s, %s)
         ON DUPLICATE KEY UPDATE
-        `Quantity` = `Quantity` + VALUES(`Quantity`)
-    """, (quantity, product_id, current_user.id))
+        `Quantity` = `Quantity` + %s
+    """ , (quantity, product_id, current_user.id, quantity) )
     
     connection.commit()
     connection.close()
