@@ -34,9 +34,9 @@
 {% for x in cart %}
 {% set ns.total = ns.total + (x['Price'] * x['Quantity']) %}
 
-<div class="grid grid-cols-6 items-center bg-white rounded-lg shadow p-4 mb-4 gap-4">
-
-  <img src="{{ x['Image'] }}" class="h-24 w-24 object-contain rounded border">
+      <div class="grid grid-cols-6 items-center bg-cyan-900 rounded-lg shadow p-4 mb-4 gap-4">
+        <!-- Product Image -->
+        <img src="{{ x['Image'] }}" class="h-24 w-24 object-contain rounded border">
 
   <div class="col-span-2 font-semibold text-gray-800">
     {{ x['Name'] }}
@@ -77,10 +77,10 @@
 
         <!-- Price + Subtotal -->
         <div class="text-right">
-          <div class="font-semibold">
+          <div class="font-semibold text-white">
             ${{ x['Price'] }}
           </div>
-          <div class="text-sm text-gray-600">
+          <div class="text-sm text-white">
             Subtotal: ${{ x['Price'] * x['Quantity'] }}
           </div>
         </div>
