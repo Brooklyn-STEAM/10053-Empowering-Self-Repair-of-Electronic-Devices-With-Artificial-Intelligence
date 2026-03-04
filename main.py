@@ -161,7 +161,11 @@ def products():
     result = cursor.fetchall()
     connection.close() 
     return render_template("products.html.jinja" , products = result)
-  
+
+@app.route("/cart")
+@login_required
+def cart():
+    return render_template("cart.html.jinja")
 
 @app.route("/search", methods=["GET"])
 def search():
