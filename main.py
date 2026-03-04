@@ -285,6 +285,7 @@ def add_to_cart(product_id):
             return redirect("/products")
     except ValueError:
         return redirect("/products")
+    quantity = int(request.form["qty"])
 
     connection = connect_db()
     cursor = connection.cursor()
