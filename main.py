@@ -241,6 +241,90 @@ def cart():
 
 @app.route("/product/<int:product_id>/add_to_cart", methods=["POST"])
 @login_required
+def update_qty(product_id):
+
+    try:
+        quantity = int(request.form.get("Quantity", 1))
+
+        if quantity <= 0:
+            flash("Quantity must be at least 1.")
+            return redirect("/cart")
+
+        connection = connect_db()
+        cursor = connection.cursor()
+
+        cursor.execute("""
+            UPDATE Cart
+            SET quantity = %s
+            WHERE ProductID = %s AND UserID = %s
+        """, (quantity, product_id, current_user.id))
+
+        connection.commit()
+
+    except Exception as e:
+        connection.rollback()
+        print(e)
+        flash("Error updating quantity.")
+
+    finally:
+        cursor.close()
+        connection.close()
+
+    return redirect("/cart")
+
+@app.route("/cart") 
+def cart():
+    connection = connect_db()
+
+    cursor = connection.cursor()
+    cursor.execute("""
+            SELECT * FROM `Cart` 
+            JOIN `Product` ON `Cart`.`ProductID` = `Product`.`ID`
+            WHERE `UserID` =  %s 
+            """, (current_user.id,) )
+    result = cursor.fetchall()
+
+    connection.close()
+    return render_template("cart.html.jinja", cart=result)
+
+
+@app.route("/product/<product_id>/add_to_cart", methods=["POST"])
+@login_required
+def add_to_cart(product_id):
+
+    try:
+        quantity = int(request.form.get("qty", 1))
+        if quantity <= 0:
+            return redirect("/products")
+    except ValueError:
+        return redirect("/products")
+
+@app.errorhandler(404)
+def page_not_found(e):
+    return render_template("404.html.jinja"), 404
+
+@app.route("/cart")
+@login_required
+def cart():
+
+    connection = connect_db()
+    cursor = connection.cursor()
+
+    cursor.execute("""
+        SELECT * FROM Cart
+        JOIN Product ON Cart.ProductID = Product.ID
+        WHERE UserID = %s
+    """, (current_user.id,))
+
+    result = cursor.fetchall()
+
+    connection.close()
+
+    return render_template("cart.html.jinja", cart=result)
+
+
+@app.route("/product/<int:product_id>/add_to_cart", methods=["POST"])
+@login_required
 def remove_from_cart(product_id):
     connection = connect_db()
 
@@ -321,6 +405,27 @@ def update_cart(product_id):
 
     return redirect('/cart')
 
+@app.route("/cart/<product_id>/remove", methods=["POST"])
+@login_required
+def remove(product_id):
+
+    connection = connect_db()
+    cursor = connection.cursor()
+
+    cursor.execute("""
+        DELETE FROM Cart 
+        WHERE ProductID = %s AND UserID = %s
+    """, (product_id, current_user.id))
+
+    connection.commit() 
+    cursor.close()
+    connection.close()
+
+    return redirect('/cart')
+
+@app.route("/checkout")
+def checkout():
+    return render_template("checkout.html.jinja")
 
 @app.route("/checkout", methods=["GET", "POST"])
 @login_required
