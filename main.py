@@ -159,7 +159,10 @@ def products():
 
     return render_template("products.html.jinja", products=products)
 
-    
+@app.route("/cart")
+@login_required
+def cart():
+    return render_template("cart.html.jinja")
 
 @app.route("/search", methods=["GET"])
 def search():
@@ -391,6 +394,28 @@ def remove(product_id):
     connection.close()
 
     return redirect('/cart')
+
+@app.route("/cart/<product_id>/update_qty", methods=["POST"])
+@login_required
+def update_cart(product_id):
+    new_quantity = request.form["Quantity"]
+    connection = connect_db()
+    cursor = connection.cursor()
+    
+    cursor.execute("""
+        UPDATE `Cart` 
+        SET `Quantity` = %s
+        WHERE `ProductID` =%s AND `UserID` = %s
+        """, (new_quantity, product_id, current_user.id) )
+    connection.close()
+
+    return redirect('/cart')
+
+
+
+@app.route("/checkout")
+def checkout():
+    return render_template("checkout.html.jinja")
 
 @app.route("/checkout", methods=["GET", "POST"])
 @login_required
