@@ -224,6 +224,33 @@ def product_page(product_id):
     return render_template("product.html.jinja", product=product, review=review)
 
 
+@app.route("/product/<int:product_id>/add_to_cart", methods=["POST"])
+@login_required
+def add_to_cart(product_id):
+
+    try:
+        quantity = int(request.form["qty"])
+        if quantity <= 0:
+            raise ValueError
+    except (KeyError, ValueError):
+        flash("Invalid quantity")
+        return redirect(f"/product/{int(product_id)}")
+
+    connection = connect_db()
+    cursor = connection.cursor()
+
+    cursor.execute("""
+        INSERT INTO `Cart` (`Quantity`, `ProductID`, `UserID`)
+        VALUES (%s, %s, %s)
+        ON DUPLICATE KEY UPDATE
+        `Quantity` = `Quantity` + VALUES(`Quantity`)
+    """, (quantity, product_id, current_user.id))
+    
+    connection.commit()
+    connection.close()
+
+    return redirect('/cart')
+
 @app.route("/cart/<int:product_id>/update_qty", methods=["POST"])
 @login_required
 def update_qty(product_id):
