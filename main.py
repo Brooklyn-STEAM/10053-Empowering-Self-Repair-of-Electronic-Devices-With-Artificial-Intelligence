@@ -245,7 +245,7 @@ def add_to_cart(product_id):
             raise ValueError
     except (KeyError, ValueError):
         flash("Invalid quantity")
-        return redirect(f"/product/{product_id}")
+        return redirect(f"/product/{int(product_id)}")
 
     connection = connect_db()
     cursor = connection.cursor()
