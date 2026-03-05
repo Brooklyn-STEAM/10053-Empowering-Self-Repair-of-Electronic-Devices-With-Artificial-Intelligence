@@ -2,88 +2,108 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0"> <!-- Added viewport meta tag -->
     <title>Sign Up</title>
     <link href="/static/style.css" rel="stylesheet">
             <link rel="icon" href="/static/products/Blueprint Logo.png" type="image">
 
     <script src="https://cdn.jsdelivr.net/npm/@tailwindcss/browser@4"></script>
-
 </head>
 
-<body>
-{%include "components/navbar.html.jinja"%}
+<body class="min-h-screen flex flex-col"> <!-- Added flex column for proper footer placement later -->
+    {%include "components/navbar.html.jinja"%}
 
+    <!-- Main container with proper spacing -->
+    <div class="flex-grow flex items-start justify-center px-4 py-6 sm:py-10"> 
+        <!-- Added px-4 for mobile padding, flex-grow to push footer down -->
+        
+        <!-- Card - adjusted max width and padding for mobile -->
+        <div class="bg-white w-full max-w-sm sm:max-w-md p-6 sm:p-8 border rounded-xl shadow-2xl">
+            <!-- Reduced padding on mobile, increased on larger screens -->
+            
+            <h2 class="text-xl sm:text-2xl font-bold text-gray-800 mb-4 sm:mb-6 text-center">
+                Create Account
+            </h2>
 
-  <div class="flex items-center justify-center mt-9">
-    <div class="bg-white w-full max-w-md p-8 border-1 shadow-2xl">
-      <h2 class="text-2xl font-bold text-gray-800 mb-6 text-center">
-        Create Account
-      </h2>
+            {% for message in get_flashed_messages() %}
+                <div class="bg-red-300 w-full text-xs sm:text-sm p-2 sm:p-3 shadow-sm text-black font-bold rounded-lg mb-4">
+                    {{ message }}
+                </div>
+            {% endfor %}
 
-        {% for message in get_flashed_messages()%}
-          <p class="bg-red-300 w-full text-sm p-3 shadow-sm text-black font-bold rounded-lg">{{ message}} </p>
-        {% endfor%}
-        <br>
-      <form method="post" class="flex flex-col gap-4">
+            <form method="post" class="flex flex-col gap-3 sm:gap-4"> <!-- Smaller gap on mobile -->
 
-        <div>
-          <label class="block text-sm font-medium text-black mb-1">Full Name</label>
-          <input
-            required
-            name="full_name"
-            class="w-full px-4 py-2 border rounded-lg focus:ring-2 text-black focus:ring-indigo-500 focus:outline-none"
-          >
+                <div>
+                    <label class="block text-xs sm:text-sm font-medium text-black mb-1">Full Name</label>
+                    <input
+                        required
+                        name="full_name"
+                        class="w-full px-3 sm:px-4 py-1.5 sm:py-2 text-sm sm:text-base border rounded-lg focus:ring-2 text-black focus:ring-indigo-500 focus:outline-none"
+                        placeholder="Enter your full name"> <!-- Added placeholder for better UX -->
+            
+                </div>
+
+                <div>
+                    <label class="block text-xs sm:text-sm font-medium text-black mb-1">Email</label>
+                    <input
+                        required
+                        type="email"
+                        name="email"
+                        class="w-full px-3 sm:px-4 py-1.5 sm:py-2 text-sm sm:text-base border rounded-lg text-black focus:ring-2 focus:ring-indigo-500 focus:outline-none"
+                        placeholder="your@email.com"
+                    >
+                </div>
+
+                <div>
+                    <label class="block text-xs sm:text-sm font-medium text-black mb-1">Password</label>
+                    <input
+                        required
+                        type="password"
+                        name="password"
+                        class="w-full px-3 sm:px-4 py-1.5 sm:py-2 text-sm sm:text-base border rounded-lg text-black focus:ring-2 focus:ring-indigo-500 focus:outline-none"
+                        placeholder="••••••••"
+                    >
+                </div>
+
+                <div>
+                    <label class="block text-xs sm:text-sm font-medium text-black mb-1">Confirm Password</label>
+                    <input
+                        type="password"
+                        name="confirm_password"
+                        class="w-full px-3 sm:px-4 py-1.5 sm:py-2 text-sm sm:text-base border rounded-lg text-black focus:ring-2 focus:ring-indigo-500 focus:outline-none"
+                        placeholder="••••••••"
+                    >
+                </div>
+
+                <div>
+                    <label class="block text-xs sm:text-sm font-medium text-black mb-1">Address</label>
+                    <input
+                        required
+                        name="address"
+                        class="w-full px-3 sm:px-4 py-1.5 sm:py-2 text-sm sm:text-base border rounded-lg text-black focus:ring-2 focus:ring-indigo-500 focus:outline-none"
+                        placeholder="123 Main St, City, State"
+                    >
+                </div>
+
+                <button
+                    type="submit"
+                    class="mt-2 sm:mt-4 bg-indigo-600 text-white py-2 sm:py-2.5 rounded-lg font-semibold
+                           hover:bg-indigo-700 transition duration-300 text-sm sm:text-base"
+                >
+                    Register
+                </button>
+
+                <!-- Optional: Add login link for better UX -->
+                <p class="text-center text-xs sm:text-sm text-gray-600 mt-2">
+                    Already have an account? 
+                    <a href="/login" class="text-indigo-600 underline hover:underline">Sign in</a>
+                </p>
+
+            </form>
         </div>
-
-        <div>
-          <label class="block text-sm font-medium text-black mb-1">Email</label>
-          <input
-            required
-            type="email"
-            name="email"
-            class="w-full px-4 py-2 border rounded-lg text-black focus:ring-2 focus:ring-indigo-500 focus:outline-none"
-          >
-        </div>
-
-        <div>
-          <label class="block text-sm font-medium text-black mb-1">Password</label>
-          <input
-            required
-            type="password"
-            name="password"
-            class="w-full px-4 py-2 border rounded-lg text-black focus:ring-2 focus:ring-indigo-500 focus:outline-none"
-          >
-        </div>
-
-        <div>
-          <label class="block text-sm font-medium text-black mb-1">Confirm Password</label>
-          <input
-            type="password"
-            name="confirm_password"
-            class="w-full px-4 py-2 border rounded-lg text-black focus:ring-2 focus:ring-indigo-500 focus:outline-none"
-          >
-        </div>
-
-        <div>
-          <label class="block text-sm font-medium text-black mb-1">Address</label>
-          <input
-            required
-            name="address"
-            class="w-full px-4 py-2 border rounded-lg text-black focus:ring-2 focus:ring-indigo-500 focus:outline-none"
-          >
-        </div>
-
-        <button
-          type="submit"
-          class="mt-4 bg-indigo-600 text-white py-2 rounded-lg font-semibold
-                hover:bg-indigo-700 transition duration-300"
-        >
-          Register
-        </button>
-
-      </form>
     </div>
-  </div>
 
+    <!-- Include footer if you have one -->
+    <!-- {% include "components/footer.html.jinja" %} -->
 </body>
 </html>
