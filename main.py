@@ -310,7 +310,32 @@ def update_cart(product_id):
     return redirect('/cart')
 
 
-
-@app.route("/checkout")
+@app.route("/checkout", methods=["GET", "POST"])
+@login_required
 def checkout():
-    return render_template("checkout.html.jinja")
+    connection = connect_db()
+
+    cursor = connection.cursor()
+    cursor.execute("""
+        SELECT * FROM `Cart` 
+        JOIN `Product` ON `Cart`.`ProductID` = `Product`.`ID`
+        WHERE `UserID` =  %s 
+        """, (current_user.id,) )
+    result = cursor.fetchall()
+
+    sale = cursor.lastrowid
+    if request.method == "POST":
+        # create the sale in the database
+        cursor.execute("INSERT INTO `Sale` (`UserID`) VALUES (%s)", (current_user.id,))
+        sale = cursor.lastrowid  # Retrieve the last inserted sale ID
+        # store products bought
+        for item in result:
+            cursor.execute("INSERT INTO `SaleProduct` (`SaleID`, `ProductID`, `Quantity`) VALUES (%s, %s, %s)", (sale, item['ID'], item['quantity']))
+        # empty cart
+        cursor.execute("DELETE FROM `Cart` WHERE `UserID` = %s", (current_user.id,))
+        # thank you screen
+        return redirect('/thank_you')
+
+    connection.close()
+
+    return render_template("checkout.html.jinja" , cart=result)
