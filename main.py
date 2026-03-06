@@ -146,9 +146,9 @@ def repairPage():
 def aboutus():
     return render_template("about_us.html.jinja")
 
-@app.route("/404")
-def error():
-    return render_template("404.html.jinja")
+@app.errorhandler(404)
+def page_not_found(e):
+    return render_template("404.html.jinja"), 404
 
 @app.route("/products")
 def products():
@@ -414,3 +414,9 @@ def checkout():
     connection.close()
 
     return render_template("checkout.html.jinja" , cart=result)
+
+
+@app.route("/thank_you", methods=["GET", "POST"])
+@login_required
+def thank_you():
+    return render_template("thank_you.html.jinja")
