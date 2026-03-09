@@ -226,8 +226,8 @@ def product_page(product_id):
 
 @app.route("/product/<int:product_id>/add_to_cart", methods=["POST"])
 @login_required
-def add_to_cart(product_id):
-
+def addtocart(product_id):
+    pass
     try:
         quantity = int(request.form["qty"])
         if quantity <= 0:
