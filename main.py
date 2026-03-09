@@ -272,6 +272,52 @@ def cart():
 
 @app.route("/product/<int:product_id>/add_to_cart", methods=["POST"])
 @login_required
+def remove_from_cart(product_id):
+    connection = connect_db()
+    cursor = connection.cursor()
+
+    cursor.execute("""
+        DELETE FROM Cart
+        WHERE ProductID = %s AND UserID = %s
+    """, (product_id, current_user.id))
+    
+    connection.commit()
+    cursor.close()
+    connection.close()
+
+    return redirect('/cart')
+
+
+@app.route("/cart/<product_id>/remove", methods=["POST"])
+@login_required
+def remove(product_id):
+   
+    connection = connect_db()
+    cursor = connection.cursor()
+    
+    cursor.execute("""
+        DELETE FROM `Cart` 
+        WHERE `ProductID` =%s AND `UserID` = %s
+        """, (product_id, current_user.id) )
+    connection.close()
+
+    return redirect('/cart')
+
+@app.route("/cart/<product_id>/update_qty", methods=["POST"])
+@login_required
+def update_cart(product_id):
+    new_quantity = request.form["Quantity"]
+    connection = connect_db()
+    cursor = connection.cursor()
+    
+    cursor.execute("""
+        UPDATE `Cart` 
+        SET `Quantity` = %s
+        WHERE `ProductID` =%s AND `UserID` = %s
+        """, (new_quantity, product_id, current_user.id) )
+
+@app.route("/product/<product_id>/add_to_cart", methods=["POST"])
+@login_required
 def add_to_cart(product_id):
 
     try:
