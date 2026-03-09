@@ -250,6 +250,41 @@ def addtocart(product_id):
     
     connection.commit()
     connection.close()
+    
+    flash("Product added to cart successfully!")
+
+    return redirect('/cart')
+
+@app.route("/cart/<int:product_id>/update_qty", methods=["POST"])
+@login_required
+def update_qty(product_id):
+
+    try:
+        quantity = int(request.form.get("Quantity", 1))
+
+        if quantity <= 0:
+            flash("Quantity must be at least 1.")
+            return redirect("/cart")
+
+        connection = connect_db()
+        cursor = connection.cursor()
+
+        cursor.execute("""
+            UPDATE Cart
+            SET quantity = %s
+            WHERE ProductID = %s AND UserID = %s
+        """, (quantity, product_id, current_user.id))
+
+        connection.commit()
+
+    except Exception as e:
+        connection.rollback()
+        print(e)
+        flash("Error updating quantity.")
+
+    finally:
+        cursor.close()
+        connection.close()
 
     return redirect('/cart')
 
@@ -430,8 +465,8 @@ def remove_from_cart(product_id):
 
 @app.route("/cart/<product_id>/update_qty", methods=["POST"])
 @login_required
-def update_cart(product_id):
-    new_quantity = request.form["Quantity"]
+def remove(product_id):
+
     connection = connect_db()
     cursor = connection.cursor()
     
