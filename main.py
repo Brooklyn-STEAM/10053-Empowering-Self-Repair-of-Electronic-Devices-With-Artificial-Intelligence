@@ -150,11 +150,6 @@ def aboutus():
 def error():
     return render_template("404.html.jinja")
 
-@app.route("/cart")
-@login_required
-def cart():
-    return render_template("cart.html.jinja")
-
 @app.route("/search", methods=["GET"])
 def search():
     query = request.args.get("q", "").strip()
