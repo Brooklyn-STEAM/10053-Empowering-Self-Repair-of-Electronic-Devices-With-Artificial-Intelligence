@@ -93,7 +93,7 @@
       <a href="/repairs">Repairs</a>
       <a href="/about_us">About Us</a>
       {% if not current_user.is_authenticated %}
-        <a href="/login">Login</a>
+        <a href="/login" class="font-bold">Login</a>
         {% else %}
             <a href="/logout">Logout</a>
        {% endif %}
