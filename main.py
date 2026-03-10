@@ -152,12 +152,10 @@ def products():
     cursor = connection.cursor()
 
     cursor.execute("SELECT * FROM Product")
-    products_list = cursor.fetchall()
-
-    cursor.close()
-    connection.close()
-
-    return render_template("products.html.jinja", products=products_list) 
+    result = cursor.fetchall()
+    connection.close() 
+    return render_template("products.html.jinja" , products = result)
+  
 
 @app.route("/search", methods=["GET"])
 def search():
@@ -214,36 +212,12 @@ def product_page(product_id):
     cursor.close()
     connection.close()
 
-    return render_template("product.html.jinja", product=product, review=review)
+    return render_template("product.html.jinja", product=product, review=reviews)
 
 
-@app.route("/product/<int:product_id>/add_to_cart", methods=["POST"])
-@login_required
-def (product_id):
-
-    try:
-        quantity = int(request.form.get("qty", 1))
-        if quantity <= 0:
-            raise ValueError
-    except (KeyError, ValueError):
-        flash("Invalid quantity")
-        return redirect(url_for("product_page", product_id=product_id))
-
-    connection = connect_db()
-    cursor = connection.cursor()
-
-    cursor.execute("""
-        INSERT INTO `Cart` (`quantity`, `ProductID`, `UserID`)
-        VALUES (%s, %s, %s)
-        ON DUPLICATE KEY UPDATE
-        `Quantity` = `Quantity` + %s
-    """ , (quantity, product_id, current_user.id, quantity) )
-    
-    connection.commit()
-    connection.close()
-
-    flash("Product added to cart!")
-    return redirect("/cart")
+@app.errorhandler(404)
+def page_not_found(e):
+    return render_template("404.html.jinja"), 404
 
 @app.route("/cart")
 @login_required
