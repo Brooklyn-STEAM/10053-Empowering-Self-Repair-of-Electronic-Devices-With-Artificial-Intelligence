@@ -206,10 +206,13 @@ def product_page(product_id):
         connection.close()
         abort(404)
 
+    cursor.execute("SELECT * FROM Review WHERE ProductID = %s", (product_id,))
+    review = cursor.fetchall()
+
     cursor.close()
     connection.close()
 
-    return render_template("product.html.jinja", product=product, review=reviews)
+    return render_template("product.html.jinja", product=product, review=review)
 
 @app.route("/product/<int:product_id>/add_to_cart", methods=["POST"])
 @login_required
@@ -307,7 +310,7 @@ def checkout():
     cursor = connection.cursor()
     cursor.execute("""
         SELECT * FROM `Cart`
-        JOIN `Product` ON `Cart`.`ProductID` = `Product`.`ID`
+        JOIN `Product` ON `Product`.`ID` = `Cart`.`ProductID`
         WHERE `UserID` = %s
     """, (current_user.id,))
     
@@ -320,8 +323,8 @@ def checkout():
         sales = cursor.lastrowid
         for item in result:
             cursor.execute(
-                "INSERT INTO `SalesProduct` (`SalesID`, `ProductID`, `Quantity`) VALUES (%s, %s, %s)",
-                (sales, item['ID'], item['Quantity'])
+                "INSERT INTO `SalesCart` (`SalesID`, `ProductID`, `Quantity`) VALUES (%s, %s, %s)",
+                (sales, item['ProductID'], item['Quantity'])
             )
 
         cursor.execute(
