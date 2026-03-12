@@ -217,9 +217,9 @@ def product_page(product_id):
 
     average_rating = sum(review["Ratings"] for review in reviews) / len(reviews) if reviews else 0
 
-    if result is None:
+    if product is None:
         abort(404)
-    return render_template("individual_product.html.jinja", product=result, reviews=reviews)
+    return render_template("individual_product.html.jinja", product=product, reviews=reviews)
 
 @app.route("/product/<product_id>/review", methods=["POST"])
 @login_required
