@@ -1,13 +1,4 @@
 <nav class="bg-[#081f36] border-b border-[#6fb7ff]">
-    <script>
-        function toggleMenu() {
-        document.getElementById("mobileMenu").classList.toggle("hidden");
-        }
-
-        function toggleSearch() {
-        document.getElementById("mobileSearch").classList.toggle("hidden");
-        }
-    </script>
   <div class="max-w-7xl mx-auto px-4 lg:px-8">
     <div class="flex justify-between items-center h-14">
 
@@ -38,14 +29,13 @@
     </form>
 
       <!-- Links -->
-      <div class="flex space-x-8 text-sm">
+      <div class="hidden lg:flex space-x-8 text-sm items-center">
       
         <a href="/" class="hover:text-[#6fb7ff] transition">Home</a>
         <a href="/browse" class="hover:text-[#6fb7ff] transition">Product</a>
         <a href="/cart" class="hover:text-[#6fb7ff] transition">Cart</a>
         <a href="/repairs" class="hover:text-[#6fb7ff] transition">Repairs</a>
         <a href="/about_us" class="hover:text-[#6fb7ff] transition">About Us</a>
-
 
                 
                         {% if  not current_user.is_authenticated %}
@@ -114,3 +104,23 @@
   </div>
 </nav>
 
+<script>
+        function toggleMenu() {
+        document.getElementById("mobileMenu").classList.toggle("hidden");
+        }
+
+        function toggleSearch() {
+        document.getElementById("mobileSearch").classList.toggle("hidden");
+        }
+
+
+
+  const links = document.querySelectorAll(".nav-link");
+  const currentPage = window.location.pathname;
+
+  links.forEach(link => {
+    if(link.getAttribute("href") === currentPage){
+      link.classList.add("text-[#6fb7ff]", "border-b-2", "border-[#6fb7ff]", "pb-1");
+    }
+  });
+</script>
