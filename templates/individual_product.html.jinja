@@ -1,0 +1,269 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <script src="https://cdn.jsdelivr.net/npm/@tailwindcss/browser@4"></script>
+  <title>{{ product['Name'] }}</title>
+  <link rel="icon" href="/static/products/Blueprint Logo.png" type="image/png">
+</head>
+
+<body class="bg-[#0b2c4d] text-[#d6ecff] font-mono min-h-screen flex flex-col text-sm lg:text-xl">
+
+<script>
+  document.addEventListener('DOMContentLoaded', function() {
+    const sticky = document.querySelector("#sticky-add-to-cart");
+    const originalBtn = document.querySelector("#original-add-to-cart-btn");
+    
+    // Only run this on mobile (screen width less than 1024px)
+    function initMobileSticky() {
+      if (window.innerWidth < 1024) {
+        sticky.style.display = "none";
+        
+        const observer = new IntersectionObserver(
+          ([entry]) => {
+            if (!entry.isIntersecting) {
+              sticky.style.display = "block";
+            } else {
+              sticky.style.display = "none";
+            }
+          },
+          { 
+            threshold: 0,
+            rootMargin: "0px" 
+          }
+        );
+        
+        observer.observe(originalBtn);
+      } else {
+        // On desktop, ensure sticky is hidden
+        sticky.style.display = "none";
+      }
+    }
+    
+    // Initial check
+    initMobileSticky();
+    
+    // Handle window resize (in case user rotates device or resizes window)
+    window.addEventListener('resize', function() {
+      // Clear any existing observer by reloading the page logic
+      // Simple approach: reload the function
+      location.reload(); // Alternative: you could implement a more sophisticated approach
+    });
+  });
+</script>
+
+{% include "components/navbar.html.jinja" %}
+
+<!-- CHANGED: Removed pb-24, added mb-auto for proper spacing -->
+<main class="flex-grow px-4 sm:p-6 py-8 lg:py-10">
+  <!-- PRODUCT SECTION -->
+  <div class="max-w-6xl mx-auto grid lg:grid-cols-2 gap-10 items-start">
+
+    <!-- LEFT: IMAGE -->
+    <div class="bg-[#123d66] rounded-2xl p-6 shadow-xl">
+      <img src="{{ product['Image'] }}" 
+           alt="{{ product['Name'] }}"
+           class="w-full h-[260px] sm:h-[320px] lg:h-[400px] object-contain rounded-lg">
+    </div>
+
+    <!-- RIGHT: INFO -->
+    <div class="space-y-6">
+
+      <div>
+        <h1 class="text-2xl sm:text-3xl lg:text-4xl font-bold mb-2">
+          {{ product['Name'] }}
+        </h1>
+        <p class="text-xl sm:text-2xl lg:text-3xl text-yellow-400 font-bold">
+          ${{ product['Price'] }}
+        </p>
+      </div>
+
+      <div class="bg-[#123d66] p-6 rounded-xl shadow-md">
+        <p class="text-[#cde7ff] leading-relaxed">
+          {{ product['Description'] }}
+        </p>
+      </div>
+
+      <!-- ADD TO CART -->
+      <form method="POST" form="add-to-cart-form" action="/product/{{ product['ID'] }}/add_to_cart"
+            class="bg-[#09223c] p-6 rounded-xl shadow-lg space-y-4">
+
+        <div>
+          <label class="block text-sm mb-2 uppercase tracking-wide">
+            Quantity
+          </label>
+          <input type="number" name="qty" value="1" min="1" required
+            class="w-28 sm:w-24 bg-[#123d66] border border-blue-400 text-center rounded-md p-2 focus:outline-none 
+                        focus:ring-2 focus:ring-yellow-400">
+        </div>
+
+        <button id="original-add-to-cart-btn" type="submit"
+          class="w-full bg-yellow-500 hover:bg-yellow-600 text-black font-bold py-3 rounded-lg
+                 transition transform hover:scale-105 active:scale-95 shadow-md">
+          Add to Cart
+        </button>
+
+      </form>
+
+    </div>
+  </div>
+
+
+  <!-- REVIEWS SECTION -->
+  <div class="max-w-4xl mx-auto mt-20">
+
+    <h2 class="text-3xl font-bold mb-8 text-center border-b border-blue-400 pb-4">
+      Customer Reviews
+    </h2>
+
+  <!-- REVIEW FORM -->
+  <div class="flex flex-left space-x-400">
+        {% if current_user.is_authenticated %}
+            <div class="max-w-3xl mx-auto mb-10 bg-white p-6 rounded-xl shadow text-left">
+                <h3 class="text-xl font-bold mb-4">Write a Review</h3>
+
+                <form method="POST" action="/product/{{ product['ID'] }}/review">
+
+                    <label class="block mb-1 font-semibold">Rating</label>
+                    <input type="number"
+                        name="rating"
+                        min="1"
+                        max="5"
+                        value="5"
+                        required
+                        class="border rounded p-2 mb-4 w-full">
+
+                    <label class="block mb-1 font-semibold">Comment</label>
+                    <textarea name="comment"
+                            required
+                            class="border rounded p-2 mb-4 w-full"
+                            rows="4"></textarea>
+
+                    <button type="submit"
+                            class="bg-blue-600 text-white px-4 py-2 rounded hover:bg-blue-700">
+                        Submit Review
+                    </button>
+                </form>
+            </div>
+            {% else %}
+            <p class="text-center text-gray-500 mb-10">
+                <a href="/login" class="text-blue-600 font-semibold hover:underline">
+                    Log in
+                </a>
+                to write a review.
+            </p>
+            {% endif %}
+
+            <div class="max-w-3xl mx-auto space-y-6 text-left">
+                {% if reviews %}
+                    {% for x in reviews %}
+                        <div class="bg-white rounded-xl shadow p-6">
+
+                            <div class="flex justify-between items-center mb-2">
+                                <p class="font-semibold text-gray-800">
+                                    {{ x["Name"] }}
+                                </p>
+                                <p class="text-sm text-gray-500">
+                                    {{ x["Timestamp"].strftime('%m/%d/%Y') }}
+                                </p>
+                            </div>
+
+                            <div class="mb-2">
+                                {% for i in range(1, 6) %}
+                                    {% if i <= x["Ratings"] %}
+                                    <span class="text-yellow-400">★</span>
+                                    {% else %}
+                                    <span class="text-gray-300">★</span>
+                                    {% endif %}
+                                {% endfor %}
+                            </div>
+
+                            <p class="text-gray-700">
+                                {{ x["Comment"] }}
+                            </p>
+                        </div>
+                    {% endfor %}
+                {% else %}
+                    <p class="text-center text-gray-500">
+                        No reviews yet. Be the first to review!
+                    </p>
+                {% endif %}
+    </div>
+  </div>
+
+    
+
+</main>
+
+<!-- CHANGED: Added !lg:hidden to force hide on desktop, improved positioning -->
+<div id="sticky-add-to-cart" 
+     class="fixed bottom-0 left-0 right-0 bg-[#09223c] p-4 border-t border-blue-900 
+            !lg:hidden z-50 shadow-lg transition-opacity duration-300"
+     style="display: none;">
+  <button
+    type="submit"
+    form="add-to-cart-form"
+    class="w-full bg-yellow-500 hover:bg-yellow-600 active:scale-95
+           text-black font-bold py-3 rounded-lg transition">
+    Add to Cart
+  </button>
+</div>
+
+<!-- CHANGED: Simplified footer - removed mb-20, added proper responsive padding -->
+<footer>
+  {% include "components/footer.html.jinja" %}
+</footer>
+
+<!-- CHANGED: Added spacer div that only appears on mobile when sticky is visible -->
+<div id="mobile-spacer" class="block lg:hidden h-0"></div>
+
+<!-- CHANGED: Added script to handle spacer height -->
+<script>
+  document.addEventListener('DOMContentLoaded', function() {
+    const sticky = document.querySelector("#sticky-add-to-cart");
+    const spacer = document.querySelector("#mobile-spacer");
+    const originalBtn = document.querySelector("#original-add-to-cart-btn");
+    
+    function updateSpacer() {
+      if (window.innerWidth < 1024) {
+        // On mobile, set spacer height to match sticky button when visible
+        if (sticky.style.display === "block") {
+          spacer.style.height = sticky.offsetHeight + "px";
+        } else {
+          spacer.style.height = "0";
+        }
+      } else {
+        spacer.style.height = "0";
+      }
+    }
+    
+    // Only run mobile sticky logic
+    if (window.innerWidth < 1024) {
+      sticky.style.display = "none";
+      
+      const observer = new IntersectionObserver(
+        ([entry]) => {
+          if (!entry.isIntersecting) {
+            sticky.style.display = "block";
+          } else {
+            sticky.style.display = "none";
+          }
+          updateSpacer();
+        },
+        { threshold: 0 }
+      );
+      
+      observer.observe(originalBtn);
+      
+      // Update spacer on resize
+      window.addEventListener('resize', updateSpacer);
+    } else {
+      sticky.style.display = "none";
+      spacer.style.height = "0";
+    }
+  });
+</script>
+
+</body>
+</html>

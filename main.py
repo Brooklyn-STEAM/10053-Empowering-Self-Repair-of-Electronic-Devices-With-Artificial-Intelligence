@@ -182,38 +182,53 @@ def browse():
 
 @app.route("/product/<product_id>")
 def product_page(product_id):
- 
     connection = connect_db()
-
     cursor = connection.cursor()
 
-    cursor.execute("SELECT * FROM `Product` WHERE `ID` = %s", (product_id,) )
-
+    cursor.execute("SELECT * FROM `Product` WHERE `ID` = %s", (product_id,))
     result = cursor.fetchone()
-
     cursor.close()
 
     connection = connect_db()
-
     cursor = connection.cursor()
 
     cursor.execute("""
-    SELECT * FROM `Review`
-    
-    JOIN `User` ON `Review`.`UserID` = `User`.`ID` 
-                   
-    WHERE `ProductID` = %s
-    
-    """, (product_id,) )
+    SELECT * FROM Review
+    JOIN User ON User.ID = Review.UserID              
+    WHERE ProductID = %s
+    """, (product_id,))
+    reviews = cursor.fetchall()  # Renamed from `review` to `reviews`
 
-    review = cursor.fetchall()
+    connection.close()
 
-    connection.close() 
+    average_rating = sum(review["Ratings"] for review in reviews) / len(reviews) if reviews else 0
 
     if result is None:
         abort(404)
-    return render_template("product.html.jinja", product=result , review=review)
+    return render_template("individual_product.html.jinja", product=result, reviews=reviews)
 
+@app.route("/product/<product_id>/review", methods=["POST"])
+@login_required
+def add_review(product_id):
+    #get input vale from form 
+    rating = request.form["rating"]
+    comment = request.form["comment"]
+   
+   
+    connection = connect_db()
+    cursor = connection.cursor()
+
+    cursor.execute("""
+      INSERT INTO Review
+             (Ratings, Comment, UserID, ProductID)
+       VALUES
+            (%s,%s,%s,%s)
+      """,(rating,comment,current_user.id,product_id))
+    
+
+    connection.close()
+
+    return redirect(f"/product/{product_id}")
 
 @app.route("/cart/<int:product_id>/update_qty", methods=["POST"])
 @login_required
