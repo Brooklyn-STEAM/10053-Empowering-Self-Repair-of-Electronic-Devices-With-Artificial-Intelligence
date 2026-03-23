@@ -1,0 +1,72 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{{product['Name']}} </title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="/static/style.css" rel="stylesheet">
+    <link rel="icon" href="/static/products/Blueprint Logo.png" type="image">
+</head>
+
+
+<body class="min-h-screen flex flex-col bg-[#0b2c4d] text-[#d6ecff] leading-relaxed tracking-wide font-[Inter]">
+  {% include "components/navbar.html.jinja" %}
+<main class="flex-grow px-4 md:px-8 py-8 max-w-7xl mx-auto w-full">
+  <!-- PRODUCT SECTION -->
+  <div class="max-w-6xl mx-auto grid md:grid-cols-2 gap-10 items-start">
+  
+    <!-- LEFT: IMAGE -->
+    <div class="bg-[#123d66] rounded-2xl p-6 shadow-xl">
+      <img src="{{ product['Image'] }}" 
+           alt="{{ product['Name'] }}"
+           class="w-full h-[400px] object-contain rounded-lg">
+    </div>
+
+    <!-- INFO -->
+    <div class="space-y-6">
+
+      <div>
+        <h1 class="text-4xl font-bold mb-2">
+          {{ product['Name'] }}
+        </h1>
+        <p class="text-3xl text-yellow-400 font-bold">
+          ${{ product['Price'] }}
+        </p>
+      </div>
+
+      <div class="bg-[#123d66] p-6 rounded-xl shadow-md">
+        <p class="text-[#cde7ff] leading-relaxed">
+          {{ product['Description'] }}
+        </p>
+      </div>
+
+      <!-- ADD TO CART -->
+    <form method="POST" action="/cart/{{ product.ID }}/add_to_cart"
+            class="bg-[#09223c] p-6 rounded-xl shadow-lg space-y-4">
+
+        <div>
+          <label class="block text-sm mb-2 uppercase tracking-wide">
+            Quantity
+          </label>
+          <input type="number" name="qty" value="1" min="1" required
+            class="w-24 bg-[#123d66] border border-blue-400 text-center rounded-md p-2 focus:outline-none 
+                        focus:ring-2 focus:ring-yellow-400">
+        </div>
+
+        <button type="submit"
+          class="w-full bg-yellow-500 hover:bg-yellow-600 text-black font-bold py-3 rounded-lg
+                 transition transform hover:scale-105 shadow-md">
+          Add to Cart
+        </button>
+
+      </form>
+
+    </div>
+  </div>
+
+</main>
+{% include "components/footer.html.jinja" %}
+
+</body>
+</html>
