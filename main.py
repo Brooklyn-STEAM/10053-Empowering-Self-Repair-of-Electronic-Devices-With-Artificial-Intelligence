@@ -217,7 +217,7 @@ def page_not_found(e):
 @login_required
 def cart():
     connection = connect_db()
-    cursor = connection.cursor(pymysql.cursors.DictCursor)  # ✅ DictCursor
+    cursor = connection.cursor(pymysql.cursors.DictCursor)  
 
     cursor.execute("""
         SELECT Cart.ProductID, Cart.Quantity, Product.Name, Product.Price, Product.Image
