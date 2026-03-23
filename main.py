@@ -160,42 +160,25 @@ def products():
 @app.route("/search", methods=["GET"])
 def search():
     query = request.args.get("q", "").strip()
-    print(f"Search query: '{query}'")   # keep debug
 
     connection = connect_db()
     cursor = connection.cursor(pymysql.cursors.DictCursor)
 
     results = []
+
     if query:
-        # Union products and repair items
         sql = """
-            SELECT 
-                ID,
-                Name,
-                Image,
-                Price,
-                'product' AS type
-            FROM Product
-            WHERE Name LIKE %s
-
-            UNION ALL
-
-            SELECT 
-                ID,
-                Name,
-                Image,
-                NULL AS Price,      -- RepairItems might not have price
-                'repair_item' AS type
-            FROM RepairItems
+            SELECT *
+            From Product
             WHERE Name LIKE %s
         """
-        params = [f"%{query}%", f"%{query}%"]
+        params = [f"%{query}%"]
         cursor.execute(sql, params)
-        results = cursor.fetchall()
-        print(f"Found {len(results)} total results")
-
+        results = cursor. fetchall()
+    
     connection.close()
-    return render_template("search_results.html.jinja", query=query, results=results)
+
+    return render_template("search_results.html.jinja", query=query, results = results)
 
 @app.route("/browse")
 def browse():
@@ -260,25 +243,6 @@ def add_review(product_id):
     connection.close()
 
     return redirect(f"/product/{product_id}")
-
-@app.route('/repair-item/<int:id>')
-def repair_item_detail(id):
-    connection = connect_db()
-    cursor = connection.cursor(pymysql.cursors.DictCursor)
-    
-    cursor.execute("SELECT * FROM RepairItems WHERE ID = %s", (id,))
-    item = cursor.fetchone()
-
-    cursor.execute("SELECT * FROM RepairGuides WHERE repair_item_id = %s", (id,))
-    guides = cursor.fetchall()
-
-    connection.close()
-    
-
-    if item is None:
-        return "Repair item not found", 404
-    
-    return render_template('repair_items.html.jinja', item=item, guides=guides)
 
 @app.route("/cart/<int:product_id>/update_qty", methods=["POST"])
 @login_required
