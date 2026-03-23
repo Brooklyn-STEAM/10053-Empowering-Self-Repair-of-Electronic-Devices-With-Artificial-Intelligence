@@ -160,25 +160,42 @@ def products():
 @app.route("/search", methods=["GET"])
 def search():
     query = request.args.get("q", "").strip()
+    print(f"Search query: '{query}'")   # keep debug
 
     connection = connect_db()
     cursor = connection.cursor(pymysql.cursors.DictCursor)
 
     results = []
-
     if query:
+        # Union products and repair items
         sql = """
-            SELECT *
-            From Product
+            SELECT 
+                ID,
+                Name,
+                Image,
+                Price,
+                'product' AS type
+            FROM Product
+            WHERE Name LIKE %s
+
+            UNION ALL
+
+            SELECT 
+                ID,
+                Name,
+                Image,
+                NULL AS Price,      -- RepairItems might not have price
+                'repair_item' AS type
+            FROM RepairItems
             WHERE Name LIKE %s
         """
-        params = [f"%{query}%"]
+        params = [f"%{query}%", f"%{query}%"]
         cursor.execute(sql, params)
-        results = cursor. fetchall()
-    
-    connection.close()
+        results = cursor.fetchall()
+        print(f"Found {len(results)} total results")
 
-    return render_template("search_results.html.jinja", query=query, results = results)
+    connection.close()
+    return render_template("search_results.html.jinja", query=query, results=results)
 
 @app.route("/browse")
 def browse():
@@ -243,6 +260,40 @@ def add_review(product_id):
     connection.close()
 
     return redirect(f"/product/{product_id}")
+
+@app.route('/repair-item/<int:id>')
+def repair_item_detail(id):
+    connection = connect_db()
+    cursor = connection.cursor(pymysql.cursors.DictCursor)
+    
+    cursor.execute("SELECT * FROM RepairItems WHERE ID = %s", (id,))
+    item = cursor.fetchone()
+
+    cursor.execute("SELECT * FROM RepairGuides WHERE Repair_Item_ID = %s", (id,))
+    guides = cursor.fetchall()
+
+    connection.close()
+    
+
+    if item is None:
+        return "Repair item not found", 404
+    
+    return render_template('repair_items.html.jinja', item=item, guides=guides)
+
+@app.route('/guide/<int:id>')
+def guide_detail(id):
+    connection = connect_db()
+    cursor = connection.cursor(pymysql.cursors.DictCursor)
+
+    cursor.execute("SELECT * FROM RepairGuides WHERE ID = %s", (id,))
+    guide = cursor.fetchone()
+
+    connection.close()
+
+    if guide is None:
+        return "Guide not found", 404
+
+    return render_template('guides_detail.html.jinja', guide=guide)
 
 @app.route("/cart/<int:product_id>/update_qty", methods=["POST"])
 @login_required
