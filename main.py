@@ -269,7 +269,7 @@ def repair_item_detail(id):
     cursor.execute("SELECT * FROM RepairItems WHERE ID = %s", (id,))
     item = cursor.fetchone()
 
-    cursor.execute("SELECT * FROM RepairGuides WHERE repair_item_id = %s", (id,))
+    cursor.execute("SELECT * FROM RepairGuides WHERE Repair_Item_ID = %s", (id,))
     guides = cursor.fetchall()
 
     connection.close()
