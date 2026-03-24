@@ -149,7 +149,7 @@ def products():
     cursor.close()
     connection.close()
 
-    return render_template("products.html.jinja", products=products)
+    return render_template("individual_products.html.jinja", products=products)
 
 @app.route("/search", methods=["GET"])
 def search():
