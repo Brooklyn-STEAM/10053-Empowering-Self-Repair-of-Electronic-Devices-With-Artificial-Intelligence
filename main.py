@@ -368,3 +368,12 @@ def checkout():
     connection.close()
     return render_template("checkout.html.jinja", cart=result)
 
+@app.route("/thank_you")
+@login_required
+def thank_you():
+    return render_template("thank_you.html.jinja")
+
+@app.route("/profile")
+@login_required
+def profile():
+    return render_template("profile.html.jinja")
