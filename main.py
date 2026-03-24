@@ -282,16 +282,20 @@ def add_to_cart(product_id):
 @login_required
 def update_quantity(product_id):
 
+    connection = None
+    cursor = None
+
     try:
         quantity = int(request.form.get("quantity"))
+
         if quantity <= 0:
             flash("Quantity must be at least 1.")
             return redirect("/cart")
 
-    connection = connect_db()
-    cursor = connection.cursor()
+        connection = connect_db()
+        cursor = connection.cursor()
 
-    cursor.execute("""
+        cursor.execute("""
             UPDATE Cart
             SET Quantity = %s
             WHERE ProductID = %s AND UserID = %s
@@ -300,13 +304,16 @@ def update_quantity(product_id):
         connection.commit()
 
     except Exception as e:
-        connection.rollback()
+        if connection:
+            connection.rollback()
         print(e)
         flash("Error updating quantity.")
 
     finally:
-        cursor.close()
-        connection.close()
+        if cursor:
+            cursor.close()
+        if connection:
+            connection.close()
 
     return redirect("/cart")
 
