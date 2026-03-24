@@ -154,25 +154,42 @@ def products():
 @app.route("/search", methods=["GET"])
 def search():
     query = request.args.get("q", "").strip()
+    print(f"Search query: '{query}'")   # keep debug
 
     connection = connect_db()
     cursor = connection.cursor(pymysql.cursors.DictCursor)
 
     results = []
-
     if query:
+        # Union products and repair items
         sql = """
-            SELECT *
-            From Product
+            SELECT 
+                ID,
+                Name,
+                Image,
+                Price,
+                'product' AS type
+            FROM Product
+            WHERE Name LIKE %s
+
+            UNION ALL
+
+            SELECT 
+                ID,
+                Name,
+                Image,
+                NULL AS Price,      -- RepairItems might not have price
+                'repair_item' AS type
+            FROM RepairItems
             WHERE Name LIKE %s
         """
-        params = [f"%{query}%"]
+        params = [f"%{query}%", f"%{query}%"]
         cursor.execute(sql, params)
-        results = cursor. fetchall()
-    
-    connection.close()
+        results = cursor.fetchall()
+        print(f"Found {len(results)} total results")
 
-    return render_template("search_results.html.jinja", query=query, results = results)
+    connection.close()
+    return render_template("search_results.html.jinja", query=query, results=results)
 
 @app.route("/browse")
 def browse():
@@ -271,10 +288,10 @@ def update_quantity(product_id):
             flash("Quantity must be at least 1.")
             return redirect("/cart")
 
-        connection = connect_db()
-        cursor = connection.cursor()
+    connection = connect_db()
+    cursor = connection.cursor()
 
-        cursor.execute("""
+    cursor.execute("""
             UPDATE Cart
             SET Quantity = %s
             WHERE ProductID = %s AND UserID = %s
@@ -344,14 +361,3 @@ def checkout():
     connection.close()
     return render_template("checkout.html.jinja", cart=result)
 
-
-@app.route("/thank_you")
-@login_required
-def thank_you():
-    return render_template("thank_you.html.jinja")
-
-
-@app.route("/profile")
-@login_required
-def profile():
-    return render_template("profile.html.jinja")

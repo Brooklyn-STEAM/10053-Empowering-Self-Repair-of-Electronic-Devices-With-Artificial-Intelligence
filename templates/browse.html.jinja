@@ -3,90 +3,105 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Product</title>
-    <script src="https://cdn.tailwindcss.com"></script>
+    <title>Products</title>
     <link href="/static/style.css" rel="stylesheet">
     <link rel="icon" href="/static/products/Blueprint Logo.png" type="image">
+    <script src="https://cdn.jsdelivr.net/npm/@tailwindcss/browser@4"></script>
 </head>
 
 
-<body class="min-h-screen flex flex-col">
+<body class="min-h-screen flex flex-col text-sm lg:text-xl">
 
-  {% include "components/navbar.html.jinja" %}
+{% include "components/navbar.html.jinja" %}
 
- <main class="ml-64 px-4 md:px-8 py-8">
+<main class="flex-grow px-4 py-6 lg:px-8 lg:py-8 lg:ml-10">
 
-    <!-- Page Header -->
-    <section class="max-w-7xl mx-auto mb-10">
-      <div class="flex flex-col sm:flex-row sm:items-end sm:justify-between gap-4">
-        <div>
-     <h1 class="text-3xl font-extrabold bg-gradient-to-r from-blue-600 to-purple-600 bg-clip-text text-transparent">
-  Products
+<!-- Page Header -->
+<section class="max-w-7xl mx-auto mb-8 lg:mb-10">
+
+<div class="flex flex-col gap-4 lg:flex-row lg:items-end lg:justify-between">
+
+<div>
+
+<h1 class="text-2xl lg:text-3xl font-extrabold bg-gradient-to-r from-blue-600 to-purple-600 bg-clip-text text-transparent">
+Products
 </h1>
-<p class="text-blue-500 mt-1">Browse and select your favorite items.</p>
-        <a href="/cart"
-           class="inline-flex items-center px-5 py-2.5 rounded-lg bg-blue-600 text-white font-semibold hover:bg-blue-700 transition">
-          Go to Cart →
-        </a>
-      </div>
-    </section>
 
-    <!-- Product Grid -->
-    <section class="max-w-7xl mx-auto">
-      <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-8">
+<p class="text-blue-500 mt-1 text-sm lg:text-base">
+Browse and select your favorite items.
+</p>
 
-        {% for x in products %}
-        <div class="bg-white rounded-2xl shadow-sm border border-gray-200 hover:shadow-lg transition overflow-hidden flex flex-col">
+</div>
 
-          <!-- Image -->
-          <a href="/product/{{ x['ID'] }}"
-             class="h-52 bg-gray-100 flex items-center justify-center p-4 overflow-hidden">
-            <img
-              src="{{ x['Image'] }}"
-              alt="{{ x['Name'] }}"
-              class="max-h-full object-contain transition duration-300 hover:scale-105"
-            />
-          </a>
+<a href="/cart"
+class="w-full sm:w-auto text-center inline-flex items-center justify-center px-5 py-2.5 rounded-lg bg-blue-600 text-white font-semibold hover:bg-blue-700 transition">
+Go to Cart →
+</a>
 
-          <!-- Content -->
-          <div class="flex flex-col flex-1 p-5">
+</div>
 
-            <!-- Title -->
-            <a href="/product/{{ x['ID'] }}">
-              <h3 class="text-lg font-bold text-gray-900 hover:text-blue-600 transition">
-                {{ x['Name'] }}
-              </h3>
-            </a>
+</section>
 
-            <!-- Spacer -->
-            <div class="flex-grow"></div>
+<!-- Product Grid -->
+<section class="max-w-7xl mx-auto">
 
-            <!-- Bottom Section -->
-            <div class="mt-5 flex items-center justify-between">
+<div class="grid grid-cols-2 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-6 lg:gap-8">
 
-              <!-- Price -->
-              <span class="text-lg font-extrabold text-gray-900">
-                ${{ "%.2f"|format(x['Price']) }}
-              </span>
+{% for x in products %}
+<div class="bg-white rounded-2xl shadow-sm border border-gray-200 hover:shadow-lg transition overflow-hidden flex flex-col">
 
-              <!-- Shop Button -->
-              <a href="/product/{{ x['ID'] }}"
-                 class="px-4 py-2 rounded-lg bg-blue-500 text-white font-semibold hover:bg-yellow-600 transition">
-                Shop
-              </a>
+<!-- Image -->
+<a href="/product/{{ x['ID'] }}"
+class="h-44 sm:h-48 lg:h-52 bg-gray-100 flex items-center justify-center p-4 overflow-hidden">
 
-            </div>
+<img
+src="{{ x['Image'] }}"
+alt="{{ x['Name'] }}"
+class="max-h-full object-contain transition duration-300 hover:scale-105"
+/>
 
-          </div>
-        </div>
-        {% endfor %}
+</a>
 
-      </div>
-    </section>
+<!-- Content -->
+<div class="flex flex-col flex-1 p-2 lg:p-3">
 
-  </main>
+<!-- Title -->
+<a href="/product/{{ x['ID'] }}">
 
-  {% include "components/footer.html.jinja" %}
+<h3 class="text-base lg:text-lg font-bold text-gray-900 hover:text-blue-600 transition">
+{{ x['Name'] }}
+</h3>
+
+</a>
+
+<div class="flex-grow"></div>
+
+<!-- Bottom Section -->
+<div class="mt-4 lg:mt-5 flex items-center justify-between">
+
+<span class="text-base lg:text-lg font-extrabold text-gray-900">
+${{ "%.2f"|format(x['Price']) }}
+</span>
+
+<a href="/product/{{ x['ID'] }}"
+class="px-3 py-1.5 lg:px-4 lg:py-2 rounded-lg bg-blue-500 text-white font-semibold hover:bg-yellow-600 transition">
+Shop
+</a>
+
+</div>
+
+</div>
+
+</div>
+{% endfor %}
+
+</div>
+
+</section>
+
+</main>
+
+{% include "components/footer.html.jinja" %}
 
 </body>
 </html>

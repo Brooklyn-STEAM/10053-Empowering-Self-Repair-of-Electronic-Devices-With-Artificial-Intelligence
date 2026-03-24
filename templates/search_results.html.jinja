@@ -28,7 +28,7 @@
          {% if results %}
             <div class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-3 sm:gap-4">
                {% for product in results %}
-                  <a href="/product/{{ product['ID'] }}" 
+                  <a href="{% if product.type == 'product' %}/product/{{ product.ID }}{% else %}/repair-item/{{ product.ID }}{% endif %}" 
                      class="bg-[#1a3a5a] rounded-xl overflow-hidden hover:ring-2 hover:ring-[#6fb7ff] transition-all duration-200">
                      
                      <!-- Image container - square aspect ratio -->
@@ -48,9 +48,11 @@
                               {{ product["Variant"] }}
                            </p>
                         {% endif %}
-                        <p class="text-[#6fb7ff] text-sm font-semibold mt-2">
-                           ${{ product["Price"] }}
-                        </p>
+                           {% if product["Price"] %}
+                              <p class="text-[#6fb7ff] text-sm font-semibold mt-2">
+                                 ${{ product["Price"] }}
+                              </p>
+                           {% endif %}
                      </div>
                   </a>
                {% endfor %}
