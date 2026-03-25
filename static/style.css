@@ -1,16 +1,18 @@
+/* Load DSEG14 Modern */
+@font-face {
+    font-family: 'DSEG14 Modern';
+    font-style: normal;
+    font-display: swap;
+    font-weight: 400;
+    src: url(https://cdn.jsdelivr.net/fontsource/fonts/dseg14-modern@latest/latin-400-normal.woff2) format('woff2'),
+         url(https://cdn.jsdelivr.net/fontsource/fonts/dseg14-modern@latest/latin-400-normal.woff) format('woff');
+}
+
+/* Apply site-wide */
+
 body {
     margin: 0;
     font-family: 'Courier New', monospace;
     background-color: #0b2c4d;
     color: #d6ecff;
 }
-
-
-/* dseg14-modern-latin-400-normal */
-@font-face {
-    font-family: 'DSEG14 Modern';
-    font-style: normal;
-    font-display: swap;
-    font-weight: 400;
-    src: url(https://cdn.jsdelivr.net/fontsource/fonts/dseg14-modern@latest/latin-400-normal.woff2) format('woff2'), url(https://cdn.jsdelivr.net/fontsource/fonts/dseg14-modern@latest/latin-400-normal.woff) format('woff');
-  }

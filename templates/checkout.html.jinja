@@ -1,27 +1,20 @@
+
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <script src="https://cdn.tailwindcss.com"></script>
-  <title>Checkout</title>
-  <link rel="icon" href="/static/products/Blueprint Logo.png" type="image/png">
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Checkout</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="/static/style.css" rel="stylesheet">
+    <link rel="icon" href="/static/products/Blueprint Logo.png" type="image">
 </head>
-<body class="bg-[#0b2c4d] text-[#d6ecff] font-mono min-h-screen flex flex-col">
-<!DOCTYPE html>
-<html lang="en">
-<head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <script src="https://cdn.tailwindcss.com"></script>
-  <title>Checkout</title>
-  <link rel="icon" href="/static/products/Blueprint Logo.png" type="image/png">
-</head>
-<body class="bg-[#0b2c4d] text-[#d6ecff] font-mono min-h-screen flex flex-col">
 
-{% include "components/navbar.html.jinja" %}
 
-<main class="ml-64 px-4 md:px-8 py-8 flex-1">
+<body class="min-h-screen flex flex-col bg-[#0b2c4d] text-[#d6ecff] leading-relaxed tracking-wide font-[Inter]">
+    {% include "components/navbar.html.jinja" %}
+
+  <main class="flex-grow">
 
   <h1 class="text-4xl font-bold mb-8 text-white">Checkout</h1>
 
@@ -51,8 +44,10 @@
             {{ x['Name'] }}
           </div>
 
-          <!-- Remove Button -->
+          <!-- Quantity Input -->
           <div class="col-span-1 flex flex-col items-center justify-center gap-2">
+            <input type="number" class="quantity-input w-16 border border-gray-300 rounded-lg px-2 py-1 text-center text-gray-900"
+                   value="{{ x['Quantity'] }}" min="1">
             <form method="post" action="/cart/{{ x['ProductID'] }}/remove">
               <button type="submit" class="bg-red-500 hover:bg-red-600 text-white px-3 py-1 rounded text-sm transition">
                 Remove
@@ -92,16 +87,16 @@
         <!--  form submits-->
         <form method="post" action="/checkout" class="space-y-4 text-sm">
 
-          <input type="text" name="street" placeholder="Street" required
+          <input type="text" name="street" placeholder="123 Main St" required
                  class="w-full border border-gray-300 rounded-lg px-4 py-3 focus:outline-none focus:ring-2 focus:ring-blue-400 text-gray-900">
 
-          <input type="text" name="city" placeholder="City" required
+          <input type="text" name="city" placeholder="Las Vegas" required
                  class="w-full border border-gray-300 rounded-lg px-4 py-3 focus:outline-none focus:ring-2 focus:ring-blue-400 text-gray-900">
 
           <div class="grid grid-cols-2 gap-2">
-            <input type="text" name="state" placeholder="State" required
+            <input type="text" name="state" placeholder="NV" required
                    class="w-full border border-gray-300 rounded-lg px-4 py-3 focus:outline-none focus:ring-2 focus:ring-blue-400 text-gray-900">
-            <input type="text" name="zip" placeholder="Zip" required
+            <input type="text" name="zip" placeholder="11111" required
                    class="w-full border border-gray-300 rounded-lg px-4 py-3 focus:outline-none focus:ring-2 focus:ring-blue-400 text-gray-900">
           </div>
 
@@ -120,7 +115,7 @@
 
 </main>
 
-<!-- Dynamic subtotal + total update (optional) -->
+<!-- Dynamic subtotal + total update  -->
 <script>
 const quantityInputs = document.querySelectorAll('.quantity-input');
 const orderTotalEl = document.querySelector('#order-total');
@@ -146,4 +141,4 @@ quantityInputs.forEach(input => input.addEventListener('input', updateTotals));
 
 {% include "components/footer.html.jinja" %}
 </body>
-</html>
+</html> 
