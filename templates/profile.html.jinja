@@ -72,12 +72,61 @@
                     <h2 class="text-2xl mb-4 border-b border-[#6fb7ff] pb-2">
                          Orders progress
                     </h2>
-                    <p class="text-gray-300">You have no orders yet.</p>
+
+{% if orders %}
+<div class="space-y-6">
+
+    {% for order in orders %}
+    <div class="bg-[#0b2c4d] p-5 rounded-lg border border-[#6fb7ff]">
+
+        <!-- Order Info -->
+        <div class="flex justify-between items-center mb-4">
+            <div>
+                <p class="font-semibold text-lg">Order #{{ order.id }}</p>
+                <p class="text-sm text-gray-300">${{ order.total }}</p>
+            </div>
+            <span class="text-sm px-3 py-1 rounded bg-[#6fb7ff] text-[#0b2c4d] font-semibold">
+                {{ order.status }}
+            </span>
+        </div>
+
+        <!-- Progress Bar -->
+        <div class="w-full bg-gray-700 rounded-full h-3 overflow-hidden">
+            <div class="bg-[#6fb7ff] h-3 rounded-full transition-all duration-500"
+                 style="width: 
+                 {% if order.status == 'Pending' %}25%
+                 {% elif order.status == 'Processing' %}50%
+                 {% elif order.status == 'Shipped' %}75%
+                 {% elif order.status == 'Delivered' %}100%
+                 {% else %}10%
+                 {% endif %};">
+            </div>
+        </div>
+
+        <!-- Steps -->
+        <div class="flex justify-between text-xs text-gray-300 mt-2">
+            <span>Pending</span>
+            <span>Processing</span>
+            <span>Shipped</span>
+            <span>Delivered</span>
+        </div>
+
+    </div>
+    {% endfor %}
+
+</div>
+{% else %}
+<p class="text-gray-300 italic text-center py-6">
+    You haven’t placed any orders yet.
+</p>
+{% endif %}
+
                 
-
-
+                </div>
+            </div>
+        </div>
 
     </main>
-
+{% include "components/footer.html.jinja" %}
 </body>
 </html>
