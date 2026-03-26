@@ -247,6 +247,27 @@ def cart():
 
     cursor.close()
     connection.close()
+    
+
+    if item is None:
+        return "Repair item not found", 404
+    
+    return render_template('repair_items.html.jinja', item=item, guides=guides)
+
+@app.route('/guide/<int:id>')
+def guide_detail(id):
+    connection = connect_db()
+    cursor = connection.cursor(pymysql.cursors.DictCursor)
+
+    cursor.execute("SELECT * FROM `RepairGuides` WHERE ID = %s", (id,))
+    guide = cursor.fetchone()
+
+    connection.close()
+
+    if guide is None:
+        return "Guide not found", 404
+
+    return render_template('guides_detail.html.jinja', guide=guide)
 
     return render_template("cart.html.jinja", cart=cart_items)
 
