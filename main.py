@@ -285,7 +285,7 @@ def guide_detail(id):
     connection = connect_db()
     cursor = connection.cursor(pymysql.cursors.DictCursor)
 
-    cursor.execute("SELECT * FROM RepairGuides WHERE ID = %s", (id,))
+    cursor.execute("SELECT * FROM `RepairGuides` WHERE ID = %s", (id,))
     guide = cursor.fetchone()
 
     connection.close()
