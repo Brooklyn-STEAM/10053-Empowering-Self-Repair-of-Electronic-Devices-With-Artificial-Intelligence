@@ -3,67 +3,113 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <script src="https://cdn.jsdelivr.net/npm/@tailwindcss/browser@4"></script>
     <title>About us</title>
     <link href="/static/style.css" rel="stylesheet">
-            <link rel="icon" href="/static/products/Blueprint Logo.png" type="image">
-
-    <script src="https://cdn.jsdelivr.net/npm/@tailwindcss/browser@4"></script>
-
+    <link rel="icon" href="/static/products/Blueprint Logo.png" type="image">
 </head>
 
 <body class="bg-[#0b2c4d] text-[#d6ecff] font-mono min-h-screen flex flex-col text-sm lg:text-lg">
-  <main class="flex-grow">
-    <!-- NAVBAR -->
     {% include "components/navbar.html.jinja" %}
+  <main class="flex-grow">
 
-   <!-- HERO SECTION -->
-<div class="py-12 px-4 lg:py-[90px] lg:px-[80px] bg-[#0e3a63] border-b-2 border-dashed border-[#6fb7ff]">
-  
-  <h1 class="text-3xl lg:text-[44px] mb-4 lg:mb-[20px] tracking-[1px]">
-    About BluePrint
-  </h1>
+    <!-- HERO SECTION -->
+    <div class="py-[90px] px-[80px] bg-[#0e3a63] border-b-2 border-dashed border-[#6fb7ff]">
 
-  <p class="max-w-[700px] text-base lg:text-lg leading-relaxed mb-6 lg:mb-10">
-    BluePrint gives you clear, step-by-step repair guides powered by
-    artificial intelligence — helping you save money and reduce electronic waste.
-  </p>
-</div>
+    <h1 class="text-[44px] mb-[20px] tracking-[1px]">About BluePrint</h1>
 
-<!-- TEAM SECTION -->
-<div class="py-12 px-4 lg:py-[70px] lg:px-[80px] bg-[#0b2c4d]">
-  
-  <h2 class="text-2xl lg:text-3xl mb-6 lg:mb-10 border-b-2 border-dashed border-[#6fb7ff] inline-block pb-2 lg:pb-[10px]">
-    The People
+    <p class="max-w-[700px] text-lg leading-relaxed mb-10">
+            BluePrint gives you clear, step-by-step repair guides powered by
+            artificial intelligence — helping you save money and reduce electronic waste.
+    </p>
+    
+<!-- THE PEOPLE -->
+    <div class="py-[70px] px-[80px] bg-[#0b2c4d]">
+
+<section class="mt-1">
+  <h2 class="text-3xl mb-8 border-b-2 border-dashed border-[#6fb7ff] inline-block pb-1">
+    The Team
   </h2>
 
-  <!-- Team grid - Stack on mobile, side by side on desktop -->
-  <div class="flex flex-col lg:flex-row gap-6 lg:gap-[50px] mt-6 lg:mt-10">
-    
-    <!-- Jason -->
-    <div class="max-w-full lg:max-w-[300px] bg-[#1a3a5a] p-4 lg:p-5 rounded-lg">
-      <h3 class="text-xl lg:text-2xl font-bold text-[#6fb7ff] mb-2">Jason Geban</h3>
-      <p class="text-sm lg:text-base leading-relaxed">
-        Jason is the team leader. His roles are team leadership, sprint planning, stakeholder and communication.
-      </p>
-    </div>
-
-    <!-- Caleb -->
-    <div class="max-w-full lg:max-w-[300px] bg-[#1a3a5a] p-4 lg:p-5 rounded-lg">
-      <h3 class="text-xl lg:text-2xl font-bold text-[#6fb7ff] mb-2">Caleb Ogboe</h3>
-      <p class="text-sm lg:text-base leading-relaxed">
-        Caleb is the backend developer. His roles are UI/UX design, and responsive design.
-      </p>
-    </div>
-
-    <!-- Jayson -->
-    <div class="max-w-full lg:max-w-[300px] bg-[#1a3a5a] p-4 lg:p-5 rounded-lg">
-      <h3 class="text-xl lg:text-2xl font-bold text-[#6fb7ff] mb-2">Jayson Ramirez</h3>
-      <p class="text-sm lg:text-base leading-relaxed">
-        Jayson is the frontend developer. His roles are API development, database management, security.
-      </p>
-    </div>
-
+  <div class="flex gap-12">
+    <p class="max-w-[700px] text-base lg:text-lg leading-relaxed">
+      BluePrint is a capstone project developed by a team of three dedicated students: Jason Geban, Caleb Ogboe, and Jayson Ramirez. 
+      Each member contributes a distinct set of skills and perspectives, working collaboratively to design and build an innovative 
+      AI-powered repair guide system.
+      <br><br>
+      The team participates in the Brooklyn STEAM Center during the morning, where they focus on technical and project-based learning, 
+      and attend their respective home schools in the afternoon. Jason Geban and Caleb Ogboe attend Bedford Academy High School, 
+      while Jayson Ramirez attends The High School for Global Citizenship. 
+      Jason and Jayson are both seniors, while Caleb is a junior. 
+      
+    </p>
   </div>
+</section>
+
+<!-- Team grid -->
+<div class="flex flex-col lg:flex-row gap-6 lg:gap-[50px] mt-6 lg:mt-10">
+
+  <!-- Jason -->
+  <div class="w-full lg:w-[300px] bg-[#1a3a5a] p-5 rounded-lg 
+              transition-all duration-300 ease-in-out
+              hover:-translate-y-2 hover:shadow-2xl hover:shadow-blue-500/30">
+
+    <a href="https://www.linkedin.com/in/jason-geban-jr-b7a475329/"
+       class="block text-xl lg:text-2xl font-bold text-[#6fb7ff] mb-2 
+              transition-all duration-300
+              hover:text-white hover:tracking-wide"
+              target="_blank">
+      Jason Geban
+    </a>
+
+    <p class="text-sm lg:text-base leading-relaxed text-white 
+              transition-opacity duration-300 hover:opacity-90">
+      Jason is the team leader. His roles are team leadership, sprint planning,
+      stakeholder communication.
+    </p>
+  </div>
+
+  <!-- Caleb -->
+  <div class="w-full lg:w-[300px] bg-[#1a3a5a] p-5 rounded-lg 
+              transition-all duration-300 ease-in-out
+              hover:-translate-y-2 hover:shadow-2xl hover:shadow-blue-500/30">
+
+    <a href="https://www.linkedin.com/in/caleb-ogboe-48181632a/"
+       class="block text-xl lg:text-2xl font-bold text-[#6fb7ff] mb-2 
+              transition-all duration-300
+              hover:text-white hover:tracking-wide"
+              target="_blank">
+      Caleb Ogboe
+    </a>
+
+    <p class="text-sm lg:text-base leading-relaxed text-white 
+              transition-opacity duration-300 hover:opacity-90"
+              target="_blank">
+      Caleb is the backend developer. His roles are API development, database management,
+      and server-side logic.
+    </p>
+  </div>
+
+  <!-- Jayson -->
+  <div class="w-full lg:w-[300px] bg-[#1a3a5a] p-5 rounded-lg 
+              transition-all duration-300 ease-in-out
+              hover:-translate-y-2 hover:shadow-2xl hover:shadow-blue-500/30">
+
+    <a href="https://www.linkedin.com/in/jayson-ram%C3%ADrez-marin-b67a5124a?trk"
+       class="block text-xl lg:text-2xl font-bold text-[#6fb7ff] mb-2 
+              transition-all duration-300
+              hover:text-white hover:tracking-wide"
+              target="_blank">
+      Jayson Ramirez
+    </a>
+
+    <p class="text-sm lg:text-base leading-relaxed text-white 
+              transition-opacity duration-300 hover:opacity-90">
+      Jayson is the frontend developer. His roles are UI/UX design, responsive design,
+      and client-side functionality.
+    </p>
+  </div>
+
 </div>
   </main>
 
