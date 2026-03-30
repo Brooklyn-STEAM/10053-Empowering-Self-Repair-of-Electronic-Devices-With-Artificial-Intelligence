@@ -1,11 +1,12 @@
-<!doctype html>
+<!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <script src="https://cdn.jsdelivr.net/npm/@tailwindcss/browser@4"></script>
-  <title>{{ product['Name'] }}</title>
-  <link rel="icon" href="/static/products/Blueprint Logo.png" type="image/png">
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{{product['Name']}} </title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="/static/style.css" rel="stylesheet">
+    <link rel="icon" href="/static/products/Blueprint Logo.png" type="image">
 </head>
 
 {% include "components/ai_chat.html.jinja" %}
@@ -87,14 +88,14 @@
       </div>
 
       <!-- ADD TO CART -->
-      <form method="POST" form="add-to-cart-form" action="/product/{{ product['ID'] }}/add_to_cart"
-            class="bg-[#09223c] p-6 rounded-xl shadow-lg space-y-4">
-
+      <form method="POST" id="add-to-cart-form"
+      action="/cart/{{ product['ID'] }}/add_to_cart"
+      class="bg-[#09223c] p-6 rounded-xl shadow-lg space-y-4">
         <div>
           <label class="block text-sm mb-2 uppercase tracking-wide">
             Quantity
           </label>
-          <input type="number" name="qty" value="1" min="1" required
+          <input type="number" name="quantity" value="1" min="1" required          
             class="w-28 sm:w-24 bg-[#123d66] border border-blue-400 text-center rounded-md p-2 focus:outline-none 
                         focus:ring-2 focus:ring-yellow-400">
         </div>
