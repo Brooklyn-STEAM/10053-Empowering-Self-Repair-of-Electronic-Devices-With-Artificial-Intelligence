@@ -1,14 +1,17 @@
-from flask import Flask, render_template, request, flash, redirect, abort, url_for, session
+from flask import Flask, render_template, request, flash, redirect, abort, url_for, session, jsonify
 from flask_login import LoginManager, login_user, logout_user, login_required, current_user
 import pymysql
 from dynaconf import Dynaconf
-
+from openai import OpenAI
 
 app = Flask(__name__)
 
 config = Dynaconf(settings_file =["settings.toml"])
 
+client = OpenAI(api_key=config.get("OPENAI_API_KEY"))
+
 app.secret_key = config.secret_key
+
 
 login_manager = LoginManager(app)
 
@@ -409,7 +412,127 @@ def checkout():
 def thank_you():
     return render_template("thank_you.html.jinja")
 
+<<<<<<< HEAD
+@app.route('/ai-help', methods=['POST'])
+def ai_help():
+    user_input = request.form.get("message")
+    image = request.files.get("image")
+
+    image_path = None
+
+    if image:
+        image_path = f"static/uploads/{image.filename}"
+        image.save(image_path)
+
+    # 🔥 ALWAYS call AI (with or without image)
+    response = call_ai(user_input, image_path)
+
+    return jsonify({"reply": response})
+
+def load_repair_knowledge():
+    try:
+        with open("repair_knowledge.txt", "r") as f:
+            return f.read()
+    except:
+        return ""
+
+user_sessions = {}
+
+user_sessions = {}
+
+def call_ai(user_input, image_path=None):
+    knowledge = load_repair_knowledge()
+
+    connection = connect_db()
+    cursor = connection.cursor(pymysql.cursors.DictCursor)
+
+    cursor.execute("SELECT ID, Name FROM RepairGuides")
+    guides = cursor.fetchall()
+    connection.close()
+
+    user_id = "default"
+
+    if not user_input and image_path:
+        return """
+📷 I see you uploaded an image.
+
+What device is this and what seems to be the issue?
+"""
+
+    if not user_input:
+        return "Please describe your issue."
+
+    user_input_lower = user_input.lower()
+
+    # 🔹 Handle step-by-step
+    if user_input_lower == "next step":
+        if user_id in user_sessions:
+            steps = user_sessions[user_id]
+            if steps:
+                next_step = steps.pop(0)
+                return f"➡️ Next step:<br>{next_step}"
+            else:
+                return "✅ You're done! You've completed all steps."
+
+    keywords = {
+        "battery": ["battery", "charge", "power", "dead"],
+        "screen": ["screen", "display", "crack", "touch"],
+        "camera": ["camera", "lens", "photo"]
+    }
+
+    best_match = None
+
+    for guide in guides:
+        for key, words in keywords.items():
+            if any(word in user_input_lower for word in words):
+                if key in guide["Name"].lower():
+                    best_match = guide
+                    break
+
+    # 🔹 Extract steps
+    steps = []
+    for line in knowledge.split("\n"):
+        if "step" in line.lower() and any(word in line.lower() for word in user_input_lower.split()):
+            steps.append(line.strip())
+
+    steps = steps[:3]
+
+    # 🔹 Save steps for session
+    user_sessions[user_id] = steps.copy()
+
+    # 🔹 Format steps OUTSIDE f-string
+    if steps:
+        step_text = ""
+        for i, step in enumerate(steps, 1):
+            step_text += f"{i}. {step}<br>"
+    else:
+        step_text = "1. Turn off your device<br>2. Inspect for damage<br>3. Follow the guide below<br>"
+
+    # 🔹 Final response
+    if best_match:
+        return f"""
+🔧 <b>{best_match['Name']} detected</b><br><br>
+
+Here are the first steps you should try:<br><br>
+
+{step_text}
+
+👉 <a href="/guide/{best_match['ID']}" target="_blank" style="color:#60a5fa;">Open Full Repair Guide</a><br><br>
+
+Reply <b>next step</b> and I’ll guide you further.
+"""
+
+    return """
+I couldn't find a clear match.<br><br>
+
+Try:
+- my screen is cracked<br>
+- battery drains fast<br>
+- camera not working
+"""
+=======
 @app.route("/profile")
 @login_required
 def profile():
     return render_template("profile.html.jinja")
+>>>>>>> origin/main
