@@ -132,7 +132,22 @@ def logout():
 
 @app.route("/repairs")
 def repair_page():
+
     return render_template("repairs.html.jinja")
+
+@app.route("/phone_guides")
+def phone_guides():
+    connection = connect_db()
+
+    cursor = connection.cursor()
+
+    cursor.execute("SELECT * FROM `RepairItems`")
+    
+    result = cursor.fetchall()
+    
+    connection.close()
+
+    return render_template("phone_guides.html.jinja", guides=result)
 
 @app.route("/about_us")
 def about_us():

@@ -9,38 +9,36 @@
     <link rel="icon" href="/static/products/Blueprint Logo.png" type="image">
 </head>
 {% include "components/ai_chat.html.jinja" %}
-<body class="bg-[#0b2c4d] text-[#d6ecff] font-mono min-h-screen flex flex-col text-sm lg:text-xl">
+<body class="bg-[#0b2c4d] text-[#d6ecff] min-h-screen flex flex-col text-sm lg:text-xl">
   <main class="flex-grow">
     <!-- NAVBAR -->
     {% include "components/navbar.html.jinja" %}
-
-  <main class="flex-grow">
 
     <header class="py-[70px] px-[80px] bg-[#0e3a63] border-b-2 border-dashed border-[#6fb7ff] text-center">
         <h1 class="text-4xl mb-6 border-b-2 border-dashed border-[#6fb7ff] inline-block pb-[10px]">
             Welcome to the Repair Page
         </h1>
         <p class="max-w-[700px] mx-auto text-lg leading-relaxed">
-            Step-by-step guides and tools to help you repair your device safely and correctly.
+            Step-by-step guides and equipment to help you repair your device safely and correctly.
         </p>
     </header>
 
     <div class="grid grid-cols-1 md:grid-cols-2 gap-10 items-center">
 
-        <!-- Images -->
+   
         <div class="grid grid-cols-2 gap-4">
-            <img src="/static/img/step1.jpg" class="w-full rounded-lg shadow-md" alt="Step 1">
-            <img src="/static/img/step2.jpg" class="w-full rounded-lg shadow-md" alt="Step 2">
+            <a href="/phone_guides" class=" hover:text-[#6fb7ff] transition ml-3">Phone Guides</a>
+            <a href="/browse" class="hover:text-[#6fb7ff] transition">Repair Equipment</a>
         </div>
 
         <!-- Text -->
         <div>
             <h2 class="text-3xl mb-6 border-b-2 border-dashed border-[#6fb7ff] inline-block pb-[10px]">
-                Repair Steps
+                Repair Tips
             </h2>
 
             <p class="text-lg leading-relaxed mb-4">
-                Follow these step-by-step images to safely repair your device. Each image shows the correct tool placement and part removal order.
+                Use the links on the left to find detailed guides and equipment for your repair. Follow these general tips for a successful repair:
             </p>
 
             <ul class="list-disc pl-6 space-y-2 text-base">
