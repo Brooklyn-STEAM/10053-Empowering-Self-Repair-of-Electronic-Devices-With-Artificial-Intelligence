@@ -1,0 +1,633 @@
+WARNING:werkzeug: * Debugger is active!
+INFO:werkzeug: * Debugger PIN: 170-316-799
+INFO:werkzeug: * Detected change in '/Users/cohort24/10053-Empowering-Self-Repair-of-Electronic-Devices-With-Artificial-Intelligence/main.py', reloading
+WARNING:werkzeug: * Debugger is active!
+INFO:werkzeug: * Debugger PIN: 170-316-799
+INFO:werkzeug:127.0.0.1 - - [31/Mar/2026 09:34:38] "GET /profile HTTP/1.1" 200 -
+INFO:werkzeug:127.0.0.1 - - [31/Mar/2026 09:34:38] "[36mGET /static/style.css HTTP/1.1[0m" 304 -
+INFO:werkzeug:127.0.0.1 - - [31/Mar/2026 09:34:38] "[36mGET /static/products/Blueprint%20Logo.png HTTP/1.1[0m" 304 -
+INFO:werkzeug:127.0.0.1 - - [31/Mar/2026 09:34:38] "[36mGET /static/products/Blueprint%20Logo.png HTTP/1.1[0m" 304 -
+INFO:werkzeug:127.0.0.1 - - [31/Mar/2026 09:34:39] "GET /profile HTTP/1.1" 200 -
+INFO:werkzeug:127.0.0.1 - - [31/Mar/2026 09:34:39] "[36mGET /static/style.css HTTP/1.1[0m" 304 -
+INFO:werkzeug:127.0.0.1 - - [31/Mar/2026 09:34:39] "[36mGET /static/products/Blueprint%20Logo.png HTTP/1.1[0m" 304 -
+INFO:werkzeug:127.0.0.1 - - [31/Mar/2026 09:34:39] "[36mGET /static/products/Blueprint%20Logo.png HTTP/1.1[0m" 304 -
+INFO:werkzeug:127.0.0.1 - - [31/Mar/2026 09:34:39] "GET /profile HTTP/1.1" 200 -
+INFO:werkzeug:127.0.0.1 - - [31/Mar/2026 09:34:39] "[36mGET /static/style.css HTTP/1.1[0m" 304 -
+INFO:werkzeug:127.0.0.1 - - [31/Mar/2026 09:34:39] "[36mGET /static/products/Blueprint%20Logo.png HTTP/1.1[0m" 304 -
+INFO:werkzeug:127.0.0.1 - - [31/Mar/2026 09:34:40] "GET /profile HTTP/1.1" 200 -
+INFO:werkzeug:127.0.0.1 - - [31/Mar/2026 09:34:40] "GET /profile HTTP/1.1" 200 -
+INFO:werkzeug:127.0.0.1 - - [31/Mar/2026 09:34:40] "[36mGET /static/style.css HTTP/1.1[0m" 304 -
+INFO:werkzeug:127.0.0.1 - - [31/Mar/2026 09:34:40] "[36mGET /static/products/Blueprint%20Logo.png HTTP/1.1[0m" 304 -
+INFO:werkzeug:127.0.0.1 - - [31/Mar/2026 09:34:40] "[36mGET /static/products/Blueprint%20Logo.png HTTP/1.1[0m" 304 -
+INFO:werkzeug:127.0.0.1 - - [31/Mar/2026 09:34:40] "GET /profile HTTP/1.1" 200 -
+INFO:werkzeug:127.0.0.1 - - [31/Mar/2026 09:34:40] "[36mGET /static/style.css HTTP/1.1[0m" 304 -
+INFO:werkzeug:127.0.0.1 - - [31/Mar/2026 09:34:40] "[36mGET /static/products/Blueprint%20Logo.png HTTP/1.1[0m" 304 -
+INFO:werkzeug:127.0.0.1 - - [31/Mar/2026 09:34:41] "GET /profile HTTP/1.1" 200 -
+INFO:werkzeug:127.0.0.1 - - [31/Mar/2026 09:34:41] "[36mGET /static/style.css HTTP/1.1[0m" 304 -
+INFO:werkzeug:127.0.0.1 - - [31/Mar/2026 09:34:41] "[36mGET /static/products/Blueprint%20Logo.png HTTP/1.1[0m" 304 -
+INFO:werkzeug:127.0.0.1 - - [31/Mar/2026 09:34:41] "[36mGET /static/products/Blueprint%20Logo.png HTTP/1.1[0m" 304 -
+INFO:werkzeug:127.0.0.1 - - [31/Mar/2026 09:34:41] "GET /profile HTTP/1.1" 200 -
+INFO:werkzeug:127.0.0.1 - - [31/Mar/2026 09:34:41] "[36mGET /static/style.css HTTP/1.1[0m" 304 -
+INFO:werkzeug:127.0.0.1 - - [31/Mar/2026 09:34:41] "[36mGET /static/products/Blueprint%20Logo.png HTTP/1.1[0m" 304 -
+INFO:werkzeug:127.0.0.1 - - [31/Mar/2026 09:34:41] "[36mGET /static/products/Blueprint%20Logo.png HTTP/1.1[0m" 304 -
+INFO:werkzeug:127.0.0.1 - - [31/Mar/2026 09:34:42] "GET /profile HTTP/1.1" 200 -
+INFO:werkzeug:127.0.0.1 - - [31/Mar/2026 09:34:42] "[36mGET /static/style.css HTTP/1.1[0m" 304 -
+INFO:werkzeug:127.0.0.1 - - [31/Mar/2026 09:34:42] "[36mGET /static/products/Blueprint%20Logo.png HTTP/1.1[0m" 304 -
+INFO:werkzeug:127.0.0.1 - - [31/Mar/2026 09:34:42] "[36mGET /static/products/Blueprint%20Logo.png HTTP/1.1[0m" 304 -
+INFO:werkzeug:127.0.0.1 - - [31/Mar/2026 09:37:19] "GET /profile HTTP/1.1" 200 -
+INFO:werkzeug:127.0.0.1 - - [31/Mar/2026 09:37:19] "[36mGET /static/style.css HTTP/1.1[0m" 304 -
+INFO:werkzeug:127.0.0.1 - - [31/Mar/2026 09:37:19] "[36mGET /static/products/Blueprint%20Logo.png HTTP/1.1[0m" 304 -
+INFO:werkzeug:127.0.0.1 - - [31/Mar/2026 09:37:19] "[36mGET /static/products/Blueprint%20Logo.png HTTP/1.1[0m" 304 -
+INFO:werkzeug:127.0.0.1 - - [31/Mar/2026 09:38:10] "[35m[1mGET /profile HTTP/1.1[0m" 500 -
+INFO:werkzeug:127.0.0.1 - - [31/Mar/2026 09:38:10] "[36mGET /profile?__debugger__=yes&cmd=resource&f=style.css HTTP/1.1[0m" 304 -
+INFO:werkzeug:127.0.0.1 - - [31/Mar/2026 09:38:10] "[36mGET /profile?__debugger__=yes&cmd=resource&f=debugger.js HTTP/1.1[0m" 304 -
+INFO:werkzeug:127.0.0.1 - - [31/Mar/2026 09:38:10] "GET /profile?__debugger__=yes&cmd=resource&f=console.png&s=lYy6F9pB6N8Abb2sEH0D HTTP/1.1" 200 -
+INFO:werkzeug:127.0.0.1 - - [31/Mar/2026 09:38:10] "[36mGET /profile?__debugger__=yes&cmd=resource&f=console.png HTTP/1.1[0m" 304 -
+INFO:werkzeug: * Detected change in '/Users/cohort24/10053-Empowering-Self-Repair-of-Electronic-Devices-With-Artificial-Intelligence/main.py', reloading
+WARNING:werkzeug: * Debugger is active!
+INFO:werkzeug: * Debugger PIN: 170-316-799
+INFO:werkzeug:127.0.0.1 - - [31/Mar/2026 09:38:46] "[35m[1mGET /profile HTTP/1.1[0m" 500 -
+INFO:werkzeug:127.0.0.1 - - [31/Mar/2026 09:38:46] "[36mGET /profile?__debugger__=yes&cmd=resource&f=style.css HTTP/1.1[0m" 304 -
+INFO:werkzeug:127.0.0.1 - - [31/Mar/2026 09:38:46] "[36mGET /profile?__debugger__=yes&cmd=resource&f=debugger.js HTTP/1.1[0m" 304 -
+INFO:werkzeug:127.0.0.1 - - [31/Mar/2026 09:38:46] "GET /profile?__debugger__=yes&cmd=resource&f=console.png&s=zYiTfobuCgybgomrUUZI HTTP/1.1" 200 -
+INFO:werkzeug:127.0.0.1 - - [31/Mar/2026 09:38:46] "[36mGET /profile?__debugger__=yes&cmd=resource&f=console.png HTTP/1.1[0m" 304 -
+INFO:werkzeug:127.0.0.1 - - [31/Mar/2026 09:38:47] "[35m[1mGET /profile HTTP/1.1[0m" 500 -
+INFO:werkzeug:127.0.0.1 - - [31/Mar/2026 09:38:47] "[36mGET /profile?__debugger__=yes&cmd=resource&f=style.css HTTP/1.1[0m" 304 -
+INFO:werkzeug:127.0.0.1 - - [31/Mar/2026 09:38:47] "[36mGET /profile?__debugger__=yes&cmd=resource&f=debugger.js HTTP/1.1[0m" 304 -
+INFO:werkzeug:127.0.0.1 - - [31/Mar/2026 09:38:47] "[36mGET /profile?__debugger__=yes&cmd=resource&f=console.png&s=zYiTfobuCgybgomrUUZI HTTP/1.1[0m" 304 -
+INFO:werkzeug:127.0.0.1 - - [31/Mar/2026 09:38:47] "[36mGET /profile?__debugger__=yes&cmd=resource&f=console.png HTTP/1.1[0m" 304 -
+INFO:werkzeug:127.0.0.1 - - [31/Mar/2026 09:38:47] "[35m[1mGET /profile HTTP/1.1[0m" 500 -
+INFO:werkzeug:127.0.0.1 - - [31/Mar/2026 09:38:47] "[36mGET /profile?__debugger__=yes&cmd=resource&f=style.css HTTP/1.1[0m" 304 -
+INFO:werkzeug:127.0.0.1 - - [31/Mar/2026 09:38:47] "[36mGET /profile?__debugger__=yes&cmd=resource&f=debugger.js HTTP/1.1[0m" 304 -
+INFO:werkzeug:127.0.0.1 - - [31/Mar/2026 09:38:47] "[36mGET /profile?__debugger__=yes&cmd=resource&f=console.png&s=zYiTfobuCgybgomrUUZI HTTP/1.1[0m" 304 -
+INFO:werkzeug:127.0.0.1 - - [31/Mar/2026 09:38:47] "[36mGET /profile?__debugger__=yes&cmd=resource&f=console.png HTTP/1.1[0m" 304 -
+INFO:werkzeug:127.0.0.1 - - [31/Mar/2026 09:38:48] "[35m[1mGET /profile HTTP/1.1[0m" 500 -
+INFO:werkzeug:127.0.0.1 - - [31/Mar/2026 09:38:48] "[36mGET /profile?__debugger__=yes&cmd=resource&f=style.css HTTP/1.1[0m" 304 -
+INFO:werkzeug:127.0.0.1 - - [31/Mar/2026 09:38:48] "[36mGET /profile?__debugger__=yes&cmd=resource&f=debugger.js HTTP/1.1[0m" 304 -
+INFO:werkzeug:127.0.0.1 - - [31/Mar/2026 09:38:48] "[36mGET /profile?__debugger__=yes&cmd=resource&f=console.png&s=zYiTfobuCgybgomrUUZI HTTP/1.1[0m" 304 -
+INFO:werkzeug:127.0.0.1 - - [31/Mar/2026 09:38:48] "[35m[1mGET /profile HTTP/1.1[0m" 500 -
+INFO:werkzeug:127.0.0.1 - - [31/Mar/2026 09:38:48] "[36mGET /profile?__debugger__=yes&cmd=resource&f=debugger.js HTTP/1.1[0m" 304 -
+INFO:werkzeug:127.0.0.1 - - [31/Mar/2026 09:38:48] "[36mGET /profile?__debugger__=yes&cmd=resource&f=style.css HTTP/1.1[0m" 304 -
+INFO:werkzeug:127.0.0.1 - - [31/Mar/2026 09:38:48] "[36mGET /profile?__debugger__=yes&cmd=resource&f=console.png&s=zYiTfobuCgybgomrUUZI HTTP/1.1[0m" 304 -
+INFO:werkzeug:127.0.0.1 - - [31/Mar/2026 09:38:48] "[36mGET /profile?__debugger__=yes&cmd=resource&f=console.png HTTP/1.1[0m" 304 -
+INFO:werkzeug:127.0.0.1 - - [31/Mar/2026 09:38:48] "[35m[1mGET /profile HTTP/1.1[0m" 500 -
+INFO:werkzeug:127.0.0.1 - - [31/Mar/2026 09:38:48] "[35m[1mGET /profile HTTP/1.1[0m" 500 -
+INFO:werkzeug:127.0.0.1 - - [31/Mar/2026 09:38:48] "[35m[1mGET /profile HTTP/1.1[0m" 500 -
+INFO:werkzeug:127.0.0.1 - - [31/Mar/2026 09:38:49] "[35m[1mGET /profile HTTP/1.1[0m" 500 -
+INFO:werkzeug:127.0.0.1 - - [31/Mar/2026 09:38:49] "[36mGET /profile?__debugger__=yes&cmd=resource&f=style.css HTTP/1.1[0m" 304 -
+INFO:werkzeug:127.0.0.1 - - [31/Mar/2026 09:38:49] "[36mGET /profile?__debugger__=yes&cmd=resource&f=debugger.js HTTP/1.1[0m" 304 -
+INFO:werkzeug:127.0.0.1 - - [31/Mar/2026 09:38:49] "[36mGET /profile?__debugger__=yes&cmd=resource&f=console.png&s=zYiTfobuCgybgomrUUZI HTTP/1.1[0m" 304 -
+INFO:werkzeug:127.0.0.1 - - [31/Mar/2026 09:38:49] "[36mGET /profile?__debugger__=yes&cmd=resource&f=console.png HTTP/1.1[0m" 304 -
+INFO:werkzeug: * Detected change in '/Users/cohort24/10053-Empowering-Self-Repair-of-Electronic-Devices-With-Artificial-Intelligence/main.py', reloading
+WARNING:werkzeug: * Debugger is active!
+INFO:werkzeug: * Debugger PIN: 170-316-799
+INFO:werkzeug: * Detected change in '/Users/cohort24/10053-Empowering-Self-Repair-of-Electronic-Devices-With-Artificial-Intelligence/main.py', reloading
+WARNING:werkzeug: * Debugger is active!
+INFO:werkzeug: * Debugger PIN: 170-316-799
+INFO:werkzeug: * Detected change in '/Users/cohort24/10053-Empowering-Self-Repair-of-Electronic-Devices-With-Artificial-Intelligence/main.py', reloading
+WARNING:werkzeug: * Debugger is active!
+INFO:werkzeug: * Debugger PIN: 170-316-799
+INFO:werkzeug:127.0.0.1 - - [31/Mar/2026 09:51:44] "[35m[1mGET /profile HTTP/1.1[0m" 500 -
+INFO:werkzeug:127.0.0.1 - - [31/Mar/2026 09:51:44] "[36mGET /profile?__debugger__=yes&cmd=resource&f=debugger.js HTTP/1.1[0m" 304 -
+INFO:werkzeug:127.0.0.1 - - [31/Mar/2026 09:51:44] "[36mGET /profile?__debugger__=yes&cmd=resource&f=style.css HTTP/1.1[0m" 304 -
+INFO:werkzeug:127.0.0.1 - - [31/Mar/2026 09:51:44] "GET /profile?__debugger__=yes&cmd=resource&f=console.png&s=puPTSa1lpfZoH54lWK2f HTTP/1.1" 200 -
+INFO:werkzeug:127.0.0.1 - - [31/Mar/2026 09:51:44] "[36mGET /profile?__debugger__=yes&cmd=resource&f=console.png HTTP/1.1[0m" 304 -
+INFO:werkzeug: * Detected change in '/Users/cohort24/10053-Empowering-Self-Repair-of-Electronic-Devices-With-Artificial-Intelligence/main.py', reloading
+WARNING:werkzeug: * Debugger is active!
+INFO:werkzeug: * Debugger PIN: 170-316-799
+INFO:werkzeug: * Detected change in '/Users/cohort24/10053-Empowering-Self-Repair-of-Electronic-Devices-With-Artificial-Intelligence/main.py', reloading
+WARNING:werkzeug: * Debugger is active!
+INFO:werkzeug: * Debugger PIN: 170-316-799
+INFO:werkzeug:127.0.0.1 - - [31/Mar/2026 09:53:12] "GET /profile HTTP/1.1" 200 -
+INFO:werkzeug:127.0.0.1 - - [31/Mar/2026 09:53:12] "[36mGET /static/style.css HTTP/1.1[0m" 304 -
+INFO:werkzeug:127.0.0.1 - - [31/Mar/2026 09:53:12] "[36mGET /static/products/Blueprint%20Logo.png HTTP/1.1[0m" 304 -
+INFO:werkzeug:127.0.0.1 - - [31/Mar/2026 09:53:12] "[36mGET /static/products/Blueprint%20Logo.png HTTP/1.1[0m" 304 -
+INFO:werkzeug:127.0.0.1 - - [31/Mar/2026 09:54:31] "GET /profile HTTP/1.1" 200 -
+INFO:werkzeug:127.0.0.1 - - [31/Mar/2026 09:54:31] "[36mGET /static/style.css HTTP/1.1[0m" 304 -
+INFO:werkzeug:127.0.0.1 - - [31/Mar/2026 09:54:31] "[36mGET /static/products/Blueprint%20Logo.png HTTP/1.1[0m" 304 -
+INFO:werkzeug:127.0.0.1 - - [31/Mar/2026 09:54:31] "[36mGET /static/products/Blueprint%20Logo.png HTTP/1.1[0m" 304 -
+INFO:werkzeug:127.0.0.1 - - [31/Mar/2026 09:54:32] "GET /profile HTTP/1.1" 200 -
+INFO:werkzeug:127.0.0.1 - - [31/Mar/2026 09:54:32] "[36mGET /static/style.css HTTP/1.1[0m" 304 -
+INFO:werkzeug:127.0.0.1 - - [31/Mar/2026 09:54:32] "[36mGET /static/products/Blueprint%20Logo.png HTTP/1.1[0m" 304 -
+INFO:werkzeug:127.0.0.1 - - [31/Mar/2026 09:54:32] "[36mGET /static/products/Blueprint%20Logo.png HTTP/1.1[0m" 304 -
+INFO:werkzeug:127.0.0.1 - - [31/Mar/2026 09:54:32] "GET /profile HTTP/1.1" 200 -
+INFO:werkzeug:127.0.0.1 - - [31/Mar/2026 09:54:32] "[36mGET /static/style.css HTTP/1.1[0m" 304 -
+INFO:werkzeug:127.0.0.1 - - [31/Mar/2026 09:54:32] "[36mGET /static/products/Blueprint%20Logo.png HTTP/1.1[0m" 304 -
+INFO:werkzeug:127.0.0.1 - - [31/Mar/2026 09:54:33] "GET /profile HTTP/1.1" 200 -
+INFO:werkzeug:127.0.0.1 - - [31/Mar/2026 09:54:33] "[36mGET /static/style.css HTTP/1.1[0m" 304 -
+INFO:werkzeug:127.0.0.1 - - [31/Mar/2026 09:54:33] "[36mGET /static/products/Blueprint%20Logo.png HTTP/1.1[0m" 304 -
+INFO:werkzeug:127.0.0.1 - - [31/Mar/2026 09:54:33] "[36mGET /static/products/Blueprint%20Logo.png HTTP/1.1[0m" 304 -
+INFO:werkzeug:127.0.0.1 - - [31/Mar/2026 09:54:33] "GET /profile HTTP/1.1" 200 -
+INFO:werkzeug:127.0.0.1 - - [31/Mar/2026 09:54:33] "[36mGET /static/style.css HTTP/1.1[0m" 304 -
+INFO:werkzeug:127.0.0.1 - - [31/Mar/2026 09:54:33] "[36mGET /static/products/Blueprint%20Logo.png HTTP/1.1[0m" 304 -
+INFO:werkzeug:127.0.0.1 - - [31/Mar/2026 09:54:33] "GET /profile HTTP/1.1" 200 -
+INFO:werkzeug:127.0.0.1 - - [31/Mar/2026 09:54:33] "[36mGET /static/style.css HTTP/1.1[0m" 304 -
+INFO:werkzeug:127.0.0.1 - - [31/Mar/2026 09:54:33] "[36mGET /static/products/Blueprint%20Logo.png HTTP/1.1[0m" 304 -
+INFO:werkzeug:127.0.0.1 - - [31/Mar/2026 09:54:33] "[36mGET /static/products/Blueprint%20Logo.png HTTP/1.1[0m" 304 -
+INFO:werkzeug:127.0.0.1 - - [31/Mar/2026 09:54:33] "GET /profile HTTP/1.1" 200 -
+INFO:werkzeug:127.0.0.1 - - [31/Mar/2026 09:54:33] "[36mGET /static/style.css HTTP/1.1[0m" 304 -
+INFO:werkzeug:127.0.0.1 - - [31/Mar/2026 09:54:33] "[36mGET /static/products/Blueprint%20Logo.png HTTP/1.1[0m" 304 -
+INFO:werkzeug:127.0.0.1 - - [31/Mar/2026 09:54:33] "[36mGET /static/products/Blueprint%20Logo.png HTTP/1.1[0m" 304 -
+INFO:werkzeug:127.0.0.1 - - [31/Mar/2026 09:54:34] "GET /profile HTTP/1.1" 200 -
+INFO:werkzeug:127.0.0.1 - - [31/Mar/2026 09:54:34] "[36mGET /static/style.css HTTP/1.1[0m" 304 -
+INFO:werkzeug:127.0.0.1 - - [31/Mar/2026 09:54:34] "[36mGET /static/products/Blueprint%20Logo.png HTTP/1.1[0m" 304 -
+INFO:werkzeug:127.0.0.1 - - [31/Mar/2026 09:54:34] "GET /profile HTTP/1.1" 200 -
+INFO:werkzeug:127.0.0.1 - - [31/Mar/2026 09:54:34] "[36mGET /static/style.css HTTP/1.1[0m" 304 -
+INFO:werkzeug:127.0.0.1 - - [31/Mar/2026 09:54:34] "[36mGET /static/products/Blueprint%20Logo.png HTTP/1.1[0m" 304 -
+INFO:werkzeug:127.0.0.1 - - [31/Mar/2026 09:54:34] "[36mGET /static/products/Blueprint%20Logo.png HTTP/1.1[0m" 304 -
+INFO:werkzeug:127.0.0.1 - - [31/Mar/2026 09:54:34] "GET /profile HTTP/1.1" 200 -
+INFO:werkzeug:127.0.0.1 - - [31/Mar/2026 09:54:34] "[36mGET /static/style.css HTTP/1.1[0m" 304 -
+INFO:werkzeug:127.0.0.1 - - [31/Mar/2026 09:54:34] "[36mGET /static/products/Blueprint%20Logo.png HTTP/1.1[0m" 304 -
+INFO:werkzeug:127.0.0.1 - - [31/Mar/2026 09:54:34] "GET /profile HTTP/1.1" 200 -
+INFO:werkzeug:127.0.0.1 - - [31/Mar/2026 09:54:34] "GET /profile HTTP/1.1" 200 -
+INFO:werkzeug:127.0.0.1 - - [31/Mar/2026 09:54:34] "[36mGET /static/style.css HTTP/1.1[0m" 304 -
+INFO:werkzeug:127.0.0.1 - - [31/Mar/2026 09:54:34] "[36mGET /static/products/Blueprint%20Logo.png HTTP/1.1[0m" 304 -
+INFO:werkzeug:127.0.0.1 - - [31/Mar/2026 09:54:34] "[36mGET /static/products/Blueprint%20Logo.png HTTP/1.1[0m" 304 -
+INFO:werkzeug:127.0.0.1 - - [31/Mar/2026 09:54:34] "GET /profile HTTP/1.1" 200 -
+INFO:werkzeug:127.0.0.1 - - [31/Mar/2026 09:54:34] "[36mGET /static/style.css HTTP/1.1[0m" 304 -
+INFO:werkzeug:127.0.0.1 - - [31/Mar/2026 09:54:34] "[36mGET /static/products/Blueprint%20Logo.png HTTP/1.1[0m" 304 -
+INFO:werkzeug:127.0.0.1 - - [31/Mar/2026 09:54:34] "GET /profile HTTP/1.1" 200 -
+INFO:werkzeug:127.0.0.1 - - [31/Mar/2026 09:54:34] "[36mGET /static/style.css HTTP/1.1[0m" 304 -
+INFO:werkzeug:127.0.0.1 - - [31/Mar/2026 09:54:34] "[36mGET /static/products/Blueprint%20Logo.png HTTP/1.1[0m" 304 -
+INFO:werkzeug:127.0.0.1 - - [31/Mar/2026 09:54:35] "[36mGET /static/products/Blueprint%20Logo.png HTTP/1.1[0m" 304 -
+INFO:werkzeug:127.0.0.1 - - [31/Mar/2026 09:56:16] "GET /profile HTTP/1.1" 200 -
+INFO:werkzeug:127.0.0.1 - - [31/Mar/2026 09:56:16] "[36mGET /static/style.css HTTP/1.1[0m" 304 -
+INFO:werkzeug:127.0.0.1 - - [31/Mar/2026 09:56:16] "[36mGET /static/products/Blueprint%20Logo.png HTTP/1.1[0m" 304 -
+INFO:werkzeug:127.0.0.1 - - [31/Mar/2026 09:56:16] "[36mGET /static/products/Blueprint%20Logo.png HTTP/1.1[0m" 304 -
+INFO:werkzeug: * Detected change in '/Users/cohort24/10053-Empowering-Self-Repair-of-Electronic-Devices-With-Artificial-Intelligence/main.py', reloading
+WARNING:werkzeug: * Debugger is active!
+INFO:werkzeug: * Debugger PIN: 170-316-799
+INFO:werkzeug: * Detected change in '/Users/cohort24/10053-Empowering-Self-Repair-of-Electronic-Devices-With-Artificial-Intelligence/main.py', reloading
+WARNING:werkzeug: * Debugger is active!
+INFO:werkzeug: * Debugger PIN: 395-541-764
+INFO:werkzeug:127.0.0.1 - - [31/Mar/2026 09:58:01] "[35m[1mGET /profile HTTP/1.1[0m" 500 -
+INFO:werkzeug:127.0.0.1 - - [31/Mar/2026 09:58:02] "[36mGET /profile?__debugger__=yes&cmd=resource&f=style.css HTTP/1.1[0m" 304 -
+INFO:werkzeug:127.0.0.1 - - [31/Mar/2026 09:58:02] "[36mGET /profile?__debugger__=yes&cmd=resource&f=debugger.js HTTP/1.1[0m" 304 -
+INFO:werkzeug:127.0.0.1 - - [31/Mar/2026 09:58:02] "GET /profile?__debugger__=yes&cmd=resource&f=console.png&s=URu60G3yntaGAiBA6cZW HTTP/1.1" 200 -
+INFO:werkzeug:127.0.0.1 - - [31/Mar/2026 09:58:02] "[36mGET /profile?__debugger__=yes&cmd=resource&f=console.png HTTP/1.1[0m" 304 -
+INFO:werkzeug:127.0.0.1 - - [31/Mar/2026 09:58:02] "[35m[1mGET /profile HTTP/1.1[0m" 500 -
+INFO:werkzeug:127.0.0.1 - - [31/Mar/2026 09:58:02] "[36mGET /profile?__debugger__=yes&cmd=resource&f=style.css HTTP/1.1[0m" 304 -
+INFO:werkzeug:127.0.0.1 - - [31/Mar/2026 09:58:02] "[36mGET /profile?__debugger__=yes&cmd=resource&f=debugger.js HTTP/1.1[0m" 304 -
+INFO:werkzeug:127.0.0.1 - - [31/Mar/2026 09:58:02] "[36mGET /profile?__debugger__=yes&cmd=resource&f=console.png&s=URu60G3yntaGAiBA6cZW HTTP/1.1[0m" 304 -
+INFO:werkzeug:127.0.0.1 - - [31/Mar/2026 09:58:02] "[36mGET /profile?__debugger__=yes&cmd=resource&f=console.png HTTP/1.1[0m" 304 -
+INFO:werkzeug:127.0.0.1 - - [31/Mar/2026 09:58:02] "[35m[1mGET /profile HTTP/1.1[0m" 500 -
+INFO:werkzeug:127.0.0.1 - - [31/Mar/2026 09:58:02] "[36mGET /profile?__debugger__=yes&cmd=resource&f=style.css HTTP/1.1[0m" 304 -
+INFO:werkzeug:127.0.0.1 - - [31/Mar/2026 09:58:02] "[36mGET /profile?__debugger__=yes&cmd=resource&f=debugger.js HTTP/1.1[0m" 304 -
+INFO:werkzeug:127.0.0.1 - - [31/Mar/2026 09:58:02] "[36mGET /profile?__debugger__=yes&cmd=resource&f=console.png&s=URu60G3yntaGAiBA6cZW HTTP/1.1[0m" 304 -
+INFO:werkzeug:127.0.0.1 - - [31/Mar/2026 09:58:02] "[36mGET /profile?__debugger__=yes&cmd=resource&f=console.png HTTP/1.1[0m" 304 -
+INFO:werkzeug:127.0.0.1 - - [31/Mar/2026 09:58:02] "[35m[1mGET /profile HTTP/1.1[0m" 500 -
+INFO:werkzeug:127.0.0.1 - - [31/Mar/2026 09:58:02] "[36mGET /profile?__debugger__=yes&cmd=resource&f=style.css HTTP/1.1[0m" 304 -
+INFO:werkzeug:127.0.0.1 - - [31/Mar/2026 09:58:02] "[36mGET /profile?__debugger__=yes&cmd=resource&f=debugger.js HTTP/1.1[0m" 304 -
+INFO:werkzeug:127.0.0.1 - - [31/Mar/2026 09:58:03] "[36mGET /profile?__debugger__=yes&cmd=resource&f=console.png&s=URu60G3yntaGAiBA6cZW HTTP/1.1[0m" 304 -
+INFO:werkzeug:127.0.0.1 - - [31/Mar/2026 09:58:03] "[36mGET /profile?__debugger__=yes&cmd=resource&f=console.png HTTP/1.1[0m" 304 -
+INFO:werkzeug:127.0.0.1 - - [31/Mar/2026 09:58:03] "[35m[1mGET /profile HTTP/1.1[0m" 500 -
+INFO:werkzeug:127.0.0.1 - - [31/Mar/2026 09:58:03] "[36mGET /profile?__debugger__=yes&cmd=resource&f=style.css HTTP/1.1[0m" 304 -
+INFO:werkzeug:127.0.0.1 - - [31/Mar/2026 09:58:03] "[36mGET /profile?__debugger__=yes&cmd=resource&f=debugger.js HTTP/1.1[0m" 304 -
+INFO:werkzeug:127.0.0.1 - - [31/Mar/2026 09:58:03] "[36mGET /profile?__debugger__=yes&cmd=resource&f=console.png&s=URu60G3yntaGAiBA6cZW HTTP/1.1[0m" 304 -
+INFO:werkzeug:127.0.0.1 - - [31/Mar/2026 09:58:03] "[36mGET /profile?__debugger__=yes&cmd=resource&f=console.png HTTP/1.1[0m" 304 -
+INFO:werkzeug:127.0.0.1 - - [31/Mar/2026 09:58:03] "[35m[1mGET /profile HTTP/1.1[0m" 500 -
+INFO:werkzeug:127.0.0.1 - - [31/Mar/2026 09:58:03] "[36mGET /profile?__debugger__=yes&cmd=resource&f=style.css HTTP/1.1[0m" 304 -
+INFO:werkzeug:127.0.0.1 - - [31/Mar/2026 09:58:03] "[36mGET /profile?__debugger__=yes&cmd=resource&f=debugger.js HTTP/1.1[0m" 304 -
+INFO:werkzeug:127.0.0.1 - - [31/Mar/2026 09:58:03] "[36mGET /profile?__debugger__=yes&cmd=resource&f=console.png&s=URu60G3yntaGAiBA6cZW HTTP/1.1[0m" 304 -
+INFO:werkzeug:127.0.0.1 - - [31/Mar/2026 09:58:03] "[36mGET /profile?__debugger__=yes&cmd=resource&f=console.png HTTP/1.1[0m" 304 -
+INFO:werkzeug:127.0.0.1 - - [31/Mar/2026 09:58:03] "[35m[1mGET /profile HTTP/1.1[0m" 500 -
+INFO:werkzeug:127.0.0.1 - - [31/Mar/2026 09:58:03] "[36mGET /profile?__debugger__=yes&cmd=resource&f=style.css HTTP/1.1[0m" 304 -
+INFO:werkzeug:127.0.0.1 - - [31/Mar/2026 09:58:03] "[36mGET /profile?__debugger__=yes&cmd=resource&f=debugger.js HTTP/1.1[0m" 304 -
+INFO:werkzeug:127.0.0.1 - - [31/Mar/2026 09:58:03] "[36mGET /profile?__debugger__=yes&cmd=resource&f=console.png&s=URu60G3yntaGAiBA6cZW HTTP/1.1[0m" 304 -
+INFO:werkzeug:127.0.0.1 - - [31/Mar/2026 09:58:03] "[36mGET /profile?__debugger__=yes&cmd=resource&f=console.png HTTP/1.1[0m" 304 -
+INFO:werkzeug:127.0.0.1 - - [31/Mar/2026 09:58:03] "[35m[1mGET /profile HTTP/1.1[0m" 500 -
+INFO:werkzeug:127.0.0.1 - - [31/Mar/2026 09:58:03] "[36mGET /profile?__debugger__=yes&cmd=resource&f=style.css HTTP/1.1[0m" 304 -
+INFO:werkzeug:127.0.0.1 - - [31/Mar/2026 09:58:03] "[36mGET /profile?__debugger__=yes&cmd=resource&f=debugger.js HTTP/1.1[0m" 304 -
+INFO:werkzeug:127.0.0.1 - - [31/Mar/2026 09:58:03] "[36mGET /profile?__debugger__=yes&cmd=resource&f=console.png&s=URu60G3yntaGAiBA6cZW HTTP/1.1[0m" 304 -
+INFO:werkzeug:127.0.0.1 - - [31/Mar/2026 09:58:03] "[36mGET /profile?__debugger__=yes&cmd=resource&f=console.png HTTP/1.1[0m" 304 -
+INFO:werkzeug:127.0.0.1 - - [31/Mar/2026 09:58:03] "[35m[1mGET /profile HTTP/1.1[0m" 500 -
+INFO:werkzeug:127.0.0.1 - - [31/Mar/2026 09:58:03] "[36mGET /profile?__debugger__=yes&cmd=resource&f=style.css HTTP/1.1[0m" 304 -
+INFO:werkzeug:127.0.0.1 - - [31/Mar/2026 09:58:03] "[36mGET /profile?__debugger__=yes&cmd=resource&f=debugger.js HTTP/1.1[0m" 304 -
+INFO:werkzeug:127.0.0.1 - - [31/Mar/2026 09:58:03] "[36mGET /profile?__debugger__=yes&cmd=resource&f=console.png&s=URu60G3yntaGAiBA6cZW HTTP/1.1[0m" 304 -
+INFO:werkzeug:127.0.0.1 - - [31/Mar/2026 09:58:03] "[36mGET /profile?__debugger__=yes&cmd=resource&f=console.png HTTP/1.1[0m" 304 -
+INFO:werkzeug:127.0.0.1 - - [31/Mar/2026 09:58:03] "[35m[1mGET /profile HTTP/1.1[0m" 500 -
+INFO:werkzeug:127.0.0.1 - - [31/Mar/2026 09:58:03] "[36mGET /profile?__debugger__=yes&cmd=resource&f=style.css HTTP/1.1[0m" 304 -
+INFO:werkzeug:127.0.0.1 - - [31/Mar/2026 09:58:03] "[36mGET /profile?__debugger__=yes&cmd=resource&f=debugger.js HTTP/1.1[0m" 304 -
+INFO:werkzeug:127.0.0.1 - - [31/Mar/2026 09:58:03] "[36mGET /profile?__debugger__=yes&cmd=resource&f=console.png&s=URu60G3yntaGAiBA6cZW HTTP/1.1[0m" 304 -
+INFO:werkzeug:127.0.0.1 - - [31/Mar/2026 09:58:03] "[36mGET /profile?__debugger__=yes&cmd=resource&f=console.png HTTP/1.1[0m" 304 -
+INFO:werkzeug: * Detected change in '/Users/cohort24/10053-Empowering-Self-Repair-of-Electronic-Devices-With-Artificial-Intelligence/main.py', reloading
+WARNING:werkzeug: * Debugger is active!
+INFO:werkzeug: * Debugger PIN: 395-541-764
+INFO:werkzeug:127.0.0.1 - - [31/Mar/2026 10:01:36] "[35m[1mGET /profile HTTP/1.1[0m" 500 -
+INFO:werkzeug:127.0.0.1 - - [31/Mar/2026 10:01:37] "[36mGET /profile?__debugger__=yes&cmd=resource&f=style.css HTTP/1.1[0m" 304 -
+INFO:werkzeug:127.0.0.1 - - [31/Mar/2026 10:01:37] "[36mGET /profile?__debugger__=yes&cmd=resource&f=debugger.js HTTP/1.1[0m" 304 -
+INFO:werkzeug:127.0.0.1 - - [31/Mar/2026 10:01:37] "GET /profile?__debugger__=yes&cmd=resource&f=console.png&s=NVurdIRuBlt6gBxCBB8C HTTP/1.1" 200 -
+INFO:werkzeug:127.0.0.1 - - [31/Mar/2026 10:01:37] "[36mGET /profile?__debugger__=yes&cmd=resource&f=console.png HTTP/1.1[0m" 304 -
+INFO:werkzeug:127.0.0.1 - - [31/Mar/2026 10:01:37] "[35m[1mGET /profile HTTP/1.1[0m" 500 -
+INFO:werkzeug:127.0.0.1 - - [31/Mar/2026 10:01:37] "[36mGET /profile?__debugger__=yes&cmd=resource&f=style.css HTTP/1.1[0m" 304 -
+INFO:werkzeug:127.0.0.1 - - [31/Mar/2026 10:01:37] "[36mGET /profile?__debugger__=yes&cmd=resource&f=debugger.js HTTP/1.1[0m" 304 -
+INFO:werkzeug:127.0.0.1 - - [31/Mar/2026 10:01:37] "[36mGET /profile?__debugger__=yes&cmd=resource&f=console.png&s=NVurdIRuBlt6gBxCBB8C HTTP/1.1[0m" 304 -
+INFO:werkzeug:127.0.0.1 - - [31/Mar/2026 10:01:37] "[36mGET /profile?__debugger__=yes&cmd=resource&f=console.png HTTP/1.1[0m" 304 -
+INFO:werkzeug: * Detected change in '/Users/cohort24/10053-Empowering-Self-Repair-of-Electronic-Devices-With-Artificial-Intelligence/main.py', reloading
+WARNING:werkzeug: * Debugger is active!
+INFO:werkzeug: * Debugger PIN: 170-316-799
+INFO:werkzeug:127.0.0.1 - - [31/Mar/2026 10:01:55] "GET /profile HTTP/1.1" 200 -
+INFO:werkzeug:127.0.0.1 - - [31/Mar/2026 10:01:55] "[36mGET /static/products/Blueprint%20Logo.png HTTP/1.1[0m" 304 -
+INFO:werkzeug:127.0.0.1 - - [31/Mar/2026 10:01:55] "[36mGET /static/style.css HTTP/1.1[0m" 304 -
+INFO:werkzeug:127.0.0.1 - - [31/Mar/2026 10:01:55] "[36mGET /static/products/Blueprint%20Logo.png HTTP/1.1[0m" 304 -
+INFO:werkzeug:127.0.0.1 - - [31/Mar/2026 10:01:56] "GET /profile HTTP/1.1" 200 -
+INFO:werkzeug:127.0.0.1 - - [31/Mar/2026 10:01:56] "[36mGET /static/style.css HTTP/1.1[0m" 304 -
+INFO:werkzeug:127.0.0.1 - - [31/Mar/2026 10:01:56] "[36mGET /static/products/Blueprint%20Logo.png HTTP/1.1[0m" 304 -
+INFO:werkzeug:127.0.0.1 - - [31/Mar/2026 10:01:56] "[36mGET /static/products/Blueprint%20Logo.png HTTP/1.1[0m" 304 -
+INFO:werkzeug:127.0.0.1 - - [31/Mar/2026 10:01:56] "GET /profile HTTP/1.1" 200 -
+INFO:werkzeug:127.0.0.1 - - [31/Mar/2026 10:01:56] "[36mGET /static/style.css HTTP/1.1[0m" 304 -
+INFO:werkzeug:127.0.0.1 - - [31/Mar/2026 10:01:56] "[36mGET /static/products/Blueprint%20Logo.png HTTP/1.1[0m" 304 -
+INFO:werkzeug:127.0.0.1 - - [31/Mar/2026 10:01:56] "[36mGET /static/products/Blueprint%20Logo.png HTTP/1.1[0m" 304 -
+INFO:werkzeug:127.0.0.1 - - [31/Mar/2026 10:01:56] "GET /profile HTTP/1.1" 200 -
+INFO:werkzeug:127.0.0.1 - - [31/Mar/2026 10:01:56] "[36mGET /static/style.css HTTP/1.1[0m" 304 -
+INFO:werkzeug:127.0.0.1 - - [31/Mar/2026 10:01:56] "[36mGET /static/products/Blueprint%20Logo.png HTTP/1.1[0m" 304 -
+INFO:werkzeug:127.0.0.1 - - [31/Mar/2026 10:01:56] "[36mGET /static/products/Blueprint%20Logo.png HTTP/1.1[0m" 304 -
+INFO:werkzeug:127.0.0.1 - - [31/Mar/2026 10:01:57] "GET /profile HTTP/1.1" 200 -
+INFO:werkzeug:127.0.0.1 - - [31/Mar/2026 10:01:57] "[36mGET /static/style.css HTTP/1.1[0m" 304 -
+INFO:werkzeug:127.0.0.1 - - [31/Mar/2026 10:01:57] "[36mGET /static/products/Blueprint%20Logo.png HTTP/1.1[0m" 304 -
+INFO:werkzeug:127.0.0.1 - - [31/Mar/2026 10:01:57] "[36mGET /static/products/Blueprint%20Logo.png HTTP/1.1[0m" 304 -
+INFO:werkzeug:127.0.0.1 - - [31/Mar/2026 10:02:47] "GET /profile HTTP/1.1" 200 -
+INFO:werkzeug:127.0.0.1 - - [31/Mar/2026 10:02:47] "[36mGET /static/style.css HTTP/1.1[0m" 304 -
+INFO:werkzeug:127.0.0.1 - - [31/Mar/2026 10:02:47] "[36mGET /static/products/Blueprint%20Logo.png HTTP/1.1[0m" 304 -
+INFO:werkzeug:127.0.0.1 - - [31/Mar/2026 10:02:47] "[36mGET /static/products/Blueprint%20Logo.png HTTP/1.1[0m" 304 -
+INFO:werkzeug:127.0.0.1 - - [31/Mar/2026 10:02:47] "GET /profile HTTP/1.1" 200 -
+INFO:werkzeug:127.0.0.1 - - [31/Mar/2026 10:02:47] "[36mGET /static/style.css HTTP/1.1[0m" 304 -
+INFO:werkzeug:127.0.0.1 - - [31/Mar/2026 10:02:47] "[36mGET /static/products/Blueprint%20Logo.png HTTP/1.1[0m" 304 -
+INFO:werkzeug:127.0.0.1 - - [31/Mar/2026 10:02:47] "[36mGET /static/products/Blueprint%20Logo.png HTTP/1.1[0m" 304 -
+INFO:werkzeug:127.0.0.1 - - [31/Mar/2026 10:02:47] "GET /profile HTTP/1.1" 200 -
+INFO:werkzeug:127.0.0.1 - - [31/Mar/2026 10:02:47] "[36mGET /static/style.css HTTP/1.1[0m" 304 -
+INFO:werkzeug:127.0.0.1 - - [31/Mar/2026 10:02:47] "[36mGET /static/products/Blueprint%20Logo.png HTTP/1.1[0m" 304 -
+INFO:werkzeug:127.0.0.1 - - [31/Mar/2026 10:02:48] "[36mGET /static/products/Blueprint%20Logo.png HTTP/1.1[0m" 304 -
+INFO:werkzeug:127.0.0.1 - - [31/Mar/2026 10:02:48] "GET /profile HTTP/1.1" 200 -
+INFO:werkzeug:127.0.0.1 - - [31/Mar/2026 10:02:48] "[36mGET /static/style.css HTTP/1.1[0m" 304 -
+INFO:werkzeug:127.0.0.1 - - [31/Mar/2026 10:02:48] "[36mGET /static/products/Blueprint%20Logo.png HTTP/1.1[0m" 304 -
+INFO:werkzeug:127.0.0.1 - - [31/Mar/2026 10:02:48] "GET /profile HTTP/1.1" 200 -
+INFO:werkzeug:127.0.0.1 - - [31/Mar/2026 10:02:48] "[36mGET /static/style.css HTTP/1.1[0m" 304 -
+INFO:werkzeug:127.0.0.1 - - [31/Mar/2026 10:02:48] "[36mGET /static/products/Blueprint%20Logo.png HTTP/1.1[0m" 304 -
+INFO:werkzeug:127.0.0.1 - - [31/Mar/2026 10:02:48] "[36mGET /static/products/Blueprint%20Logo.png HTTP/1.1[0m" 304 -
+INFO:werkzeug:127.0.0.1 - - [31/Mar/2026 10:02:48] "GET /profile HTTP/1.1" 200 -
+INFO:werkzeug:127.0.0.1 - - [31/Mar/2026 10:02:48] "[36mGET /static/style.css HTTP/1.1[0m" 304 -
+INFO:werkzeug:127.0.0.1 - - [31/Mar/2026 10:02:48] "[36mGET /static/products/Blueprint%20Logo.png HTTP/1.1[0m" 304 -
+INFO:werkzeug:127.0.0.1 - - [31/Mar/2026 10:02:48] "[36mGET /static/products/Blueprint%20Logo.png HTTP/1.1[0m" 304 -
+INFO:werkzeug:127.0.0.1 - - [31/Mar/2026 10:02:48] "GET /profile HTTP/1.1" 200 -
+INFO:werkzeug:127.0.0.1 - - [31/Mar/2026 10:02:48] "[36mGET /static/products/Blueprint%20Logo.png HTTP/1.1[0m" 304 -
+INFO:werkzeug:127.0.0.1 - - [31/Mar/2026 10:02:48] "[36mGET /static/style.css HTTP/1.1[0m" 304 -
+INFO:werkzeug:127.0.0.1 - - [31/Mar/2026 10:02:50] "[33mGET /edit_profile HTTP/1.1[0m" 404 -
+INFO:werkzeug:127.0.0.1 - - [31/Mar/2026 10:02:50] "[36mGET /static/style.css HTTP/1.1[0m" 304 -
+INFO:werkzeug:127.0.0.1 - - [31/Mar/2026 10:02:50] "[36mGET /static/products/Blueprint%20Logo.png HTTP/1.1[0m" 304 -
+INFO:werkzeug:127.0.0.1 - - [31/Mar/2026 10:03:05] "[35m[1mGET /orders HTTP/1.1[0m" 500 -
+INFO:werkzeug:127.0.0.1 - - [31/Mar/2026 10:03:05] "[36mGET /orders?__debugger__=yes&cmd=resource&f=style.css HTTP/1.1[0m" 304 -
+INFO:werkzeug:127.0.0.1 - - [31/Mar/2026 10:03:05] "[36mGET /orders?__debugger__=yes&cmd=resource&f=debugger.js HTTP/1.1[0m" 304 -
+INFO:werkzeug:127.0.0.1 - - [31/Mar/2026 10:03:05] "GET /orders?__debugger__=yes&cmd=resource&f=console.png&s=Chz0bvVbkwBnDDAEqCCI HTTP/1.1" 200 -
+INFO:werkzeug:127.0.0.1 - - [31/Mar/2026 10:03:05] "[36mGET /orders?__debugger__=yes&cmd=resource&f=console.png HTTP/1.1[0m" 304 -
+INFO:werkzeug: * Detected change in '/Users/cohort24/10053-Empowering-Self-Repair-of-Electronic-Devices-With-Artificial-Intelligence/main.py', reloading
+WARNING:werkzeug: * Debugger is active!
+INFO:werkzeug: * Debugger PIN: 170-316-799
+INFO:werkzeug: * Detected change in '/Users/cohort24/10053-Empowering-Self-Repair-of-Electronic-Devices-With-Artificial-Intelligence/main.py', reloading
+WARNING:werkzeug: * Debugger is active!
+INFO:werkzeug: * Debugger PIN: 170-316-799
+INFO:werkzeug: * Detected change in '/Users/cohort24/10053-Empowering-Self-Repair-of-Electronic-Devices-With-Artificial-Intelligence/main.py', reloading
+WARNING:werkzeug: * Debugger is active!
+INFO:werkzeug: * Debugger PIN: 170-316-799
+ERROR:main:Error fetching orders: Connection.cursor() got an unexpected keyword argument 'dictionary'
+INFO:werkzeug:127.0.0.1 - - [31/Mar/2026 10:06:24] "[35m[1mGET /orders HTTP/1.1[0m" 500 -
+ERROR:main:Error fetching orders: Connection.cursor() got an unexpected keyword argument 'dictionary'
+INFO:werkzeug:127.0.0.1 - - [31/Mar/2026 10:06:30] "[35m[1mGET /orders HTTP/1.1[0m" 500 -
+ERROR:main:Error fetching orders: Connection.cursor() got an unexpected keyword argument 'dictionary'
+INFO:werkzeug:127.0.0.1 - - [31/Mar/2026 10:06:33] "[35m[1mGET /orders HTTP/1.1[0m" 500 -
+ERROR:main:Error fetching orders: Connection.cursor() got an unexpected keyword argument 'dictionary'
+INFO:werkzeug:127.0.0.1 - - [31/Mar/2026 10:09:17] "[35m[1mGET /orders HTTP/1.1[0m" 500 -
+ERROR:main:Error fetching orders: Connection.cursor() got an unexpected keyword argument 'dictionary'
+INFO:werkzeug:127.0.0.1 - - [31/Mar/2026 10:09:18] "[35m[1mGET /orders HTTP/1.1[0m" 500 -
+ERROR:main:Error fetching orders: Connection.cursor() got an unexpected keyword argument 'dictionary'
+INFO:werkzeug:127.0.0.1 - - [31/Mar/2026 10:09:18] "[35m[1mGET /orders HTTP/1.1[0m" 500 -
+ERROR:main:Error fetching orders: Connection.cursor() got an unexpected keyword argument 'dictionary'
+INFO:werkzeug:127.0.0.1 - - [31/Mar/2026 10:09:18] "[35m[1mGET /orders HTTP/1.1[0m" 500 -
+ERROR:main:Error fetching orders: Connection.cursor() got an unexpected keyword argument 'dictionary'
+INFO:werkzeug:127.0.0.1 - - [31/Mar/2026 10:09:18] "[35m[1mGET /orders HTTP/1.1[0m" 500 -
+INFO:werkzeug:127.0.0.1 - - [31/Mar/2026 10:09:20] "GET /profile HTTP/1.1" 200 -
+INFO:werkzeug:127.0.0.1 - - [31/Mar/2026 10:09:20] "[36mGET /static/products/Blueprint%20Logo.png HTTP/1.1[0m" 304 -
+INFO:werkzeug:127.0.0.1 - - [31/Mar/2026 10:09:20] "[36mGET /static/style.css HTTP/1.1[0m" 304 -
+INFO:werkzeug:127.0.0.1 - - [31/Mar/2026 10:09:20] "[36mGET /static/products/Blueprint%20Logo.png HTTP/1.1[0m" 304 -
+INFO:werkzeug:127.0.0.1 - - [31/Mar/2026 10:09:20] "GET /profile HTTP/1.1" 200 -
+INFO:werkzeug:127.0.0.1 - - [31/Mar/2026 10:09:21] "[36mGET /static/style.css HTTP/1.1[0m" 304 -
+INFO:werkzeug:127.0.0.1 - - [31/Mar/2026 10:09:21] "[36mGET /static/products/Blueprint%20Logo.png HTTP/1.1[0m" 304 -
+INFO:werkzeug:127.0.0.1 - - [31/Mar/2026 10:09:21] "[36mGET /static/products/Blueprint%20Logo.png HTTP/1.1[0m" 304 -
+ERROR:main:Error fetching orders: Connection.cursor() got an unexpected keyword argument 'dictionary'
+INFO:werkzeug:127.0.0.1 - - [31/Mar/2026 10:10:52] "[35m[1mGET /orders HTTP/1.1[0m" 500 -
+ERROR:main:Error fetching orders: Connection.cursor() got an unexpected keyword argument 'dictionary'
+INFO:werkzeug:127.0.0.1 - - [31/Mar/2026 10:14:30] "[35m[1mGET /orders HTTP/1.1[0m" 500 -
+ERROR:main:Error fetching orders: Connection.cursor() got an unexpected keyword argument 'dictionary'
+INFO:werkzeug:127.0.0.1 - - [31/Mar/2026 10:14:33] "[35m[1mGET /orders HTTP/1.1[0m" 500 -
+INFO:werkzeug: * Detected change in '/Users/cohort24/10053-Empowering-Self-Repair-of-Electronic-Devices-With-Artificial-Intelligence/main.py', reloading
+WARNING:werkzeug: * Debugger is active!
+INFO:werkzeug: * Debugger PIN: 170-316-799
+INFO:werkzeug: * Detected change in '/Users/cohort24/10053-Empowering-Self-Repair-of-Electronic-Devices-With-Artificial-Intelligence/main.py', reloading
+WARNING:werkzeug: * Debugger is active!
+INFO:werkzeug: * Debugger PIN: 170-316-799
+ERROR:main:Error fetching orders: Connection.cursor() got an unexpected keyword argument 'dictionary'
+INFO:werkzeug:127.0.0.1 - - [31/Mar/2026 10:14:46] "[35m[1mGET /orders HTTP/1.1[0m" 500 -
+ERROR:main:Error fetching orders: Connection.cursor() got an unexpected keyword argument 'dictionary'
+INFO:werkzeug:127.0.0.1 - - [31/Mar/2026 10:14:46] "[35m[1mGET /orders HTTP/1.1[0m" 500 -
+ERROR:main:Error fetching orders: Connection.cursor() got an unexpected keyword argument 'dictionary'
+INFO:werkzeug:127.0.0.1 - - [31/Mar/2026 10:14:47] "[35m[1mGET /orders HTTP/1.1[0m" 500 -
+ERROR:main:Error fetching orders: Connection.cursor() got an unexpected keyword argument 'dictionary'
+INFO:werkzeug:127.0.0.1 - - [31/Mar/2026 10:14:47] "[35m[1mGET /orders HTTP/1.1[0m" 500 -
+ERROR:main:Error fetching orders: Connection.cursor() got an unexpected keyword argument 'dictionary'
+INFO:werkzeug:127.0.0.1 - - [31/Mar/2026 10:14:47] "[35m[1mGET /orders HTTP/1.1[0m" 500 -
+ERROR:main:Error fetching orders: Connection.cursor() got an unexpected keyword argument 'dictionary'
+INFO:werkzeug:127.0.0.1 - - [31/Mar/2026 10:14:47] "[35m[1mGET /orders HTTP/1.1[0m" 500 -
+ERROR:main:Error fetching orders: Connection.cursor() got an unexpected keyword argument 'dictionary'
+INFO:werkzeug:127.0.0.1 - - [31/Mar/2026 10:14:47] "[35m[1mGET /orders HTTP/1.1[0m" 500 -
+ERROR:main:Error fetching orders: Connection.cursor() got an unexpected keyword argument 'dictionary'
+INFO:werkzeug:127.0.0.1 - - [31/Mar/2026 10:14:47] "[35m[1mGET /orders HTTP/1.1[0m" 500 -
+ERROR:main:Error fetching orders: Connection.cursor() got an unexpected keyword argument 'dictionary'
+INFO:werkzeug:127.0.0.1 - - [31/Mar/2026 10:14:48] "[35m[1mGET /orders HTTP/1.1[0m" 500 -
+ERROR:main:Error fetching orders: Connection.cursor() got an unexpected keyword argument 'dictionary'
+INFO:werkzeug:127.0.0.1 - - [31/Mar/2026 10:14:48] "[35m[1mGET /orders HTTP/1.1[0m" 500 -
+ERROR:main:Error fetching orders: Connection.cursor() got an unexpected keyword argument 'dictionary'
+INFO:werkzeug:127.0.0.1 - - [31/Mar/2026 10:14:48] "[35m[1mGET /orders HTTP/1.1[0m" 500 -
+ERROR:main:Error fetching orders: Connection.cursor() got an unexpected keyword argument 'dictionary'
+INFO:werkzeug:127.0.0.1 - - [31/Mar/2026 10:14:48] "[35m[1mGET /orders HTTP/1.1[0m" 500 -
+ERROR:main:Error fetching orders: Connection.cursor() got an unexpected keyword argument 'dictionary'
+INFO:werkzeug:127.0.0.1 - - [31/Mar/2026 10:14:48] "[35m[1mGET /orders HTTP/1.1[0m" 500 -
+ERROR:main:Error fetching orders: Connection.cursor() got an unexpected keyword argument 'dictionary'
+INFO:werkzeug:127.0.0.1 - - [31/Mar/2026 10:14:49] "[35m[1mGET /orders HTTP/1.1[0m" 500 -
+ERROR:main:Error fetching orders: Connection.cursor() got an unexpected keyword argument 'dictionary'
+INFO:werkzeug:127.0.0.1 - - [31/Mar/2026 10:14:49] "[35m[1mGET /orders HTTP/1.1[0m" 500 -
+ERROR:main:Error fetching orders: Connection.cursor() got an unexpected keyword argument 'dictionary'
+INFO:werkzeug:127.0.0.1 - - [31/Mar/2026 10:14:49] "[35m[1mGET /orders HTTP/1.1[0m" 500 -
+INFO:werkzeug: * Detected change in '/Users/cohort24/10053-Empowering-Self-Repair-of-Electronic-Devices-With-Artificial-Intelligence/main.py', reloading
+WARNING:werkzeug: * Debugger is active!
+INFO:werkzeug: * Debugger PIN: 170-316-799
+INFO:werkzeug: * Detected change in '/Users/cohort24/10053-Empowering-Self-Repair-of-Electronic-Devices-With-Artificial-Intelligence/main.py', reloading
+WARNING:werkzeug: * Debugger is active!
+INFO:werkzeug: * Debugger PIN: 170-316-799
+ERROR:main:Error fetching orders: Connection.cursor() got an unexpected keyword argument 'dictionary'
+INFO:werkzeug:127.0.0.1 - - [31/Mar/2026 10:15:18] "[35m[1mGET /orders HTTP/1.1[0m" 500 -
+ERROR:main:Error fetching orders: Connection.cursor() got an unexpected keyword argument 'dictionary'
+INFO:werkzeug:127.0.0.1 - - [31/Mar/2026 10:15:19] "[35m[1mGET /orders HTTP/1.1[0m" 500 -
+ERROR:main:Error fetching orders: Connection.cursor() got an unexpected keyword argument 'dictionary'
+INFO:werkzeug:127.0.0.1 - - [31/Mar/2026 10:15:19] "[35m[1mGET /orders HTTP/1.1[0m" 500 -
+ERROR:main:Error fetching orders: Connection.cursor() got an unexpected keyword argument 'dictionary'
+INFO:werkzeug:127.0.0.1 - - [31/Mar/2026 10:15:40] "[35m[1mGET /orders HTTP/1.1[0m" 500 -
+ERROR:main:Error fetching orders: Connection.cursor() got an unexpected keyword argument 'dictionary'
+INFO:werkzeug:127.0.0.1 - - [31/Mar/2026 10:15:41] "[35m[1mGET /orders HTTP/1.1[0m" 500 -
+ERROR:main:Error fetching orders: Connection.cursor() got an unexpected keyword argument 'dictionary'
+INFO:werkzeug:127.0.0.1 - - [31/Mar/2026 10:15:41] "[35m[1mGET /orders HTTP/1.1[0m" 500 -
+ERROR:main:Error fetching orders: Connection.cursor() got an unexpected keyword argument 'dictionary'
+INFO:werkzeug:127.0.0.1 - - [31/Mar/2026 10:16:35] "[35m[1mGET /orders HTTP/1.1[0m" 500 -
+INFO:werkzeug:127.0.0.1 - - [31/Mar/2026 10:16:39] "[33mGET /edit_profile HTTP/1.1[0m" 404 -
+INFO:werkzeug:127.0.0.1 - - [31/Mar/2026 10:16:39] "[36mGET /static/style.css HTTP/1.1[0m" 304 -
+INFO:werkzeug:127.0.0.1 - - [31/Mar/2026 10:16:39] "[36mGET /static/products/Blueprint%20Logo.png HTTP/1.1[0m" 304 -
+INFO:werkzeug:127.0.0.1 - - [31/Mar/2026 10:16:41] "GET / HTTP/1.1" 200 -
+INFO:werkzeug:127.0.0.1 - - [31/Mar/2026 10:16:41] "[36mGET /static/style.css HTTP/1.1[0m" 304 -
+INFO:werkzeug:127.0.0.1 - - [31/Mar/2026 10:16:41] "[36mGET /static/products/Blueprint%20Logo.png HTTP/1.1[0m" 304 -
+ERROR:main:Error fetching orders: Connection.cursor() got an unexpected keyword argument 'dictionary'
+INFO:werkzeug:127.0.0.1 - - [31/Mar/2026 10:16:43] "[35m[1mGET /orders HTTP/1.1[0m" 500 -
+ERROR:main:Error fetching orders: Connection.cursor() got an unexpected keyword argument 'dictionary'
+INFO:werkzeug:127.0.0.1 - - [31/Mar/2026 10:17:47] "[35m[1mGET /orders HTTP/1.1[0m" 500 -
+ERROR:main:Error fetching orders: Connection.cursor() got an unexpected keyword argument 'dictionary'
+INFO:werkzeug:127.0.0.1 - - [31/Mar/2026 10:17:51] "[35m[1mGET /orders HTTP/1.1[0m" 500 -
+ERROR:main:Error fetching orders: Connection.cursor() got an unexpected keyword argument 'dictionary'
+INFO:werkzeug:127.0.0.1 - - [31/Mar/2026 10:17:52] "[35m[1mGET /orders HTTP/1.1[0m" 500 -
+ERROR:main:Error fetching orders: Connection.cursor() got an unexpected keyword argument 'dictionary'
+INFO:werkzeug:127.0.0.1 - - [31/Mar/2026 10:17:53] "[35m[1mGET /orders HTTP/1.1[0m" 500 -
+ERROR:main:Error fetching orders: Connection.cursor() got an unexpected keyword argument 'dictionary'
+INFO:werkzeug:127.0.0.1 - - [31/Mar/2026 10:17:53] "[35m[1mGET /orders HTTP/1.1[0m" 500 -
+INFO:werkzeug: * Detected change in '/Users/cohort24/10053-Empowering-Self-Repair-of-Electronic-Devices-With-Artificial-Intelligence/main.py', reloading
+WARNING:werkzeug: * Debugger is active!
+INFO:werkzeug: * Debugger PIN: 170-316-799
+ERROR:main:Error fetching orders: Connection.cursor() got an unexpected keyword argument 'dictionary'
+INFO:werkzeug:127.0.0.1 - - [31/Mar/2026 10:20:18] "[35m[1mGET /orders HTTP/1.1[0m" 500 -
+ERROR:main:Error fetching orders: Connection.cursor() got an unexpected keyword argument 'dictionary'
+INFO:werkzeug:127.0.0.1 - - [31/Mar/2026 10:22:14] "[35m[1mGET /orders HTTP/1.1[0m" 500 -
+ERROR:main:Error fetching orders: Connection.cursor() got an unexpected keyword argument 'dictionary'
+INFO:werkzeug:127.0.0.1 - - [31/Mar/2026 10:22:14] "[35m[1mGET /orders HTTP/1.1[0m" 500 -
+ERROR:main:Error fetching orders: Connection.cursor() got an unexpected keyword argument 'dictionary'
+INFO:werkzeug:127.0.0.1 - - [31/Mar/2026 10:22:14] "[35m[1mGET /orders HTTP/1.1[0m" 500 -
+INFO:werkzeug:127.0.0.1 - - [31/Mar/2026 10:22:39] "GET /browse HTTP/1.1" 200 -
+INFO:werkzeug:127.0.0.1 - - [31/Mar/2026 10:22:39] "[36mGET /static/style.css HTTP/1.1[0m" 304 -
+INFO:werkzeug:127.0.0.1 - - [31/Mar/2026 10:22:39] "[36mGET /static/products/Iphone.jpg HTTP/1.1[0m" 304 -
+INFO:werkzeug:127.0.0.1 - - [31/Mar/2026 10:22:39] "[36mGET /static/products/Blueprint%20Logo.png HTTP/1.1[0m" 304 -
+INFO:werkzeug:127.0.0.1 - - [31/Mar/2026 10:22:39] "[36mGET /static/products/scredriver.jpg HTTP/1.1[0m" 304 -
+INFO:werkzeug:127.0.0.1 - - [31/Mar/2026 10:22:39] "[36mGET /static/products/51HGPUGauhL._AC_SX679_.jpg HTTP/1.1[0m" 304 -
+INFO:werkzeug:127.0.0.1 - - [31/Mar/2026 10:22:39] "[36mGET /static/products/iPhone13-Pro-Max-Screen-Replacement-3D-Touch-LCD-Screen-6-7-inch-Digitizer-Frame-Assembly-Screen-Replacement-iPhone-13-Pro-Max-Repair-Tool-Kit-Temper_58150deb-192e-467c-9088-297284f316da.f2168021e10655fd5d3aae5241ddc644.jpg HTTP/1.1[0m" 304 -
+INFO:werkzeug:127.0.0.1 - - [31/Mar/2026 10:22:39] "[36mGET /static/products/81vohXkRaaL._AC_SX679_.jpg HTTP/1.1[0m" 304 -
+INFO:werkzeug:127.0.0.1 - - [31/Mar/2026 10:22:39] "[36mGET /static/products/71MTbWNg04L._AC_SX679_.jpg HTTP/1.1[0m" 304 -
+INFO:werkzeug:127.0.0.1 - - [31/Mar/2026 10:22:39] "[36mGET /static/products/61T1QLQv1dL._AC_SX679_.jpg HTTP/1.1[0m" 304 -
+INFO:werkzeug:127.0.0.1 - - [31/Mar/2026 10:22:39] "[36mGET /static/products/619fgs7HrUL._AC_SX679_.jpg HTTP/1.1[0m" 304 -
+INFO:werkzeug:127.0.0.1 - - [31/Mar/2026 10:22:42] "GET /product/23 HTTP/1.1" 200 -
+INFO:werkzeug:127.0.0.1 - - [31/Mar/2026 10:22:42] "[36mGET /static/style.css HTTP/1.1[0m" 304 -
+INFO:werkzeug:127.0.0.1 - - [31/Mar/2026 10:22:42] "[36mGET /static/products/Blueprint%20Logo.png HTTP/1.1[0m" 304 -
+INFO:werkzeug:127.0.0.1 - - [31/Mar/2026 10:22:42] "[36mGET /static/products/81vohXkRaaL._AC_SX679_.jpg HTTP/1.1[0m" 304 -
+INFO:werkzeug:127.0.0.1 - - [31/Mar/2026 10:22:44] "[32mPOST /cart/23/add_to_cart HTTP/1.1[0m" 302 -
+INFO:werkzeug:127.0.0.1 - - [31/Mar/2026 10:22:44] "GET /cart HTTP/1.1" 200 -
+INFO:werkzeug:127.0.0.1 - - [31/Mar/2026 10:22:44] "[36mGET /static/style.css HTTP/1.1[0m" 304 -
+INFO:werkzeug:127.0.0.1 - - [31/Mar/2026 10:22:44] "[36mGET /static/products/Blueprint%20Logo.png HTTP/1.1[0m" 304 -
+INFO:werkzeug:127.0.0.1 - - [31/Mar/2026 10:22:44] "[36mGET /static/products/81vohXkRaaL._AC_SX679_.jpg HTTP/1.1[0m" 304 -
+INFO:werkzeug:127.0.0.1 - - [31/Mar/2026 10:22:45] "GET /checkout HTTP/1.1" 200 -
+INFO:werkzeug:127.0.0.1 - - [31/Mar/2026 10:22:45] "[36mGET /static/style.css HTTP/1.1[0m" 304 -
+INFO:werkzeug:127.0.0.1 - - [31/Mar/2026 10:22:45] "[36mGET /static/products/Blueprint%20Logo.png HTTP/1.1[0m" 304 -
+INFO:werkzeug:127.0.0.1 - - [31/Mar/2026 10:22:45] "[36mGET /static/products/81vohXkRaaL._AC_SX679_.jpg HTTP/1.1[0m" 304 -
+INFO:werkzeug:127.0.0.1 - - [31/Mar/2026 10:22:51] "[32mPOST /checkout HTTP/1.1[0m" 302 -
+INFO:werkzeug:127.0.0.1 - - [31/Mar/2026 10:22:52] "GET /thank_you HTTP/1.1" 200 -
+INFO:werkzeug:127.0.0.1 - - [31/Mar/2026 10:22:52] "GET / HTTP/1.1" 200 -
+INFO:werkzeug:127.0.0.1 - - [31/Mar/2026 10:22:53] "[36mGET /static/style.css HTTP/1.1[0m" 304 -
+INFO:werkzeug:127.0.0.1 - - [31/Mar/2026 10:22:53] "[36mGET /static/products/Blueprint%20Logo.png HTTP/1.1[0m" 304 -
+ERROR:main:Error fetching orders: Connection.cursor() got an unexpected keyword argument 'dictionary'
+INFO:werkzeug:127.0.0.1 - - [31/Mar/2026 10:22:55] "[35m[1mGET /orders HTTP/1.1[0m" 500 -
+INFO:werkzeug: * Detected change in '/Users/cohort24/10053-Empowering-Self-Repair-of-Electronic-Devices-With-Artificial-Intelligence/main.py', reloading
+WARNING:werkzeug: * Debugger is active!
+INFO:werkzeug: * Debugger PIN: 170-316-799
+INFO:werkzeug: * Detected change in '/Users/cohort24/10053-Empowering-Self-Repair-of-Electronic-Devices-With-Artificial-Intelligence/main.py', reloading
+WARNING:werkzeug: * Debugger is active!
+INFO:werkzeug: * Debugger PIN: 170-316-799
+ERROR:main:Error fetching orders: Connection.cursor() got an unexpected keyword argument 'dictionary'
+INFO:werkzeug:127.0.0.1 - - [31/Mar/2026 10:25:07] "[35m[1mGET /orders HTTP/1.1[0m" 500 -
+INFO:werkzeug: * Detected change in '/Users/cohort24/10053-Empowering-Self-Repair-of-Electronic-Devices-With-Artificial-Intelligence/main.py', reloading
+WARNING:werkzeug: * Debugger is active!
+INFO:werkzeug: * Debugger PIN: 170-316-799
+ERROR:main:Error fetching orders: Connection.cursor() got an unexpected keyword argument 'dictionary'
+INFO:werkzeug:127.0.0.1 - - [31/Mar/2026 10:26:58] "[35m[1mGET /orders HTTP/1.1[0m" 500 -
+ERROR:main:Error fetching orders: Connection.cursor() got an unexpected keyword argument 'dictionary'
+INFO:werkzeug:127.0.0.1 - - [31/Mar/2026 10:27:20] "[35m[1mGET /orders HTTP/1.1[0m" 500 -
+ERROR:main:Error fetching orders: Connection.cursor() got an unexpected keyword argument 'dictionary'
+INFO:werkzeug:127.0.0.1 - - [31/Mar/2026 10:27:20] "[35m[1mGET /orders HTTP/1.1[0m" 500 -
+ERROR:main:Error fetching orders: Connection.cursor() got an unexpected keyword argument 'dictionary'
+INFO:werkzeug:127.0.0.1 - - [31/Mar/2026 10:27:20] "[35m[1mGET /orders HTTP/1.1[0m" 500 -
+ERROR:main:Error fetching orders: Connection.cursor() got an unexpected keyword argument 'dictionary'
+INFO:werkzeug:127.0.0.1 - - [31/Mar/2026 10:27:21] "[35m[1mGET /orders HTTP/1.1[0m" 500 -
+ERROR:main:Error fetching orders: Connection.cursor() got an unexpected keyword argument 'dictionary'
+INFO:werkzeug:127.0.0.1 - - [31/Mar/2026 10:27:21] "[35m[1mGET /orders HTTP/1.1[0m" 500 -
+ERROR:main:Error fetching orders: Connection.cursor() got an unexpected keyword argument 'dictionary'
+INFO:werkzeug:127.0.0.1 - - [31/Mar/2026 10:27:21] "[35m[1mGET /orders HTTP/1.1[0m" 500 -
+INFO:werkzeug: * Detected change in '/Users/cohort24/10053-Empowering-Self-Repair-of-Electronic-Devices-With-Artificial-Intelligence/main.py', reloading
+WARNING:werkzeug: * Debugger is active!
+INFO:werkzeug: * Debugger PIN: 170-316-799
+ERROR:main:Error fetching orders: Connection.cursor() got an unexpected keyword argument 'dictionary'
+INFO:werkzeug:127.0.0.1 - - [31/Mar/2026 10:28:18] "[35m[1mGET /orders HTTP/1.1[0m" 500 -
+ERROR:main:Error fetching orders: Connection.cursor() got an unexpected keyword argument 'dictionary'
+INFO:werkzeug:127.0.0.1 - - [31/Mar/2026 10:28:19] "[35m[1mGET /orders HTTP/1.1[0m" 500 -
+ERROR:main:Error fetching orders: Connection.cursor() got an unexpected keyword argument 'dictionary'
+INFO:werkzeug:127.0.0.1 - - [31/Mar/2026 10:28:19] "[35m[1mGET /orders HTTP/1.1[0m" 500 -
+ERROR:main:Error fetching orders: Connection.cursor() got an unexpected keyword argument 'dictionary'
+INFO:werkzeug:127.0.0.1 - - [31/Mar/2026 10:28:19] "[35m[1mGET /orders HTTP/1.1[0m" 500 -
+ERROR:main:Error fetching orders: Connection.cursor() got an unexpected keyword argument 'dictionary'
+INFO:werkzeug:127.0.0.1 - - [31/Mar/2026 10:28:19] "[35m[1mGET /orders HTTP/1.1[0m" 500 -
+ERROR:main:Error fetching orders: Connection.cursor() got an unexpected keyword argument 'dictionary'
+INFO:werkzeug:127.0.0.1 - - [31/Mar/2026 10:28:20] "[35m[1mGET /orders HTTP/1.1[0m" 500 -
+ERROR:main:Error fetching orders: Connection.cursor() got an unexpected keyword argument 'dictionary'
+INFO:werkzeug:127.0.0.1 - - [31/Mar/2026 10:28:20] "[35m[1mGET /orders HTTP/1.1[0m" 500 -
+ERROR:main:Error fetching orders: Connection.cursor() got an unexpected keyword argument 'dictionary'
+INFO:werkzeug:127.0.0.1 - - [31/Mar/2026 10:28:20] "[35m[1mGET /orders HTTP/1.1[0m" 500 -
+ERROR:main:Error fetching orders: Connection.cursor() got an unexpected keyword argument 'dictionary'
+INFO:werkzeug:127.0.0.1 - - [31/Mar/2026 10:28:20] "[35m[1mGET /orders HTTP/1.1[0m" 500 -
+ERROR:main:Error fetching orders: Connection.cursor() got an unexpected keyword argument 'dictionary'
+INFO:werkzeug:127.0.0.1 - - [31/Mar/2026 10:28:22] "[35m[1mGET /orders HTTP/1.1[0m" 500 -
+INFO:werkzeug:127.0.0.1 - - [31/Mar/2026 10:28:24] "[33mGET /order HTTP/1.1[0m" 404 -
+INFO:werkzeug:127.0.0.1 - - [31/Mar/2026 10:28:24] "[36mGET /static/products/Blueprint%20Logo.png HTTP/1.1[0m" 304 -
+INFO:werkzeug:127.0.0.1 - - [31/Mar/2026 10:28:24] "[36mGET /static/style.css HTTP/1.1[0m" 304 -
+ERROR:main:Error fetching orders: Connection.cursor() got an unexpected keyword argument 'dictionary'
+INFO:werkzeug:127.0.0.1 - - [31/Mar/2026 10:28:26] "[35m[1mGET /orders HTTP/1.1[0m" 500 -
+INFO:werkzeug:127.0.0.1 - - [31/Mar/2026 10:32:05] "GET / HTTP/1.1" 200 -
+INFO:werkzeug:127.0.0.1 - - [31/Mar/2026 10:32:05] "[36mGET /static/style.css HTTP/1.1[0m" 304 -
+INFO:werkzeug:127.0.0.1 - - [31/Mar/2026 10:32:05] "[36mGET /static/products/Blueprint%20Logo.png HTTP/1.1[0m" 304 -
+INFO:werkzeug:127.0.0.1 - - [31/Mar/2026 10:32:06] "GET /browse HTTP/1.1" 200 -
+INFO:werkzeug:127.0.0.1 - - [31/Mar/2026 10:32:06] "[36mGET /static/style.css HTTP/1.1[0m" 304 -
+INFO:werkzeug:127.0.0.1 - - [31/Mar/2026 10:32:06] "[36mGET /static/products/Blueprint%20Logo.png HTTP/1.1[0m" 304 -
+INFO:werkzeug:127.0.0.1 - - [31/Mar/2026 10:32:06] "[36mGET /static/products/Iphone.jpg HTTP/1.1[0m" 304 -
+INFO:werkzeug:127.0.0.1 - - [31/Mar/2026 10:32:06] "[36mGET /static/products/scredriver.jpg HTTP/1.1[0m" 304 -
+INFO:werkzeug:127.0.0.1 - - [31/Mar/2026 10:32:06] "[36mGET /static/products/51HGPUGauhL._AC_SX679_.jpg HTTP/1.1[0m" 304 -
+INFO:werkzeug:127.0.0.1 - - [31/Mar/2026 10:32:06] "[36mGET /static/products/iPhone13-Pro-Max-Screen-Replacement-3D-Touch-LCD-Screen-6-7-inch-Digitizer-Frame-Assembly-Screen-Replacement-iPhone-13-Pro-Max-Repair-Tool-Kit-Temper_58150deb-192e-467c-9088-297284f316da.f2168021e10655fd5d3aae5241ddc644.jpg HTTP/1.1[0m" 304 -
+INFO:werkzeug:127.0.0.1 - - [31/Mar/2026 10:32:06] "[36mGET /static/products/71MTbWNg04L._AC_SX679_.jpg HTTP/1.1[0m" 304 -
+INFO:werkzeug:127.0.0.1 - - [31/Mar/2026 10:32:06] "[36mGET /static/products/81vohXkRaaL._AC_SX679_.jpg HTTP/1.1[0m" 304 -
+INFO:werkzeug:127.0.0.1 - - [31/Mar/2026 10:32:06] "[36mGET /static/products/61T1QLQv1dL._AC_SX679_.jpg HTTP/1.1[0m" 304 -
+INFO:werkzeug:127.0.0.1 - - [31/Mar/2026 10:32:06] "[36mGET /static/products/619fgs7HrUL._AC_SX679_.jpg HTTP/1.1[0m" 304 -
+INFO:werkzeug:127.0.0.1 - - [31/Mar/2026 10:32:09] "GET /cart HTTP/1.1" 200 -
+INFO:werkzeug:127.0.0.1 - - [31/Mar/2026 10:32:09] "[36mGET /static/style.css HTTP/1.1[0m" 304 -
+INFO:werkzeug:127.0.0.1 - - [31/Mar/2026 10:32:09] "[36mGET /static/products/Blueprint%20Logo.png HTTP/1.1[0m" 304 -
+INFO:werkzeug:127.0.0.1 - - [31/Mar/2026 10:32:12] "GET /cart HTTP/1.1" 200 -
+INFO:werkzeug:127.0.0.1 - - [31/Mar/2026 10:32:12] "[36mGET /static/style.css HTTP/1.1[0m" 304 -
+INFO:werkzeug:127.0.0.1 - - [31/Mar/2026 10:32:12] "[36mGET /static/products/Blueprint%20Logo.png HTTP/1.1[0m" 304 -
+INFO:werkzeug:127.0.0.1 - - [31/Mar/2026 10:32:19] "GET /cart HTTP/1.1" 200 -
+INFO:werkzeug:127.0.0.1 - - [31/Mar/2026 10:32:19] "[36mGET /static/style.css HTTP/1.1[0m" 304 -
+INFO:werkzeug:127.0.0.1 - - [31/Mar/2026 10:32:19] "[36mGET /static/products/Blueprint%20Logo.png HTTP/1.1[0m" 304 -
+INFO:werkzeug:127.0.0.1 - - [31/Mar/2026 10:36:01] "GET /profile HTTP/1.1" 200 -
+INFO:werkzeug:127.0.0.1 - - [31/Mar/2026 10:36:01] "[36mGET /static/style.css HTTP/1.1[0m" 304 -
+INFO:werkzeug:127.0.0.1 - - [31/Mar/2026 10:36:01] "[36mGET /static/products/Blueprint%20Logo.png HTTP/1.1[0m" 304 -
+ERROR:main:Error fetching orders: Connection.cursor() got an unexpected keyword argument 'dictionary'
+INFO:werkzeug:127.0.0.1 - - [31/Mar/2026 10:36:03] "[35m[1mGET /orders HTTP/1.1[0m" 500 -
+ERROR:main:Error fetching orders: Connection.cursor() got an unexpected keyword argument 'dictionary'
+INFO:werkzeug:127.0.0.1 - - [31/Mar/2026 10:36:11] "[35m[1mGET /orders HTTP/1.1[0m" 500 -
+ERROR:main:Error fetching orders: Connection.cursor() got an unexpected keyword argument 'dictionary'
+INFO:werkzeug:127.0.0.1 - - [31/Mar/2026 10:36:12] "[35m[1mGET /orders HTTP/1.1[0m" 500 -
+ERROR:main:Error fetching orders: Connection.cursor() got an unexpected keyword argument 'dictionary'
+INFO:werkzeug:127.0.0.1 - - [31/Mar/2026 10:36:12] "[35m[1mGET /orders HTTP/1.1[0m" 500 -
+ERROR:main:Error fetching orders: Connection.cursor() got an unexpected keyword argument 'dictionary'
+INFO:werkzeug:127.0.0.1 - - [31/Mar/2026 10:36:12] "[35m[1mGET /orders HTTP/1.1[0m" 500 -
+ERROR:main:Error fetching orders: Connection.cursor() got an unexpected keyword argument 'dictionary'
+INFO:werkzeug:127.0.0.1 - - [31/Mar/2026 10:36:12] "[35m[1mGET /orders HTTP/1.1[0m" 500 -
+ERROR:main:Error fetching orders: Connection.cursor() got an unexpected keyword argument 'dictionary'
+INFO:werkzeug:127.0.0.1 - - [31/Mar/2026 10:36:12] "[35m[1mGET /orders HTTP/1.1[0m" 500 -
+ERROR:main:Error fetching orders: Connection.cursor() got an unexpected keyword argument 'dictionary'
+INFO:werkzeug:127.0.0.1 - - [31/Mar/2026 10:36:12] "[35m[1mGET /orders HTTP/1.1[0m" 500 -
+ERROR:main:Error fetching orders: Connection.cursor() got an unexpected keyword argument 'dictionary'
+INFO:werkzeug:127.0.0.1 - - [31/Mar/2026 10:36:12] "[35m[1mGET /orders HTTP/1.1[0m" 500 -
+ERROR:main:Error fetching orders: Connection.cursor() got an unexpected keyword argument 'dictionary'
+INFO:werkzeug:127.0.0.1 - - [31/Mar/2026 10:36:13] "[35m[1mGET /orders HTTP/1.1[0m" 500 -
+ERROR:main:Error fetching orders: Connection.cursor() got an unexpected keyword argument 'dictionary'
+INFO:werkzeug:127.0.0.1 - - [31/Mar/2026 10:36:13] "[35m[1mGET /orders HTTP/1.1[0m" 500 -
+INFO:werkzeug: * Detected change in '/Users/cohort24/10053-Empowering-Self-Repair-of-Electronic-Devices-With-Artificial-Intelligence/main.py', reloading
+WARNING:werkzeug: * Debugger is active!
+INFO:werkzeug: * Debugger PIN: 395-541-764
+INFO:werkzeug: * Detected change in '/Users/cohort24/10053-Empowering-Self-Repair-of-Electronic-Devices-With-Artificial-Intelligence/main.py', reloading
+WARNING:werkzeug: * Debugger is active!
+INFO:werkzeug: * Debugger PIN: 170-316-799
+INFO:werkzeug:127.0.0.1 - - [31/Mar/2026 10:37:50] "[35m[1mGET /orders HTTP/1.1[0m" 500 -
+INFO:werkzeug:127.0.0.1 - - [31/Mar/2026 10:37:50] "[36mGET /orders?__debugger__=yes&cmd=resource&f=style.css HTTP/1.1[0m" 304 -
+INFO:werkzeug:127.0.0.1 - - [31/Mar/2026 10:37:50] "[36mGET /orders?__debugger__=yes&cmd=resource&f=debugger.js HTTP/1.1[0m" 304 -
+INFO:werkzeug:127.0.0.1 - - [31/Mar/2026 10:37:50] "GET /orders?__debugger__=yes&cmd=resource&f=console.png&s=qAscWhHjATI43NJiY7TY HTTP/1.1" 200 -
+INFO:werkzeug:127.0.0.1 - - [31/Mar/2026 10:37:50] "[36mGET /orders?__debugger__=yes&cmd=resource&f=console.png HTTP/1.1[0m" 304 -
+INFO:werkzeug:127.0.0.1 - - [31/Mar/2026 10:37:51] "[35m[1mGET /orders HTTP/1.1[0m" 500 -
+INFO:werkzeug:127.0.0.1 - - [31/Mar/2026 10:37:51] "[36mGET /orders?__debugger__=yes&cmd=resource&f=style.css HTTP/1.1[0m" 304 -
+INFO:werkzeug:127.0.0.1 - - [31/Mar/2026 10:37:51] "[36mGET /orders?__debugger__=yes&cmd=resource&f=debugger.js HTTP/1.1[0m" 304 -
+INFO:werkzeug:127.0.0.1 - - [31/Mar/2026 10:37:51] "[36mGET /orders?__debugger__=yes&cmd=resource&f=console.png&s=qAscWhHjATI43NJiY7TY HTTP/1.1[0m" 304 -
+INFO:werkzeug:127.0.0.1 - - [31/Mar/2026 10:37:51] "[36mGET /orders?__debugger__=yes&cmd=resource&f=console.png HTTP/1.1[0m" 304 -
+INFO:werkzeug:127.0.0.1 - - [31/Mar/2026 10:37:51] "[35m[1mGET /orders HTTP/1.1[0m" 500 -
+INFO:werkzeug:127.0.0.1 - - [31/Mar/2026 10:37:51] "[36mGET /orders?__debugger__=yes&cmd=resource&f=style.css HTTP/1.1[0m" 304 -
+INFO:werkzeug:127.0.0.1 - - [31/Mar/2026 10:37:51] "[36mGET /orders?__debugger__=yes&cmd=resource&f=debugger.js HTTP/1.1[0m" 304 -
+INFO:werkzeug:127.0.0.1 - - [31/Mar/2026 10:37:51] "[36mGET /orders?__debugger__=yes&cmd=resource&f=console.png&s=qAscWhHjATI43NJiY7TY HTTP/1.1[0m" 304 -
+INFO:werkzeug:127.0.0.1 - - [31/Mar/2026 10:37:51] "[36mGET /orders?__debugger__=yes&cmd=resource&f=console.png HTTP/1.1[0m" 304 -
+INFO:werkzeug:127.0.0.1 - - [31/Mar/2026 10:41:18] "[35m[1mGET /orders HTTP/1.1[0m" 500 -
+INFO:werkzeug:127.0.0.1 - - [31/Mar/2026 10:41:18] "[36mGET /orders?__debugger__=yes&cmd=resource&f=style.css HTTP/1.1[0m" 304 -
+INFO:werkzeug:127.0.0.1 - - [31/Mar/2026 10:41:18] "[36mGET /orders?__debugger__=yes&cmd=resource&f=debugger.js HTTP/1.1[0m" 304 -
+INFO:werkzeug:127.0.0.1 - - [31/Mar/2026 10:41:18] "[36mGET /orders?__debugger__=yes&cmd=resource&f=console.png&s=qAscWhHjATI43NJiY7TY HTTP/1.1[0m" 304 -
+INFO:werkzeug:127.0.0.1 - - [31/Mar/2026 10:41:18] "[36mGET /orders?__debugger__=yes&cmd=resource&f=console.png HTTP/1.1[0m" 304 -
+INFO:werkzeug: * Detected change in '/Users/cohort24/10053-Empowering-Self-Repair-of-Electronic-Devices-With-Artificial-Intelligence/main.py', reloading
+WARNING:werkzeug: * Debugger is active!
+INFO:werkzeug: * Debugger PIN: 170-316-799
+INFO:werkzeug: * Detected change in '/Users/cohort24/10053-Empowering-Self-Repair-of-Electronic-Devices-With-Artificial-Intelligence/main.py', reloading
+WARNING:werkzeug: * Debugger is active!
+INFO:werkzeug: * Debugger PIN: 170-316-799
+INFO:werkzeug:127.0.0.1 - - [31/Mar/2026 10:44:16] "[35m[1mGET /orders HTTP/1.1[0m" 500 -
+INFO:werkzeug:127.0.0.1 - - [31/Mar/2026 10:44:16] "[36mGET /orders?__debugger__=yes&cmd=resource&f=style.css HTTP/1.1[0m" 304 -
+INFO:werkzeug:127.0.0.1 - - [31/Mar/2026 10:44:16] "[36mGET /orders?__debugger__=yes&cmd=resource&f=debugger.js HTTP/1.1[0m" 304 -
+INFO:werkzeug:127.0.0.1 - - [31/Mar/2026 10:44:16] "GET /orders?__debugger__=yes&cmd=resource&f=console.png&s=73Pkh5YklMKljk98VTHx HTTP/1.1" 200 -
+INFO:werkzeug:127.0.0.1 - - [31/Mar/2026 10:44:16] "[36mGET /orders?__debugger__=yes&cmd=resource&f=console.png HTTP/1.1[0m" 304 -
+INFO:werkzeug:127.0.0.1 - - [31/Mar/2026 10:46:20] "[35m[1mGET /orders HTTP/1.1[0m" 500 -
+INFO:werkzeug:127.0.0.1 - - [31/Mar/2026 10:46:20] "[36mGET /orders?__debugger__=yes&cmd=resource&f=style.css HTTP/1.1[0m" 304 -
+INFO:werkzeug:127.0.0.1 - - [31/Mar/2026 10:46:20] "[36mGET /orders?__debugger__=yes&cmd=resource&f=debugger.js HTTP/1.1[0m" 304 -
+INFO:werkzeug:127.0.0.1 - - [31/Mar/2026 10:46:20] "[36mGET /orders?__debugger__=yes&cmd=resource&f=console.png&s=73Pkh5YklMKljk98VTHx HTTP/1.1[0m" 304 -
+INFO:werkzeug:127.0.0.1 - - [31/Mar/2026 10:46:20] "[36mGET /orders?__debugger__=yes&cmd=resource&f=console.png HTTP/1.1[0m" 304 -
+INFO:werkzeug: * Detected change in '/Users/cohort24/10053-Empowering-Self-Repair-of-Electronic-Devices-With-Artificial-Intelligence/main.py', reloading
+WARNING:werkzeug: * Debugger is active!
+INFO:werkzeug: * Debugger PIN: 170-316-799
+INFO:werkzeug:127.0.0.1 - - [01/Apr/2026 09:15:18] "[35m[1mGET /orders HTTP/1.1[0m" 500 -
+INFO:werkzeug:127.0.0.1 - - [01/Apr/2026 09:15:18] "[36mGET /orders?__debugger__=yes&cmd=resource&f=style.css HTTP/1.1[0m" 304 -
+INFO:werkzeug:127.0.0.1 - - [01/Apr/2026 09:15:18] "[36mGET /orders?__debugger__=yes&cmd=resource&f=debugger.js HTTP/1.1[0m" 304 -
+INFO:werkzeug:127.0.0.1 - - [01/Apr/2026 09:15:18] "GET /orders?__debugger__=yes&cmd=resource&f=console.png&s=pLKlDYhAu3EQmJBue7hv HTTP/1.1" 200 -
+INFO:werkzeug:127.0.0.1 - - [01/Apr/2026 09:15:19] "[36mGET /orders?__debugger__=yes&cmd=resource&f=console.png HTTP/1.1[0m" 304 -
+INFO:werkzeug:127.0.0.1 - - [01/Apr/2026 09:15:20] "[35m[1mGET /orders HTTP/1.1[0m" 500 -
+INFO:werkzeug:127.0.0.1 - - [01/Apr/2026 09:15:20] "[36mGET /orders?__debugger__=yes&cmd=resource&f=style.css HTTP/1.1[0m" 304 -
+INFO:werkzeug:127.0.0.1 - - [01/Apr/2026 09:15:20] "[36mGET /orders?__debugger__=yes&cmd=resource&f=debugger.js HTTP/1.1[0m" 304 -
+INFO:werkzeug:127.0.0.1 - - [01/Apr/2026 09:15:20] "[36mGET /orders?__debugger__=yes&cmd=resource&f=console.png&s=pLKlDYhAu3EQmJBue7hv HTTP/1.1[0m" 304 -
+INFO:werkzeug:127.0.0.1 - - [01/Apr/2026 09:15:20] "[36mGET /orders?__debugger__=yes&cmd=resource&f=console.png HTTP/1.1[0m" 304 -
+INFO:werkzeug: * Detected change in '/Users/cohort24/10053-Empowering-Self-Repair-of-Electronic-Devices-With-Artificial-Intelligence/main.py', reloading
+WARNING:werkzeug: * Debugger is active!
+INFO:werkzeug: * Debugger PIN: 170-316-799
+INFO:werkzeug: * Detected change in '/Users/cohort24/10053-Empowering-Self-Repair-of-Electronic-Devices-With-Artificial-Intelligence/main.py', reloading
+WARNING:werkzeug: * Debugger is active!
+INFO:werkzeug: * Debugger PIN: 170-316-799
+INFO:werkzeug: * Detected change in '/Users/cohort24/10053-Empowering-Self-Repair-of-Electronic-Devices-With-Artificial-Intelligence/main.py', reloading
+WARNING:werkzeug: * Debugger is active!
+INFO:werkzeug: * Debugger PIN: 170-316-799
+INFO:werkzeug:127.0.0.1 - - [01/Apr/2026 09:16:51] "[35m[1mGET /orders HTTP/1.1[0m" 500 -
+INFO:werkzeug:127.0.0.1 - - [01/Apr/2026 09:16:51] "[36mGET /orders?__debugger__=yes&cmd=resource&f=style.css HTTP/1.1[0m" 304 -
+INFO:werkzeug:127.0.0.1 - - [01/Apr/2026 09:16:51] "[36mGET /orders?__debugger__=yes&cmd=resource&f=debugger.js HTTP/1.1[0m" 304 -
+INFO:werkzeug:127.0.0.1 - - [01/Apr/2026 09:16:51] "GET /orders?__debugger__=yes&cmd=resource&f=console.png&s=SyLXjrP26Xf6Bdv3ia3J HTTP/1.1" 200 -
+INFO:werkzeug:127.0.0.1 - - [01/Apr/2026 09:16:51] "[36mGET /orders?__debugger__=yes&cmd=resource&f=console.png HTTP/1.1[0m" 304 -
+INFO:werkzeug:127.0.0.1 - - [01/Apr/2026 09:16:52] "[35m[1mGET /orders HTTP/1.1[0m" 500 -
+INFO:werkzeug:127.0.0.1 - - [01/Apr/2026 09:16:52] "[36mGET /orders?__debugger__=yes&cmd=resource&f=style.css HTTP/1.1[0m" 304 -
+INFO:werkzeug:127.0.0.1 - - [01/Apr/2026 09:16:52] "[36mGET /orders?__debugger__=yes&cmd=resource&f=debugger.js HTTP/1.1[0m" 304 -
+INFO:werkzeug:127.0.0.1 - - [01/Apr/2026 09:16:52] "[36mGET /orders?__debugger__=yes&cmd=resource&f=console.png&s=SyLXjrP26Xf6Bdv3ia3J HTTP/1.1[0m" 304 -
+INFO:werkzeug:127.0.0.1 - - [01/Apr/2026 09:16:52] "[36mGET /orders?__debugger__=yes&cmd=resource&f=console.png HTTP/1.1[0m" 304 -
+INFO:werkzeug:127.0.0.1 - - [01/Apr/2026 09:16:52] "[35m[1mGET /orders HTTP/1.1[0m" 500 -
+INFO:werkzeug:127.0.0.1 - - [01/Apr/2026 09:16:53] "[35m[1mGET /orders HTTP/1.1[0m" 500 -
+INFO:werkzeug:127.0.0.1 - - [01/Apr/2026 09:16:53] "[35m[1mGET /orders HTTP/1.1[0m" 500 -
+INFO:werkzeug:127.0.0.1 - - [01/Apr/2026 09:16:53] "[36mGET /orders?__debugger__=yes&cmd=resource&f=style.css HTTP/1.1[0m" 304 -
+INFO:werkzeug:127.0.0.1 - - [01/Apr/2026 09:16:53] "[36mGET /orders?__debugger__=yes&cmd=resource&f=debugger.js HTTP/1.1[0m" 304 -
+INFO:werkzeug:127.0.0.1 - - [01/Apr/2026 09:16:53] "[36mGET /orders?__debugger__=yes&cmd=resource&f=console.png&s=SyLXjrP26Xf6Bdv3ia3J HTTP/1.1[0m" 304 -
+INFO:werkzeug:127.0.0.1 - - [01/Apr/2026 09:16:53] "[36mGET /orders?__debugger__=yes&cmd=resource&f=console.png HTTP/1.1[0m" 304 -
+INFO:werkzeug: * Detected change in '/Users/cohort24/10053-Empowering-Self-Repair-of-Electronic-Devices-With-Artificial-Intelligence/main.py', reloading
+WARNING:werkzeug: * Debugger is active!
+INFO:werkzeug: * Debugger PIN: 170-316-799
+INFO:werkzeug:127.0.0.1 - - [01/Apr/2026 09:17:10] "[35m[1mGET /orders HTTP/1.1[0m" 500 -
+INFO:werkzeug:127.0.0.1 - - [01/Apr/2026 09:17:11] "[35m[1mGET /orders HTTP/1.1[0m" 500 -
+INFO:werkzeug:127.0.0.1 - - [01/Apr/2026 09:17:12] "[35m[1mGET /orders HTTP/1.1[0m" 500 -
+INFO:werkzeug:127.0.0.1 - - [01/Apr/2026 09:17:12] "[35m[1mGET /orders HTTP/1.1[0m" 500 -
+INFO:werkzeug:127.0.0.1 - - [01/Apr/2026 09:17:12] "[35m[1mGET /orders HTTP/1.1[0m" 500 -
+INFO:werkzeug: * Detected change in '/Users/cohort24/10053-Empowering-Self-Repair-of-Electronic-Devices-With-Artificial-Intelligence/main.py', reloading
+WARNING:werkzeug: * Debugger is active!
+INFO:werkzeug: * Debugger PIN: 170-316-799
+INFO:werkzeug: * Detected change in '/Users/cohort24/10053-Empowering-Self-Repair-of-Electronic-Devices-With-Artificial-Intelligence/main.py', reloading

@@ -2,6 +2,10 @@ from flask import Flask, render_template, request, flash, redirect, abort, url_f
 from flask_login import LoginManager, login_user, logout_user, login_required, current_user
 import pymysql
 from dynaconf import Dynaconf
+from datetime import datetime
+import mysql.connector
+
+
 
 from openai import OpenAI
 
@@ -56,6 +60,9 @@ def connect_db():
         cursorclass= pymysql.cursors.DictCursor
     )
     return conn
+
+if __name__ == "__main__":
+    app.run(debug=True)
 
 @app.route("/")
 def index():
@@ -423,33 +430,66 @@ def remove_from_cart(product_id):
 def checkout():
     connection = connect_db()
     cursor = connection.cursor()
-    cursor.execute("""
-        SELECT * FROM `Cart`
-        JOIN `Product` ON `Product`.`ID` = `Cart`.`ProductID`
-        WHERE `UserID` = %s
-    """, (current_user.id,))
-    
-    result = cursor.fetchall()
-    if request.method == "POST":
-        cursor.execute(
-            "INSERT INTO `Sales` (`UserID`) VALUES (%s)",
-            (current_user.id,)
-        )
-        sales = cursor.lastrowid
-        for item in result:
-            cursor.execute(
-                "INSERT INTO `SalesCart` (`SalesID`, `ProductID`, `Quantity`) VALUES (%s, %s, %s)",
-                (sales, item['ProductID'], item['Quantity'])
-            )
 
-        cursor.execute(
-            "DELETE FROM `Cart` WHERE `UserID` = %s",
-            (current_user.id,)
-        )
+    # GET CART ITEMS
+    cursor.execute("""
+        SELECT 
+            Cart.ProductID AS product_id,
+            Cart.Quantity AS quantity,
+            Product.Price AS price,
+            Product.Name AS name,
+            Product.Image AS image
+        FROM Cart
+        JOIN Product ON Product.ID = Cart.ProductID
+        WHERE Cart.UserID = %s
+    """, (current_user.id,))
+
+    cart_items = cursor.fetchall()
+
+    if request.method == "POST":
+
+        total = 0
+
+        # CREATE ORDER FIRST
+        cursor.execute("""
+            INSERT INTO orders (user_id, total_amount, status, created_at)
+            VALUES (%s, %s, %s, NOW())
+        """, (current_user.id, 0, "Pending"))
+
+        order_id = cursor.lastrowid
+
+        # ADD ITEMS TO SalesCart
+        for item in cart_items:
+            product_id = item["product_id"]
+            quantity = item["quantity"]
+            price = item["price"]
+
+            total += price * quantity
+
+            cursor.execute("""
+                INSERT INTO SalesCart (order_id, product_id, quantity)
+                VALUES (%s, %s, %s)
+            """, (order_id, product_id, quantity))
+
+        # UPDATE ORDER TOTAL
+        cursor.execute("""
+            UPDATE orders
+            SET total_amount = %s
+            WHERE ID = %s
+        """, (total, order_id))
+
+        # CLEAR CART
+        cursor.execute("""
+            DELETE FROM Cart
+            WHERE UserID = %s
+        """, (current_user.id,))
+
         connection.commit()
-        return redirect('/thank_you')
-    connection.close()
-    return render_template("checkout.html.jinja", cart=result)
+        connection.close()
+
+        return redirect("/thank_you")
+
+    return render_template("checkout.html.jinja", cart=cart_items)
 
 @app.route("/thank_you")
 @login_required
@@ -461,120 +501,136 @@ def thank_you():
 def profile():
     return render_template("profile.html.jinja")
 
-@app.route('/ai-help', methods=['POST'])
-def ai_help():
-    user_input = request.form.get("message")
-    image = request.files.get("image")
+@app.route("/profile/update", methods=["POST"])
+@login_required
+def update_profile():
+    name = request.form["full_name"]
+    email = request.form["email"]
+    address = request.form["address"]
 
-    image_path = None
+    connection = connect_db()
+    cursor = connection.cursor()
 
-    if image:
-        image_path = f"static/uploads/{image.filename}"
-        image.save(image_path)
-
-    # 🔥 ALWAYS call AI (with or without image)
-    response = call_ai(user_input, image_path)
-
-    return jsonify({"reply": response})
-
-def load_repair_knowledge():
     try:
-        with open("repair_knowledge.txt", "r") as f:
-            return f.read()
+        cursor.execute("""
+            UPDATE `User`
+            SET `Name` = %s, `Email` = %s, `Address` = %s
+            WHERE `ID` = %s
+        """, (name, email, address, current_user.id))
+        connection.commit()
+    except pymysql.err.IntegrityError:
+        flash("Email is already in use")
+    finally:
+        cursor.close()
+        connection.close()
+
+    return redirect("/profile")
+
+
+def format_date(value, format='%B %d, %Y, %I:%M %p'):
+    try:
+        return value.strftime(format)
     except:
-        return ""
+        return value
 
-user_sessions = {}
+app.jinja_env.filters['date'] = format_date
 
-user_sessions = {}
-
-def call_ai(user_input, image_path=None):
-    knowledge = load_repair_knowledge()
-
+@app.route("/orders")
+@login_required
+def orders():
     connection = connect_db()
     cursor = connection.cursor(pymysql.cursors.DictCursor)
 
-    cursor.execute("SELECT ID, Name FROM RepairGuides")
-    guides = cursor.fetchall()
+    cursor.execute("""
+        SELECT 
+            o.ID,
+            o.created_at,
+            o.total_amount,
+            o.status AS order_status,
+
+            p.name AS product_name,
+            p.image,
+            sc.quantity,
+            p.price,
+
+            ot.status AS tracking_status,
+            ot.location,
+            ot.updated_at,
+            ot.remarks,
+            ot.shipping_carrier,
+            ot.estimated_delivery_date
+
+        FROM orders o
+        LEFT JOIN SalesCart sc ON o.ID = sc.order_id
+        LEFT JOIN Product p ON sc.product_id = p.ID
+        LEFT JOIN order_tracking ot ON o.ID = ot.order_id
+        WHERE o.user_id = %s
+        ORDER BY o.ID DESC, ot.updated_at ASC
+    """, (current_user.id,))
+
+    results = cursor.fetchall()
+
+    orders_dict = {}
+
+    for row in results:
+        order_id = row["ID"]
+
+        # CREATE ORDER
+        if order_id not in orders_dict:
+            orders_dict[order_id] = {
+                "id": order_id,
+                "created_at": row["created_at"],
+                "total_amount": row["total_amount"],
+                "status": row["order_status"],
+                "current_status": row["order_status"],
+                "order_items": [],
+                "tracking": [],
+                "progress": 10
+            }
+
+        # ADD ITEM (ONLY IF EXISTS)
+        if row["product_name"]:
+            item = {
+                "name": row["product_name"],
+                "image": row["image"],
+                "quantity": row["quantity"],
+                "price": row["price"]
+            }
+
+            if item not in orders_dict[order_id]["order_items"]:
+                orders_dict[order_id]["order_items"].append(item)
+
+        # ADD TRACKING
+        if row["tracking_status"]:
+            tracking = {
+                "status": row["tracking_status"],
+                "location": row["location"],
+                "updated_at": row["updated_at"],
+                "remarks": row["remarks"],
+                "carrier": row["shipping_carrier"],
+                "eta": row["estimated_delivery_date"]
+            }
+
+            if tracking not in orders_dict[order_id]["tracking"]:
+                orders_dict[order_id]["tracking"].append(tracking)
+
+    cursor.close()
     connection.close()
 
-    user_id = "default"
+    # CALCULATE STATUS + PROGRESS
+    for order in orders_dict.values():
 
-    if not user_input and image_path:
-        return """
-📷 I see you uploaded an image.
+        if order["tracking"]:
+            order["current_status"] = order["tracking"][-1]["status"]
 
-What device is this and what seems to be the issue?
-"""
+        status = order["current_status"]
 
-    if not user_input:
-        return "Please describe your issue."
+        order["progress"] = {
+            "Processing": 25,
+            "Shipped": 50,
+            "Out for Delivery": 75,
+            "Delivered": 100
+        }.get(status, 10)
 
-    user_input_lower = user_input.lower()
+    return render_template("orders.html.jinja", orders=list(orders_dict.values()))
 
-    # 🔹 Handle step-by-step
-    if user_input_lower == "next step":
-        if user_id in user_sessions:
-            steps = user_sessions[user_id]
-            if steps:
-                next_step = steps.pop(0)
-                return f"➡️ Next step:<br>{next_step}"
-            else:
-                return "✅ You're done! You've completed all steps."
-
-    keywords = {
-        "battery": ["battery", "charge", "power", "dead"],
-        "screen": ["screen", "display", "crack", "touch"],
-        "camera": ["camera", "lens", "photo"]
-    }
-
-    best_match = None
-
-    for guide in guides:
-        for key, words in keywords.items():
-            if any(word in user_input_lower for word in words):
-                if key in guide["Name"].lower():
-                    best_match = guide
-                    break
-
-    # 🔹 Extract steps
-    steps = []
-    for line in knowledge.split("\n"):
-        if "step" in line.lower() and any(word in line.lower() for word in user_input_lower.split()):
-            steps.append(line.strip())
-
-    steps = steps[:3]
-
-    # 🔹 Save steps for session
-    user_sessions[user_id] = steps.copy()
-
-    # 🔹 Format steps OUTSIDE f-string
-    if steps:
-        step_text = ""
-        for i, step in enumerate(steps, 1):
-            step_text += f"{i}. {step}<br>"
-    else:
-        step_text = "1. Turn off your device<br>2. Inspect for damage<br>3. Follow the guide below<br>"
-
-    # 🔹 Final response
-    if best_match:
-        return f"""
-🔧 <b>{best_match['Name']} detected</b><br><br>
-
-Here are the first steps you should try:<br><br>
-
-{step_text}
-
-👉 <a href="/guide/{best_match['ID']}" target="_blank" style="color:#60a5fa;">Open Full Repair Guide</a><br><br>
-
-Reply <b>next step</b> and I’ll guide you further.
-"""
-
-    return """
-I couldn't find a clear match.<br><br>
-
-Try:
-- my screen is cracked<br>
-- battery drains fast<br>
-- camera not working
-"""
