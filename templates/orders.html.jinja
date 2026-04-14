@@ -1,0 +1,154 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Profile</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="/static/style.css" rel="stylesheet">
+    <link rel="icon" href="/static/products/Blueprint Logo.png" type="image">
+</head>
+
+<body class="bg-[#0b2c4d] text-white font-sans min-h-screen flex flex-col">
+
+<!-- NAVBAR -->
+{% include "components/navbar.html.jinja" %}
+
+<main class="flex-1 max-w-5xl mx-auto p-6 space-y-6">
+
+  <h1 class="text-3xl font-bold text-center mb-6">Your Orders</h1>
+
+  {% if orders %}
+
+    {% for order in orders %}
+
+    <!-- ORDER CARD -->
+    <div class="bg-[#0e3a63] border border-[#6fb7ff] rounded-xl shadow-lg overflow-hidden">
+
+      <!-- TOP BAR -->
+      <div class="flex justify-between items-center p-4 border-b border-[#6fb7ff] bg-[#0b2c4d]">
+
+        <div>
+          <p class="text-xs text-gray-300">ORDER PLACED</p>
+          <p class="font-semibold">{{ order.created_at }}</p>
+        </div>
+
+        <div>
+          <p class="text-xs text-gray-300">TOTAL</p>
+          <p class="font-semibold">${{ "%.2f"|format(order.total_amount) }}</p>
+        </div>
+
+        <div>
+          <p class="text-xs text-gray-300">STATUS</p>
+          <span class="font-semibold
+            {% if order.current_status == 'Delivered' %}
+              text-green-400
+            {% elif order.current_status == 'Shipped' %}
+              text-blue-300
+            {% elif order.current_status == 'Processing' %}
+              text-yellow-300
+            {% else %}
+              text-red-400
+            {% endif %}">
+            {{ order.current_status }}
+          </span>
+        </div>
+
+      </div>
+
+      <!-- ITEMS -->
+      <div class="p-4 space-y-4">
+
+        {% for item in order.order_items %}
+
+        <div class="flex gap-4 items-center bg-[#0b2c4d] p-3 rounded-lg border border-[#1f4f7a]">
+
+          <div class="w-20 h-20 bg-[#0a2238] rounded overflow-hidden flex items-center justify-center">
+            {% if item.image %}
+              <img src="{{ item.image }}" class="w-full h-full object-cover">
+            {% else %}
+              <span class="text-xs text-gray-400">No Image</span>
+            {% endif %}
+          </div>
+
+          <div class="flex-1">
+            <p class="font-semibold">{{ item.name }}</p>
+            <p class="text-sm text-gray-300">Qty: {{ item.quantity }}</p>
+          </div>
+
+          <div class="font-bold">
+            ${{ "%.2f"|format(item.price) }}
+          </div>
+
+        </div>
+
+        {% endfor %}
+
+      </div>
+
+      <!-- TRACKING -->
+      <div class="p-4 border-t border-[#6fb7ff] bg-[#0b2c4d]">
+
+        <p class="font-semibold mb-3">Tracking</p>
+
+        {% if order.tracking %}
+
+          <div class="flex gap-3 overflow-x-auto">
+
+            {% for t in order.tracking %}
+
+            <div class="min-w-[220px] bg-[#0e3a63] border border-[#1f4f7a] rounded-lg p-3">
+
+              <p class="font-semibold
+                {% if t.status == order.current_status %}
+                  text-green-400
+                {% else %}
+                  text-gray-300
+                {% endif %}">
+                {{ t.status }}
+              </p>
+
+              <p class="text-sm text-gray-300">
+                📍 {{ t.location if t.location else 'N/A' }}
+              </p>
+
+              <p class="text-xs text-gray-400">
+                {{ t.updated_at }}
+              </p>
+
+              {% if t.carrier %}
+                <p class="text-xs text-gray-400 mt-1">🚚 {{ t.carrier }}</p>
+              {% endif %}
+
+            </div>
+
+            {% endfor %}
+
+          </div>
+
+        {% else %}
+          <p class="text-sm text-gray-400">No tracking available yet.</p>
+        {% endif %}
+
+      </div>
+
+    </div>
+
+    {% endfor %}
+
+  {% else %}
+
+    <p class="text-center text-gray-400 mt-20">
+      You haven't placed any orders yet.
+    </p>
+
+  {% endif %}
+
+</main>
+
+<!-- FOOTER -->
+{% include "components/footer.html.jinja" %}
+
+</body>
+</html>

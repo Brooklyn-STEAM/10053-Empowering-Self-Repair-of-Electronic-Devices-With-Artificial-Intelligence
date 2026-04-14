@@ -1,4 +1,3 @@
-
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -10,135 +9,134 @@
     <link rel="icon" href="/static/products/Blueprint Logo.png" type="image">
 </head>
 
+<body class="min-h-screen flex flex-col bg-[#0b2c4d] text-[#d6ecff] font-[Inter]">
 
-<body class="min-h-screen flex flex-col bg-[#0b2c4d] text-[#d6ecff] leading-relaxed tracking-wide font-[Inter]">
-    {% include "components/navbar.html.jinja" %}
+{% include "components/navbar.html.jinja" %}
 
-  <main class="flex-grow">
+<main class="flex-grow">
 
-  <h1 class="text-4xl font-bold mb-8 text-white">Checkout</h1>
+<h1 class="text-4xl font-bold mb-8 text-white">Checkout</h1>
 
-  {% if cart|length == 0 %}
-    <p class="text-gray-500 text-lg">Your cart is empty.</p>
-  {% else %}
+{% if cart|length == 0 %}
+    <p class="text-gray-400 text-lg">Your cart is empty.</p>
+{% else %}
 
-  {% set ns = namespace(total=0) %}
+{% set ns = namespace(total=0) %}
 
-  <div class="grid grid-cols-1 lg:grid-cols-3 gap-8">
+<div class="grid grid-cols-1 lg:grid-cols-3 gap-8">
 
     <!-- CART ITEMS -->
     <div class="lg:col-span-2 space-y-6">
 
-      {% for x in cart %}
-        {% set ns.total = ns.total + (x['Price'] * x['Quantity']) %}
+        {% for x in cart %}
 
-        <div class="cart-item grid grid-cols-6 items-center bg-white rounded-2xl shadow-md p-4 gap-4 hover:shadow-lg transition transform hover:scale-[1.01]"
-             data-price="{{ x['Price'] }}">
-          
-          <!-- Product Image -->
-          <img src="{{ x['Image'] }}" alt="{{ x['Name'] }}"
-               class="h-28 w-28 object-contain rounded-lg border">
+            {% set ns.total = ns.total + (x['price'] * x['quantity']) %}
 
-          <!-- Product Name -->
-          <div class="col-span-2 font-semibold text-gray-900 text-lg">
-            {{ x['Name'] }}
-          </div>
+            <div class="cart-item grid grid-cols-6 items-center bg-white rounded-2xl shadow-md p-4 gap-4"
+                 data-price="{{ x['price'] }}">
 
-          <!-- Quantity Input -->
-          <div class="col-span-1 flex flex-col items-center justify-center gap-2">
-            <input type="number" class="quantity-input w-16 border border-gray-300 rounded-lg px-2 py-1 text-center text-gray-900"
-                   value="{{ x['Quantity'] }}" min="1">
-            <form method="post" action="/cart/{{ x['ProductID'] }}/remove">
-              <button type="submit" class="bg-red-500 hover:bg-red-600 text-white px-3 py-1 rounded text-sm transition">
-                Remove
-              </button>
-            </form>
-          </div>
+                <img src="{{ x['image'] }}"
+                     class="h-28 w-28 object-contain rounded-lg border">
 
-          <!-- Price + Subtotal -->
-          <div class="col-span-2 text-right">
-            <div class="font-semibold text-gray-900 text-lg">${{ x['Price'] }}</div>
-            <div class="text-sm text-gray-500 subtotal">
-              Subtotal: ${{ x['Price'] * x['Quantity'] }}
+                <div class="col-span-2 font-semibold text-gray-900 text-lg">
+                    {{ x['name'] }}
+                </div>
+
+                <div class="col-span-1 flex flex-col items-center">
+                    <input type="number"
+                           class="quantity-input w-16 border rounded-lg px-2 py-1 text-center text-gray-900"
+                           value="{{ x['quantity'] }}" min="1">
+
+                    <form method="post" action="/cart/{{ x['product_id'] }}/remove">
+                        <button class="bg-red-500 text-white px-3 py-1 mt-2 rounded">
+                            Remove
+                        </button>
+                    </form>
+                </div>
+
+                <div class="col-span-2 text-right">
+                    <div class="text-gray-900 font-semibold">
+                        ${{ x['price'] }}
+                    </div>
+
+                    <div class="text-sm text-gray-500 subtotal">
+                        Subtotal: ${{ x['price'] * x['quantity'] }}
+                    </div>
+                </div>
+
             </div>
-          </div>
 
-        </div>
-      {% endfor %}
+        {% endfor %}
 
     </div>
 
-    <!-- RIGHT COLUMN: ORDER SUMMARY + SHIPPING -->
-    <div class="flex flex-col space-y-6 lg:col-span-1">
+    <!-- SUMMARY -->
+    <div class="bg-white rounded-2xl shadow-lg p-6 h-fit">
 
-      <!-- ORDER SUMMARY -->
-      <div class="bg-white rounded-2xl shadow-lg p-6">
-        <h2 class="text-2xl font-bold text-gray-900 mb-2">Order Summary</h2>
-        <div class="text-gray-500 font-medium">Order Total</div>
-        <div class="text-3xl font-extrabold text-green-600 mt-1" id="order-total">
-          ${{ ns.total }}
+        <h2 class="text-2xl font-bold text-gray-900">Order Summary</h2>
+
+        <div class="text-gray-500 mt-2">Total</div>
+
+        <div class="text-3xl font-bold text-green-600" id="order-total">
+            ${{ ns.total }}
         </div>
-      </div>
 
-      <!-- SHIPPING FORM -->
-      <div class="bg-white rounded-2xl shadow-lg p-6 flex flex-col space-y-4">
-        <h2 class="text-2xl font-bold text-gray-900">Shipping Address</h2>
+        <form method="post" action="/checkout" class="mt-6 space-y-3">
 
-        <!--  form submits-->
-        <form method="post" action="/checkout" class="space-y-4 text-sm">
+            <input type="text" name="street" placeholder="Street"
+                   class="w-full border rounded-lg px-3 py-2 text-gray-900" required>
 
-          <input type="text" name="street" placeholder="123 Main St" required
-                 class="w-full border border-gray-300 rounded-lg px-4 py-3 focus:outline-none focus:ring-2 focus:ring-blue-400 text-gray-900">
+            <input type="text" name="city" placeholder="City"
+                   class="w-full border rounded-lg px-3 py-2 text-gray-900" required>
 
-          <input type="text" name="city" placeholder="Las Vegas" required
-                 class="w-full border border-gray-300 rounded-lg px-4 py-3 focus:outline-none focus:ring-2 focus:ring-blue-400 text-gray-900">
+            <div class="grid grid-cols-2 gap-2">
+                <input type="text" name="state" placeholder="State"
+                       class="w-full border rounded-lg px-3 py-2 text-gray-900" required>
 
-          <div class="grid grid-cols-2 gap-2">
-            <input type="text" name="state" placeholder="NV" required
-                   class="w-full border border-gray-300 rounded-lg px-4 py-3 focus:outline-none focus:ring-2 focus:ring-blue-400 text-gray-900">
-            <input type="text" name="zip" placeholder="11111" required
-                   class="w-full border border-gray-300 rounded-lg px-4 py-3 focus:outline-none focus:ring-2 focus:ring-blue-400 text-gray-900">
-          </div>
+                <input type="text" name="zip" placeholder="ZIP"
+                       class="w-full border rounded-lg px-3 py-2 text-gray-900" required>
+            </div>
 
-          <button type="submit" id="place-order-btn"
-                  class="w-full bg-green-500 hover:bg-green-600 text-white font-bold py-3 rounded-lg transition transform hover:scale-105 active:scale-95 disabled:opacity-50 disabled:cursor-not-allowed">
-            Place Order
-          </button>
+            <button type="submit"
+                    class="w-full bg-green-500 hover:bg-green-600 text-white font-bold py-3 rounded-lg">
+                Place Order
+            </button>
+
         </form>
-      </div>
 
     </div>
 
-  </div>
+</div>
 
-  {% endif %}
+{% endif %}
 
 </main>
 
-<!-- Dynamic subtotal + total update  -->
 <script>
-const quantityInputs = document.querySelectorAll('.quantity-input');
-const orderTotalEl = document.querySelector('#order-total');
-const placeOrderBtn = document.querySelector('#place-order-btn');
+const inputs = document.querySelectorAll('.quantity-input');
+const totalEl = document.querySelector('#order-total');
 
-function updateTotals() {
-  let total = 0;
-  document.querySelectorAll('.cart-item').forEach(item => {
-    const price = parseFloat(item.dataset.price);
-    const qtyInput = item.querySelector('.quantity-input');
-    const qty = qtyInput ? parseInt(qtyInput.value) : 1;
-    const subtotalEl = item.querySelector('.subtotal');
-    const subtotal = price * qty;
-    if (subtotalEl) subtotalEl.textContent = `Subtotal: $${subtotal.toFixed(2)}`;
-    total += subtotal;
-  });
-  orderTotalEl.textContent = `$${total.toFixed(2)}`;
-  placeOrderBtn.disabled = total === 0;
+function update() {
+    let total = 0;
+
+    document.querySelectorAll('.cart-item').forEach(item => {
+        const price = parseFloat(item.dataset.price);
+        const qty = parseInt(item.querySelector('.quantity-input').value);
+        const sub = price * qty;
+
+        item.querySelector('.subtotal').textContent =
+            `Subtotal: $${sub.toFixed(2)}`;
+
+        total += sub;
+    });
+
+    totalEl.textContent = `$${total.toFixed(2)}`;
 }
 
-quantityInputs.forEach(input => input.addEventListener('input', updateTotals));
+inputs.forEach(i => i.addEventListener('input', update));
 </script>
 
 {% include "components/footer.html.jinja" %}
+
 </body>
-</html> 
+</html>

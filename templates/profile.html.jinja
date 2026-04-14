@@ -1,5 +1,6 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -9,124 +10,47 @@
     <link rel="icon" href="/static/products/Blueprint Logo.png" type="image">
 </head>
 
-<body class="min-h-screen flex flex-col bg-[#0b2c4d] text-[#d6ecff] leading-relaxed tracking-wide font-[Inter]">
+<body class="min-h-screen flex flex-col bg-[#0b2c4d] text-[#d6ecff] font-[Inter]">
+
     {% include "components/navbar.html.jinja" %}
 
     <main class="flex-grow">
 
         <!-- Header -->
-        <header class="py-[70px] px-[20px] lg:px-[80px] bg-[#0e3a63] border-b-2 border-dashed border-[#6fb7ff] text-center">
-            <h1 class="text-4xl mb-6 border-b-2 border-dashed border-[#6fb7ff] inline-block pb-[10px]">
+        <header class="py-16 px-6 lg:px-20 bg-[#0e3a63] border-b border-dashed border-[#6fb7ff] text-center">
+            <h1 class="text-4xl mb-4 border-b border-dashed border-[#6fb7ff] inline-block pb-2">
                 Hey {{ current_user.name }}!
             </h1>
-            <p class="max-w-[700px] mx-auto text-lg leading-relaxed">
-                View and manage your account details, orders, and settings.
+            <p class="max-w-xl mx-auto text-lg text-gray-300">
+                View and track your orders below.
             </p>
         </header>
 
         <!-- Content -->
-        <div class="py-12 px-4 lg:py-[70px] lg:px-[80px] grid grid-cols-1 lg:grid-cols-3 gap-8">
+        <div class="py-10 px-4 lg:px-20 grid grid-cols-1 lg:grid-cols-3 gap-8">
 
-            <!-- LEFT: Profile Card -->
+            <!-- Account Card -->
             <div class="bg-[#0e3a63] p-6 rounded-xl shadow-lg border border-[#6fb7ff]">
-
                 <h2 class="text-2xl mb-4 border-b border-[#6fb7ff] pb-2">
                     Account Details
                 </h2>
 
-                <div class="space-y-4">
+                <p class="text-sm text-gray-300">Name</p>
+                <p class="mb-4 font-semibold">{{ current_user.name }}</p>
 
-                    <div>
-                        <p class="text-sm text-gray-300">Name</p>
-                        <p class="text-lg font-semibold">{{ current_user.name }}</p>
-                    </div>
+                <p class="text-sm text-gray-300">Email</p>
+                <p class="mb-6 font-semibold">{{ current_user.email }}</p>
 
-                    <div>
-                        <p class="text-sm text-gray-300">Email</p>
-                        <p class="text-lg font-semibold">{{ current_user.email }}</p>
-                    </div>
+                <a href="/edit_profile" class="block text-center bg-[#6fb7ff] text-[#0b2c4d] py-2 rounded font-semibold hover:bg-blue-700 hover:text-white transition mb-3">
+                    Edit Profile
+                </a>
 
-                
-
-                </div>
-
-                <!-- Actions -->
-                <div class="mt-6 space-y-3">
-                    <a href="/edit_profile"
-                       class="block text-center bg-[#6fb7ff] text-[#0b2c4d] py-2 rounded font-semibold hover:bg-blue-700 hover:text-white transition">
-                        Edit Profile
-                    </a>
-
-                    <a href="/logout"
-                       class="block text-center bg-red-500 text-white py-2 rounded font-semibold hover:bg-red-700 transition">
-                        Logout
-                    </a>
-                </div>
-
+                <a href="/logout" class="block text-center bg-red-500 text-white py-2 rounded font-semibold hover:bg-red-700 transition">
+                    Logout
+                </a>
             </div>
 
-            <!-- Orders -->
-            <div class="lg:col-span-2 space-y-8">
+           {% include "components/footer.html.jinja" %}
 
-                <div class="bg-[#0e3a63] p-6 rounded-xl shadow-lg border border-[#6fb7ff]">
-                    <h2 class="text-2xl mb-4 border-b border-[#6fb7ff] pb-2">
-                         Orders progress
-                    </h2>
-
-{% if orders %}
-<div class="space-y-6">
-
-    {% for order in orders %}
-    <div class="bg-[#0b2c4d] p-5 rounded-lg border border-[#6fb7ff]">
-
-        <!-- Order Info -->
-        <div class="flex justify-between items-center mb-4">
-            <div>
-                <p class="font-semibold text-lg">Order #{{ order.id }}</p>
-                <p class="text-sm text-gray-300">${{ order.total }}</p>
-            </div>
-            <span class="text-sm px-3 py-1 rounded bg-[#6fb7ff] text-[#0b2c4d] font-semibold">
-                {{ order.status }}
-            </span>
-        </div>
-
-        <!-- Progress Bar -->
-        <div class="w-full bg-gray-700 rounded-full h-3 overflow-hidden">
-            <div class="bg-[#6fb7ff] h-3 rounded-full transition-all duration-500"
-                 style="width: 
-                 {% if order.status == 'Pending' %}25%
-                 {% elif order.status == 'Processing' %}50%
-                 {% elif order.status == 'Shipped' %}75%
-                 {% elif order.status == 'Delivered' %}100%
-                 {% else %}10%
-                 {% endif %};">
-            </div>
-        </div>
-
-        <!-- Steps -->
-        <div class="flex justify-between text-xs text-gray-300 mt-2">
-            <span>Pending</span>
-            <span>Processing</span>
-            <span>Shipped</span>
-            <span>Delivered</span>
-        </div>
-
-    </div>
-    {% endfor %}
-
-</div>
-{% else %}
-<p class="text-gray-300 italic text-center py-6">
-    You haven’t placed any orders yet.
-</p>
-{% endif %}
-
-                
-                </div>
-            </div>
-        </div>
-
-    </main>
-{% include "components/footer.html.jinja" %}
 </body>
 </html>
