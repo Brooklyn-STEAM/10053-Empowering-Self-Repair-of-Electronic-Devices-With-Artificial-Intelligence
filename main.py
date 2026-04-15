@@ -2,6 +2,7 @@ from flask import Flask, render_template, request, flash, redirect, abort, url_f
 from flask_login import LoginManager, login_user, logout_user, login_required, current_user
 import pymysql
 from dynaconf import Dynaconf
+from ai_agent import run_agent
 
 from openai import OpenAI
 
@@ -35,7 +36,7 @@ def load_user(user_id):
     connection  = connect_db()
     cursor = connection.cursor()
 
-    cursor.execute("SELECT * FROM `User` WHERE `ID` = %s ", (user_id))
+    cursor.execute("SELECT * FROM `User` WHERE `ID` = %s ", (user_id,))
 
     result = cursor.fetchone()
     connection.close()
@@ -71,7 +72,7 @@ def login_page():
         connection = connect_db()
         cursor = connection.cursor()
 
-        cursor.execute("SELECT * FROM `User`  WHERE `Email` = %s", (email))
+        cursor.execute("SELECT * FROM `User`  WHERE `Email` = %s", (email,))
         result = cursor.fetchone()
         connection.close()
 
@@ -461,21 +462,28 @@ def thank_you():
 def profile():
     return render_template("profile.html.jinja")
 
+
 @app.route('/ai-help', methods=['POST'])
 def ai_help():
-    user_input = request.form.get("message")
+    user_input = request.form.get("message", "")
     image = request.files.get("image")
-
-    image_path = None
 
     if image:
         image_path = f"static/uploads/{image.filename}"
         image.save(image_path)
+        user_input += "\nUser uploaded an image (image processing not enabled yet)."
 
-    # 🔥 ALWAYS call AI (with or without image)
-    response = call_ai(user_input, image_path)
+    result = run_agent(user_input)
 
-    return jsonify({"reply": response})
+    # return clean string to frontend
+    if isinstance(result, dict) and "summary" in result:
+        return jsonify({
+            "reply": result["summary"]
+        })
+
+    return jsonify({
+        "reply": str(result)
+    })
 
 def load_repair_knowledge():
     try:
@@ -486,95 +494,14 @@ def load_repair_knowledge():
 
 user_sessions = {}
 
-user_sessions = {}
-
-def call_ai(user_input, image_path=None):
-    knowledge = load_repair_knowledge()
-
-    connection = connect_db()
-    cursor = connection.cursor(pymysql.cursors.DictCursor)
-
-    cursor.execute("SELECT ID, Name FROM RepairGuides")
-    guides = cursor.fetchall()
-    connection.close()
-
-    user_id = "default"
-
-    if not user_input and image_path:
-        return """
-📷 I see you uploaded an image.
-
-What device is this and what seems to be the issue?
-"""
-
-    if not user_input:
-        return "Please describe your issue."
-
-    user_input_lower = user_input.lower()
-
-    # 🔹 Handle step-by-step
-    if user_input_lower == "next step":
-        if user_id in user_sessions:
-            steps = user_sessions[user_id]
-            if steps:
-                next_step = steps.pop(0)
-                return f"➡️ Next step:<br>{next_step}"
-            else:
-                return "✅ You're done! You've completed all steps."
-
-    keywords = {
-        "battery": ["battery", "charge", "power", "dead"],
-        "screen": ["screen", "display", "crack", "touch"],
-        "camera": ["camera", "lens", "photo"]
-    }
-
-    best_match = None
-
-    for guide in guides:
-        for key, words in keywords.items():
-            if any(word in user_input_lower for word in words):
-                if key in guide["Name"].lower():
-                    best_match = guide
-                    break
-
-    # 🔹 Extract steps
-    steps = []
-    for line in knowledge.split("\n"):
-        if "step" in line.lower() and any(word in line.lower() for word in user_input_lower.split()):
-            steps.append(line.strip())
-
-    steps = steps[:3]
-
-    # 🔹 Save steps for session
-    user_sessions[user_id] = steps.copy()
-
-    # 🔹 Format steps OUTSIDE f-string
-    if steps:
-        step_text = ""
-        for i, step in enumerate(steps, 1):
-            step_text += f"{i}. {step}<br>"
-    else:
-        step_text = "1. Turn off your device<br>2. Inspect for damage<br>3. Follow the guide below<br>"
-
-    # 🔹 Final response
-    if best_match:
-        return f"""
-🔧 <b>{best_match['Name']} detected</b><br><br>
-
-Here are the first steps you should try:<br><br>
-
-{step_text}
-
-👉 <a href="/guide/{best_match['ID']}" target="_blank" style="color:#60a5fa;">Open Full Repair Guide</a><br><br>
-
-Reply <b>next step</b> and I’ll guide you further.
-"""
-
-    return """
-I couldn't find a clear match.<br><br>
-
-Try:
-- my screen is cracked<br>
-- battery drains fast<br>
-- camera not working
-"""
+@app.route("/test-db")
+def test_db():
+    try:
+        conn = connect_db()
+        cursor = conn.cursor()
+        cursor.execute("SELECT 1")
+        result = cursor.fetchone()
+        conn.close()
+        return str(result)
+    except Exception as e:
+        return f"DB ERROR: {e}"
