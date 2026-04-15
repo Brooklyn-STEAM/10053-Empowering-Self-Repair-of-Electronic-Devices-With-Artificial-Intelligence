@@ -57,7 +57,18 @@ def connect_db():
 
 @app.route("/")
 def index():
-    return render_template("homepage.html.jinja")
+    
+    connection = connect_db()
+
+    cursor = connection.cursor()
+
+    cursor.execute("SELECT * FROM `RepairItems`")
+    
+    result = cursor.fetchmany(5)
+    
+    connection.close()
+
+    return render_template("homepage.html.jinja", guides=result)
 
 @app.route("/login", methods=["POST","GET"])
 def login_page():
