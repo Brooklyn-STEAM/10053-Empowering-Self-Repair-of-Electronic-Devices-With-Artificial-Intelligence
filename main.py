@@ -1,13 +1,20 @@
-from flask import Flask, render_template, request, flash, redirect, abort, url_for, session
+from flask import Flask, render_template, request, flash, redirect, abort, url_for, session, jsonify
 from flask_login import LoginManager, login_user, logout_user, login_required, current_user
 import pymysql
 from dynaconf import Dynaconf
+from ai_agent import run_agent
+from datetime import datetime
+import mysql.connector
 
+
+
+from openai import OpenAI
 
 app = Flask(__name__)
 
 config = Dynaconf(settings_file =["settings.toml"])
 
+client = OpenAI(api_key=config.get("OPENAI_API_KEY"))
 app.secret_key = config.secret_key
 
 login_manager = LoginManager(app)
@@ -33,7 +40,7 @@ def load_user(user_id):
     connection  = connect_db()
     cursor = connection.cursor()
 
-    cursor.execute("SELECT * FROM `User` WHERE `ID` = %s ", (user_id))
+    cursor.execute("SELECT * FROM `User` WHERE `ID` = %s ", (user_id,))
 
     result = cursor.fetchone()
     connection.close()
@@ -54,6 +61,9 @@ def connect_db():
         cursorclass= pymysql.cursors.DictCursor
     )
     return conn
+
+if __name__ == "__main__":
+    app.run(debug=True)
 
 @app.route("/")
 def index():
@@ -80,7 +90,7 @@ def login_page():
         connection = connect_db()
         cursor = connection.cursor()
 
-        cursor.execute("SELECT * FROM `User`  WHERE `Email` = %s", (email))
+        cursor.execute("SELECT * FROM `User`  WHERE `Email` = %s", (email,))
         result = cursor.fetchone()
         connection.close()
 
@@ -243,7 +253,12 @@ def product_page(product_id):
             abort(404)
 
         # Get reviews
-        cursor.execute("SELECT * FROM Review WHERE ProductID = %s", (product_id,))
+        cursor.execute("""
+            SELECT Review.*, User.Name
+            FROM Review
+            JOIN User ON User.ID = Review.UserID
+            WHERE Review.ProductID = %s
+        """, (product_id,))
         reviews = cursor.fetchall()
 
     finally:
@@ -251,6 +266,33 @@ def product_page(product_id):
         connection.close()
 
     return render_template("individual_product.html.jinja", product=product, reviews=reviews)
+
+@app.route("/product/<int:product_id>/review", methods=["POST"])
+def submit_review(product_id):
+    rating = request.form.get("rating")
+    comment = request.form.get("comment")
+
+
+    connection = connect_db()
+    cursor = connection.cursor()
+
+    if not current_user.is_authenticated:
+        return redirect(url_for("login"))
+
+    
+
+    # Save review to database
+    cursor.execute("""
+        INSERT INTO Review 
+                (ProductID, UserID, Ratings, Comment)
+        VALUES 
+        (%s, %s, %s, %s)
+    """, (product_id, current_user.id, rating, comment))
+
+
+    connection.close()
+
+    return redirect(url_for("product_page", product_id=product_id))
 
 @app.errorhandler(404)
 def page_not_found(e):
@@ -400,33 +442,66 @@ def remove_from_cart(product_id):
 def checkout():
     connection = connect_db()
     cursor = connection.cursor()
-    cursor.execute("""
-        SELECT * FROM `Cart`
-        JOIN `Product` ON `Product`.`ID` = `Cart`.`ProductID`
-        WHERE `UserID` = %s
-    """, (current_user.id,))
-    
-    result = cursor.fetchall()
-    if request.method == "POST":
-        cursor.execute(
-            "INSERT INTO `Sales` (`UserID`) VALUES (%s)",
-            (current_user.id,)
-        )
-        sales = cursor.lastrowid
-        for item in result:
-            cursor.execute(
-                "INSERT INTO `SalesCart` (`SalesID`, `ProductID`, `Quantity`) VALUES (%s, %s, %s)",
-                (sales, item['ProductID'], item['Quantity'])
-            )
 
-        cursor.execute(
-            "DELETE FROM `Cart` WHERE `UserID` = %s",
-            (current_user.id,)
-        )
+    # GET CART ITEMS
+    cursor.execute("""
+        SELECT 
+            Cart.ProductID AS product_id,
+            Cart.Quantity AS quantity,
+            Product.Price AS price,
+            Product.Name AS name,
+            Product.Image AS image
+        FROM Cart
+        JOIN Product ON Product.ID = Cart.ProductID
+        WHERE Cart.UserID = %s
+    """, (current_user.id,))
+
+    cart_items = cursor.fetchall()
+
+    if request.method == "POST":
+
+        total = 0
+
+        # CREATE ORDER FIRST
+        cursor.execute("""
+            INSERT INTO orders (user_id, total_amount, status, created_at)
+            VALUES (%s, %s, %s, NOW())
+        """, (current_user.id, 0, "Pending"))
+
+        order_id = cursor.lastrowid
+
+        # ADD ITEMS TO SalesCart
+        for item in cart_items:
+            product_id = item["product_id"]
+            quantity = item["quantity"]
+            price = item["price"]
+
+            total += price * quantity
+
+            cursor.execute("""
+                INSERT INTO SalesCart (order_id, product_id, quantity)
+                VALUES (%s, %s, %s)
+            """, (order_id, product_id, quantity))
+
+        # UPDATE ORDER TOTAL
+        cursor.execute("""
+            UPDATE orders
+            SET total_amount = %s
+            WHERE ID = %s
+        """, (total, order_id))
+
+        # CLEAR CART
+        cursor.execute("""
+            DELETE FROM Cart
+            WHERE UserID = %s
+        """, (current_user.id,))
+
         connection.commit()
-        return redirect('/thank_you')
-    connection.close()
-    return render_template("checkout.html.jinja", cart=result)
+        connection.close()
+
+        return redirect("/thank_you")
+
+    return render_template("checkout.html.jinja", cart=cart_items)
 
 @app.route("/thank_you")
 @login_required
@@ -437,3 +512,170 @@ def thank_you():
 @login_required
 def profile():
     return render_template("profile.html.jinja")
+
+
+@app.route('/ai-help', methods=['POST'])
+def ai_help():
+    user_input = request.form.get("message", "")
+    image = request.files.get("image")
+
+    if image:
+        image_path = f"static/uploads/{image.filename}"
+        image.save(image_path)
+        user_input += "\nUser uploaded an image (image processing not enabled yet)."
+
+    result = run_agent(user_input)
+
+    # return clean string to frontend
+    if isinstance(result, dict) and "summary" in result:
+        return jsonify({
+            "reply": result["summary"]
+        })
+
+    return jsonify({
+        "reply": str(result)
+    })
+@app.route("/profile/update", methods=["POST"])
+@login_required
+def update_profile():
+    name = request.form["full_name"]
+    email = request.form["email"]
+    address = request.form["address"]
+
+    connection = connect_db()
+    cursor = connection.cursor()
+
+    try:
+        cursor.execute("""
+            UPDATE `User`
+            SET `Name` = %s, `Email` = %s, `Address` = %s
+            WHERE `ID` = %s
+        """, (name, email, address, current_user.id))
+        connection.commit()
+    except pymysql.err.IntegrityError:
+        flash("Email is already in use")
+    finally:
+        cursor.close()
+        connection.close()
+
+    return redirect("/profile")
+
+
+def format_date(value, format='%B %d, %Y, %I:%M %p'):
+    try:
+        return value.strftime(format)
+    except:
+        return value
+
+@app.route("/test-db")
+def test_db():
+    try:
+        conn = connect_db()
+        cursor = conn.cursor()
+        cursor.execute("SELECT 1")
+        result = cursor.fetchone()
+        conn.close()
+        return str(result)
+    except Exception as e:
+        return f"DB ERROR: {e}"
+app.jinja_env.filters['date'] = format_date
+
+@app.route("/orders")
+@login_required
+def orders():
+    connection = connect_db()
+    cursor = connection.cursor(pymysql.cursors.DictCursor)
+
+    cursor.execute("""
+        SELECT 
+            o.ID,
+            o.created_at,
+            o.total_amount,
+            o.status AS order_status,
+
+            p.name AS product_name,
+            p.image,
+            sc.quantity,
+            p.price,
+
+            ot.status AS tracking_status,
+            ot.location,
+            ot.updated_at,
+            ot.remarks,
+            ot.shipping_carrier,
+            ot.estimated_delivery_date
+
+        FROM orders o
+        LEFT JOIN SalesCart sc ON o.ID = sc.order_id
+        LEFT JOIN Product p ON sc.product_id = p.ID
+        LEFT JOIN order_tracking ot ON o.ID = ot.order_id
+        WHERE o.user_id = %s
+        ORDER BY o.ID DESC, ot.updated_at ASC
+    """, (current_user.id,))
+
+    results = cursor.fetchall()
+
+    orders_dict = {}
+
+    for row in results:
+        order_id = row["ID"]
+
+        # CREATE ORDER
+        if order_id not in orders_dict:
+            orders_dict[order_id] = {
+                "id": order_id,
+                "created_at": row["created_at"],
+                "total_amount": row["total_amount"],
+                "status": row["order_status"],
+                "current_status": row["order_status"],
+                "order_items": [],
+                "tracking": [],
+                "progress": 10
+            }
+
+        # ADD ITEM (ONLY IF EXISTS)
+        if row["product_name"]:
+            item = {
+                "name": row["product_name"],
+                "image": row["image"],
+                "quantity": row["quantity"],
+                "price": row["price"]
+            }
+
+            if item not in orders_dict[order_id]["order_items"]:
+                orders_dict[order_id]["order_items"].append(item)
+
+        # ADD TRACKING
+        if row["tracking_status"]:
+            tracking = {
+                "status": row["tracking_status"],
+                "location": row["location"],
+                "updated_at": row["updated_at"],
+                "remarks": row["remarks"],
+                "carrier": row["shipping_carrier"],
+                "eta": row["estimated_delivery_date"]
+            }
+
+            if tracking not in orders_dict[order_id]["tracking"]:
+                orders_dict[order_id]["tracking"].append(tracking)
+
+    cursor.close()
+    connection.close()
+
+    # CALCULATE STATUS + PROGRESS
+    for order in orders_dict.values():
+
+        if order["tracking"]:
+            order["current_status"] = order["tracking"][-1]["status"]
+
+        status = order["current_status"]
+
+        order["progress"] = {
+            "Processing": 25,
+            "Shipped": 50,
+            "Out for Delivery": 75,
+            "Delivered": 100
+        }.get(status, 10)
+
+    return render_template("orders.html.jinja", orders=list(orders_dict.values()))
+
