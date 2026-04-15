@@ -2,6 +2,7 @@ from flask import Flask, render_template, request, flash, redirect, abort, url_f
 from flask_login import LoginManager, login_user, logout_user, login_required, current_user
 import pymysql
 from dynaconf import Dynaconf
+from ai_agent import run_agent
 from datetime import datetime
 import mysql.connector
 
@@ -39,7 +40,7 @@ def load_user(user_id):
     connection  = connect_db()
     cursor = connection.cursor()
 
-    cursor.execute("SELECT * FROM `User` WHERE `ID` = %s ", (user_id))
+    cursor.execute("SELECT * FROM `User` WHERE `ID` = %s ", (user_id,))
 
     result = cursor.fetchone()
     connection.close()
@@ -78,7 +79,7 @@ def login_page():
         connection = connect_db()
         cursor = connection.cursor()
 
-        cursor.execute("SELECT * FROM `User`  WHERE `Email` = %s", (email))
+        cursor.execute("SELECT * FROM `User`  WHERE `Email` = %s", (email,))
         result = cursor.fetchone()
         connection.close()
 
@@ -501,6 +502,28 @@ def thank_you():
 def profile():
     return render_template("profile.html.jinja")
 
+
+@app.route('/ai-help', methods=['POST'])
+def ai_help():
+    user_input = request.form.get("message", "")
+    image = request.files.get("image")
+
+    if image:
+        image_path = f"static/uploads/{image.filename}"
+        image.save(image_path)
+        user_input += "\nUser uploaded an image (image processing not enabled yet)."
+
+    result = run_agent(user_input)
+
+    # return clean string to frontend
+    if isinstance(result, dict) and "summary" in result:
+        return jsonify({
+            "reply": result["summary"]
+        })
+
+    return jsonify({
+        "reply": str(result)
+    })
 @app.route("/profile/update", methods=["POST"])
 @login_required
 def update_profile():
@@ -533,6 +556,17 @@ def format_date(value, format='%B %d, %Y, %I:%M %p'):
     except:
         return value
 
+@app.route("/test-db")
+def test_db():
+    try:
+        conn = connect_db()
+        cursor = conn.cursor()
+        cursor.execute("SELECT 1")
+        result = cursor.fetchone()
+        conn.close()
+        return str(result)
+    except Exception as e:
+        return f"DB ERROR: {e}"
 app.jinja_env.filters['date'] = format_date
 
 @app.route("/orders")
