@@ -2,8 +2,13 @@ from flask import Flask, render_template, request, flash, redirect, abort, url_f
 from flask_login import LoginManager, login_user, logout_user, login_required, current_user
 import pymysql
 from dynaconf import Dynaconf
+from ai_agent import run_agent
 from datetime import datetime
-import mysql.connector, re
+import mysql.connector
+
+
+
+from openai import OpenAI
 
 app = Flask(__name__)
 
@@ -33,7 +38,7 @@ def load_user(user_id):
     connection  = connect_db()
     cursor = connection.cursor()
 
-    cursor.execute("SELECT * FROM `User` WHERE `ID` = %s ", (user_id))
+    cursor.execute("SELECT * FROM `User` WHERE `ID` = %s ", (user_id,))
 
     result = cursor.fetchone()
     connection.close()
@@ -60,7 +65,18 @@ if __name__ == "__main__":
 
 @app.route("/")
 def index():
-    return render_template("homepage.html.jinja")
+    
+    connection = connect_db()
+
+    cursor = connection.cursor()
+
+    cursor.execute("SELECT * FROM `RepairItems`")
+    
+    result = cursor.fetchmany(5)
+    
+    connection.close()
+
+    return render_template("homepage.html.jinja", guides=result)
 
 @app.route("/login", methods=["POST","GET"])
 def login_page():
@@ -72,7 +88,7 @@ def login_page():
         connection = connect_db()
         cursor = connection.cursor()
 
-        cursor.execute("SELECT * FROM `User`  WHERE `Email` = %s", (email))
+        cursor.execute("SELECT * FROM `User`  WHERE `Email` = %s", (email,))
         result = cursor.fetchone()
         connection.close()
 
@@ -495,6 +511,57 @@ def thank_you():
 def profile():
     return render_template("profile.html.jinja")
 
+
+@app.route('/ai-help', methods=['POST'])
+def ai_help():
+    user_input = request.form.get("message", "")
+    image = request.files.get("image")
+
+    if image:
+        image_path = f"static/uploads/{image.filename}"
+        image.save(image_path)
+        user_input += "\nUser uploaded an image (image processing not enabled yet)."
+
+    result = run_agent(user_input)
+
+    # return clean string to frontend
+    if isinstance(result, dict) and "summary" in result:
+        return jsonify({
+            "reply": result["summary"]
+        })
+
+    return jsonify({
+        "reply": str(result)
+    })
+@app.route("/profile/update", methods=["POST"])
+@login_required
+def update_profile():
+    name = request.form["full_name"]
+    email = request.form["email"]
+    address = request.form["address"]
+
+    connection = connect_db()
+    cursor = connection.cursor()
+
+    try:
+        cursor.execute("""
+            UPDATE `User`
+            SET `Name` = %s, `Email` = %s, `Address` = %s
+            WHERE `ID` = %s
+        """, (name, email, address, current_user.id))
+        connection.commit()
+    except pymysql.err.IntegrityError:
+        flash("Email is already in use")
+    finally:
+        cursor.close()
+        connection.close()
+
+    return redirect("/profile")
+
+
+def format_date(value, format='%B %d, %Y, %I:%M %p'):
+    try:
+        return value.strftime(format)
 @app.route("/edit_profile")
 @login_required
 def edit_profile():
@@ -573,13 +640,15 @@ def format_date(value, format='%B %d, %Y, %I:%M %p'):
     try:
         return value.strftime(format)
     except:
-        return value
+        return ""
 
-app.jinja_env.filters['date'] = format_date
+user_sessions = {}
 
-@app.route("/orders")
-@login_required
-def orders():
+user_sessions = {}
+
+def call_ai(user_input, image_path=None):
+    knowledge = load_repair_knowledge()
+
     connection = connect_db()
     cursor = connection.cursor(pymysql.cursors.DictCursor)
 

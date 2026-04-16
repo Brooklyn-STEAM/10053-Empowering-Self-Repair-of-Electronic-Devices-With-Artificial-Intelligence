@@ -61,95 +61,55 @@
 
     <main class="flex-grow px-6 lg:px-20 py-10">
 
-        <!-- HEADER -->
-        <div class="text-center mb-10">
-            <div class="flex justify-center mb-4">
-                <div class="avatar">
-                    {{ current_user.name[0] }}
-                </div>
-            </div>
-
-            <h1 class="text-4xl font-bold border-b border-dashed border-[#6fb7ff] inline-block pb-2">
-                Your Profile
+        <!-- Header -->
+        <header class="py-16 px-6 lg:px-20 bg-[#0e3a63] border-b border-dashed border-[#6fb7ff] text-center">
+            <h1 class="text-4xl mb-4 border-b border-dashed border-[#6fb7ff] inline-block pb-2">
+                Hey {{ current_user.name }}!
             </h1>
-
-            <p class="text-gray-300 mt-3">
-                Manage your account information
+            <p class="max-w-xl mx-auto text-lg text-gray-300">
+                View and track your orders below.
             </p>
         </div>
 
-        <div class="grid grid-cols-1 lg:grid-cols-12 gap-6">
+        <!-- Content -->
+        <div class="py-10 px-4 lg:px-20 grid grid-cols-1 lg:grid-cols-3 gap-8">
 
-            <!-- LEFT -->
-            <div class="lg:col-span-4 glass p-6 rounded-xl border border-[#6fb7ff] soft-glow hover-lift">
-
-                <h2 class="text-xl mb-4 border-b border-[#6fb7ff] pb-2">
-                    Account Info
+            <!-- Account Card -->
+            <div class="bg-[#0e3a63] p-6 rounded-xl shadow-lg border border-[#6fb7ff]">
+                <h2 class="text-2xl mb-4 border-b border-[#6fb7ff] pb-2">
+                    Account Details
                 </h2>
 
-                <div class="space-y-4">
+                <p class="text-sm text-gray-300">Name</p>
+                <p class="mb-4 font-semibold">{{ current_user.name }}</p>
 
-                    <div class="bg-[#0b2c4d] p-3 rounded border border-white/5">
-                        <p class="text-xs text-gray-400">Name</p>
-                        <p class="font-semibold">{{ current_user.name }}</p>
-                    </div>
+                <p class="text-sm text-gray-300">Email</p>
+                <p class="mb-6 font-semibold">{{ current_user.email }}</p>
 
-                    <div class="bg-[#0b2c4d] p-3 rounded border border-white/5">
-                        <p class="text-xs text-gray-400">Email</p>
-                        <p class="font-semibold">{{ current_user.email }}</p>
-                    </div>
+                <a href="/edit_profile" class="block text-center bg-[#6fb7ff] text-[#0b2c4d] py-2 rounded font-semibold hover:bg-blue-700 hover:text-white transition mb-3">
+                    Edit Profile
+                </a>
 
-                    <div class="bg-[#0b2c4d] p-3 rounded border border-white/5">
-                        <p class="text-xs text-gray-400">Status</p>
-                        <p class="font-semibold text-green-400">Active</p>
-                    </div>
-
-                </div>
+                <a href="/logout" class="block text-center bg-red-500 text-white py-2 rounded font-semibold hover:bg-red-700 transition">
+                    Logout
+                </a>
             </div>
-
-            <!-- RIGHT -->
-            <div class="lg:col-span-8 glass p-6 rounded-xl border border-[#6fb7ff] soft-glow">
-
-                <h2 class="text-xl mb-4 border-b border-[#6fb7ff] pb-2">
-                    Actions
-                </h2>
-
-                <div class="grid grid-cols-2 gap-4">
-
-                    <a href="/edit_profile"
-                       onclick="showToast()"
-                       class="bg-[#6fb7ff] text-[#0b2c4d] p-5 rounded-xl font-bold text-center hover-lift">
-                        ⚙️ Edit Profile
-                    </a>
-
-                    <a href="/orders"
-                       class="bg-[#0b2c4d] border border-[#6fb7ff] p-5 rounded-xl text-center hover-lift">
-                        📦 My Orders
-                    </a>
-
-                    <a href="/browse"
-                       class="bg-[#0b2c4d] border border-[#6fb7ff] p-5 rounded-xl text-center hover-lift">
-                        🛒 Shop
-                    </a>
-                  
 
             </div>
 
-        </div>
+            <!-- Orders -->
+            <div class="lg:col-span-2 space-y-8">
+
+                <div class="bg-[#0e3a63] p-6 rounded-xl shadow-lg border border-[#6fb7ff]">
+                    <h2 class="text-2xl mb-4 border-b border-[#6fb7ff] pb-2">
+                         Orders progress
+                    </h2>
+                    <p class="text-gray-300">You have no orders yet.</p>
+                
+
+
 
     </main>
-
-    <script>
-        function showToast() {
-            const toast = document.getElementById("toast");
-            toast.style.display = "block";
-
-            setTimeout(() => {
-                toast.style.display = "none";
-            }, 2500);
-        }
-    </script>
-    {% include "components/footer.html.jinja" %}
 
 </body>
 </html>
