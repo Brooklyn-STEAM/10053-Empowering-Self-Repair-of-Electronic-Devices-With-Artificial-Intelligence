@@ -5,8 +5,8 @@ from dynaconf import Dynaconf
 from ai_agent import run_agent
 from datetime import datetime
 import mysql.connector
-
-
+import re
+from openai import OpenAI
 
 from openai import OpenAI
 
@@ -16,6 +16,7 @@ config = Dynaconf(settings_file =["settings.toml"])
 
 client = OpenAI(api_key=config.get("OPENAI_API_KEY"))
 app.secret_key = config.secret_key
+
 
 login_manager = LoginManager(app)
 
@@ -511,7 +512,8 @@ def thank_you():
 @app.route("/profile")
 @login_required
 def profile():
-    return render_template("profile.html.jinja")
+    user = get_user(current_user.id)
+    return render_template("profile.html.jinja", user=user)
 
 
 @app.route('/ai-help', methods=['POST'])
@@ -535,25 +537,56 @@ def ai_help():
     return jsonify({
         "reply": str(result)
     })
+
 @app.route("/profile/update", methods=["POST"])
 @login_required
 def update_profile():
-    name = request.form["full_name"]
-    email = request.form["email"]
-    address = request.form["address"]
+
+    import re
+
+    name = re.sub(r'\s+', ' ', request.form.get("full_name", "").strip()).title()
+    email = request.form.get("email", "").strip()
+    address = request.form.get("address", "").strip()
 
     connection = connect_db()
-    cursor = connection.cursor()
+    cursor = connection.cursor(pymysql.cursors.DictCursor)
 
     try:
+        # get old data
+        cursor.execute(
+            "SELECT Name, Email, Address FROM User WHERE ID=%s",
+            (current_user.id,)
+        )
+
+        old_user = cursor.fetchone()
+
+        # FIXED: dictionary keys (NO [0], [1], [2])
+        if old_user:
+            if (
+                old_user["Name"] == name and
+                old_user["Email"] == email and
+                old_user["Address"] == address
+            ):
+                flash("No changes detected", "error")
+                return redirect("/edit_profile")
+
+        # update DB
         cursor.execute("""
-            UPDATE `User`
-            SET `Name` = %s, `Email` = %s, `Address` = %s
-            WHERE `ID` = %s
+            UPDATE User
+            SET Name=%s,
+                Email=%s,
+                Address=%s
+            WHERE ID=%s
         """, (name, email, address, current_user.id))
+
         connection.commit()
+
+        flash("Profile updated successfully!", "success")
+
     except pymysql.err.IntegrityError:
-        flash("Email is already in use")
+        connection.rollback()
+        flash("Email already exists", "error")
+
     finally:
         cursor.close()
         connection.close()
@@ -561,24 +594,28 @@ def update_profile():
     return redirect("/profile")
 
 
-def format_date(value, format='%B %d, %Y, %I:%M %p'):
-    try:
-        return value.strftime(format)
-    except:
-        return value
+@app.route("/edit_profile")
+@login_required
+def edit_profile():
+    user = get_user(current_user.id)
+    return render_template("edit_profile.html.jinja", user=user)
 
-@app.route("/test-db")
-def test_db():
-    try:
-        conn = connect_db()
-        cursor = conn.cursor()
-        cursor.execute("SELECT 1")
-        result = cursor.fetchone()
-        conn.close()
-        return str(result)
-    except Exception as e:
-        return f"DB ERROR: {e}"
-app.jinja_env.filters['date'] = format_date
+
+def get_user(user_id):
+    connection = connect_db()
+    cursor = connection.cursor(pymysql.cursors.DictCursor)
+
+    cursor.execute(
+        "SELECT * FROM User WHERE ID = %s",
+        (user_id,)
+    )
+
+    user = cursor.fetchone()
+
+    cursor.close()
+    connection.close()
+
+    return user
 
 @app.route("/orders")
 @login_required
@@ -678,4 +715,3 @@ def orders():
         }.get(status, 10)
 
     return render_template("orders.html.jinja", orders=list(orders_dict.values()))
-
