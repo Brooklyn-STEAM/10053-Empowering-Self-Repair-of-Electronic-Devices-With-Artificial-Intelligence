@@ -3,18 +3,12 @@ from flask_login import LoginManager, login_user, logout_user, login_required, c
 import pymysql
 from dynaconf import Dynaconf
 from datetime import datetime
-import mysql.connector
-
-
-
-from openai import OpenAI
+import mysql.connector, re
 
 app = Flask(__name__)
 
 config = Dynaconf(settings_file =["settings.toml"])
-
-client = OpenAI(api_key=config.get("OPENAI_API_KEY"))
-app.secret_key = config.secret_key
+app.secret_key = "your_secret_key_here"
 
 login_manager = LoginManager(app)
 
@@ -501,31 +495,79 @@ def thank_you():
 def profile():
     return render_template("profile.html.jinja")
 
+@app.route("/edit_profile")
+@login_required
+def edit_profile():
+    connection = connect_db()
+    cursor = connection.cursor(pymysql.cursors.DictCursor)
+
+    cursor.execute(
+        "SELECT * FROM User WHERE ID = %s",
+        (current_user.id,)
+    )
+
+    user = cursor.fetchone()
+
+    cursor.close()
+    connection.close()
+
+    return render_template("edit_profile.html.jinja", user=user)
+
 @app.route("/profile/update", methods=["POST"])
 @login_required
 def update_profile():
-    name = request.form["full_name"]
-    email = request.form["email"]
-    address = request.form["address"]
+    name = request.form.get("full_name", "").strip()
+    email = request.form.get("email", "").strip()
+    address = request.form.get("address", "").strip()
+
+    #  validation
+    if not name or not email:
+        flash("Name and Email cannot be empty", "error")
+        return redirect("/edit_profile")
+
+    name = re.sub(r'\s+', ' ', name).title()
 
     connection = connect_db()
-    cursor = connection.cursor()
+    cursor = connection.cursor(pymysql.cursors.DictCursor)
 
     try:
+        # get current data
+        cursor.execute(
+            "SELECT Name, Email, Address FROM User WHERE ID = %s",
+            (current_user.id,)
+        )
+        old_user = cursor.fetchone()
+
+        if (
+            old_user
+            and old_user["Name"] == name
+            and old_user["Email"] == email
+            and old_user["Address"] == address
+        ):
+            flash("No changes detected", "error")
+            return redirect("/edit_profile")
+
+        # update DB
         cursor.execute("""
-            UPDATE `User`
-            SET `Name` = %s, `Email` = %s, `Address` = %s
-            WHERE `ID` = %s
+            UPDATE User
+            SET Name = %s,
+                Email = %s,
+                Address = %s
+            WHERE ID = %s
         """, (name, email, address, current_user.id))
+
         connection.commit()
+        flash("Profile updated successfully!", "success")
+
     except pymysql.err.IntegrityError:
-        flash("Email is already in use")
+        connection.rollback()
+        flash("Email already exists", "error")
+
     finally:
         cursor.close()
         connection.close()
 
-    return redirect("/profile")
-
+    return redirect("/edit_profile")
 
 def format_date(value, format='%B %d, %Y, %I:%M %p'):
     try:

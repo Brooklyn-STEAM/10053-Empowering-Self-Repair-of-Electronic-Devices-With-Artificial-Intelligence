@@ -1,0 +1,135 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Edit</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="/static/style.css" rel="stylesheet">
+    <link rel="icon" href="/static/products/Blueprint Logo.png" type="image">
+</head>
+
+<body class="min-h-screen flex flex-col bg-[#0b2c4d] text-[#d6ecff] font-[Inter]">
+
+{% include "components/navbar.html.jinja" %}
+
+<div class="min-h-screen flex items-center justify-center p-6">
+
+    <div class="w-full max-w-4xl bg-gray-900 rounded-2xl shadow-2xl overflow-hidden grid grid-cols-1 md:grid-cols-2">
+
+        <!-- LEFT SIDE (ACCOUNT SUMMARY) -->
+        <div class="bg-white p-8 flex flex-col justify-center text-black">
+
+            <h2 class="text-3xl font-bold mb-6">Account Summary</h2>
+
+            <div class="space-y-4 text-sm">
+
+                <div class="p-3 bg-gray-100 rounded">
+                    <p class="font-semibold">Name</p>
+                    <p>{{ user.Name }}</p>
+                </div>
+
+                <div class="p-3 bg-gray-100 rounded">
+                    <p class="font-semibold">Email</p>
+                    <p>{{ user.Email }}</p>
+                </div>
+
+                <div class="p-3 bg-gray-100 rounded">
+                    <p class="font-semibold">Address</p>
+                    <p>{{ user.Address }}</p>
+                </div>
+
+            </div>
+
+            <p class="mt-6 text-xs opacity-70">
+                This is your current saved information.
+            </p>
+
+        </div>
+
+        <!-- RIGHT SIDE FORM -->
+        <div class="p-8">
+
+            <!-- FLASH MESSAGE -->
+            {% with messages = get_flashed_messages(with_categories=true) %}
+                {% if messages %}
+                    <div id="flashBox">
+                        {% for category, message in messages %}
+                            <div class="mb-4 p-3 rounded text-center font-semibold text-white
+                                {% if category == 'success' %}
+                                    bg-green-500
+                                {% else %}
+                                    bg-red-500
+                                {% endif %}">
+                                {{ message }}
+                            </div>
+                        {% endfor %}
+                    </div>
+                {% endif %}
+            {% endwith %}
+
+            <form action="/profile/update" method="POST" class="space-y-5">
+
+                <h2 class="text-xl font-bold text-blue-300">Edit Details</h2>
+
+                <!-- NAME -->
+                <div>
+                    <label class="text-sm text-gray-300">Name</label>
+                    <input 
+                        type="text"
+                        name="full_name"
+                        value="{{ user.Name }}"
+                        oninput="
+                            this.value = this.value
+                                .replace(/\s+/g,' ')
+                                .replace(/^\s+/,'')
+                                .replace(/\b\w/g,c=>c.toUpperCase());
+                        "
+                        class="w-full mt-1 p-3 rounded bg-black border border-gray-700 focus:border-blue-500 outline-none"
+                        required
+                    >
+                </div>
+
+                <!-- EMAIL -->
+                <div>
+                    <label class="text-sm text-gray-300">Email</label>
+                    <input 
+                        type="email"
+                        name="email"
+                        value="{{ user.Email }}"
+                        class="w-full mt-1 p-3 rounded bg-black border border-gray-700 focus:border-blue-500 outline-none"
+                        required
+                    >
+                </div>
+
+                <!-- ADDRESS -->
+                <div>
+                    <label class="text-sm text-gray-300">Address</label>
+                    <input 
+                        type="text"
+                        name="address"
+                        value="{{ user.Address }}"
+                        class="w-full mt-1 p-3 rounded bg-black border border-gray-700 focus:border-blue-500 outline-none"
+                    >
+                </div>
+
+                <!-- BUTTON -->
+                <button 
+                    type="submit"
+                    class="w-full bg-blue-500 hover:bg-blue-600 active:scale-95 transition py-3 rounded font-semibold"
+                >
+                    Save Changes
+                </button>
+
+            </form>
+
+        </div>
+
+    </div>
+
+</div>
+
+{% include "components/footer.html.jinja" %}
+
+</body>
+</html>

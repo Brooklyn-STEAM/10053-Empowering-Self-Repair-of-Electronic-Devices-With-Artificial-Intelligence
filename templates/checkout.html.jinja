@@ -13,9 +13,9 @@
 
 {% include "components/navbar.html.jinja" %}
 
-<main class="flex-grow">
+<main class="flex-grow px-6 lg:px-20 py-10">
 
-<h1 class="text-4xl font-bold mb-8 text-white">Checkout</h1>
+<h1 class="text-4xl font-bold mb-8">Checkout</h1>
 
 {% if cart|length == 0 %}
     <p class="text-gray-400 text-lg">Your cart is empty.</p>
@@ -29,76 +29,89 @@
     <div class="lg:col-span-2 space-y-6">
 
         {% for x in cart %}
+        {% set ns.total = ns.total + (x['price'] * x['quantity']) %}
 
-            {% set ns.total = ns.total + (x['price'] * x['quantity']) %}
+        <div class="cart-item grid grid-cols-6 items-center bg-[#0e3a63] border border-[#6fb7ff] rounded-2xl p-4 gap-4"
+             data-id="{{ x['product_id'] }}"
+             data-price="{{ x['price']|float }}">
 
-            <div class="cart-item grid grid-cols-6 items-center bg-white rounded-2xl shadow-md p-4 gap-4"
-                 data-price="{{ x['price'] }}">
+            <img src="{{ x['image'] }}"
+                 class="h-28 w-28 object-contain rounded-lg border border-[#6fb7ff]">
 
-                <img src="{{ x['image'] }}"
-                     class="h-28 w-28 object-contain rounded-lg border">
-
-                <div class="col-span-2 font-semibold text-gray-900 text-lg">
-                    {{ x['name'] }}
-                </div>
-
-                <div class="col-span-1 flex flex-col items-center">
-                    <input type="number"
-                           class="quantity-input w-16 border rounded-lg px-2 py-1 text-center text-gray-900"
-                           value="{{ x['quantity'] }}" min="1">
-
-                    <form method="post" action="/cart/{{ x['product_id'] }}/remove">
-                        <button class="bg-red-500 text-white px-3 py-1 mt-2 rounded">
-                            Remove
-                        </button>
-                    </form>
-                </div>
-
-                <div class="col-span-2 text-right">
-                    <div class="text-gray-900 font-semibold">
-                        ${{ x['price'] }}
-                    </div>
-
-                    <div class="text-sm text-gray-500 subtotal">
-                        Subtotal: ${{ x['price'] * x['quantity'] }}
-                    </div>
-                </div>
-
+            <div class="col-span-2 font-semibold text-lg">
+                {{ x['name'] }}
             </div>
+
+            <div class="col-span-1 flex flex-col items-center">
+
+                <input type="number"
+                       class="quantity-input w-16 rounded-lg px-2 py-1 text-center bg-[#0b2c4d] border border-[#6fb7ff]"
+                       value="{{ x['quantity'] }}" min="1">
+
+                <button onclick="removeItem({{ x['product_id'] }})"
+                        class="bg-red-500 text-white px-3 py-1 mt-2 rounded">
+                    Remove
+                </button>
+            </div>
+
+            <div class="col-span-2 text-right">
+                <div class="font-semibold">
+                    ${{ "%.2f"|format(x['price']) }}
+                </div>
+
+                <div class="text-sm text-gray-300 subtotal">
+                    Subtotal: ${{ "%.2f"|format(x['price'] * x['quantity']) }}
+                </div>
+            </div>
+
+        </div>
 
         {% endfor %}
 
     </div>
 
     <!-- SUMMARY -->
-    <div class="bg-white rounded-2xl shadow-lg p-6 h-fit">
+    <div class="bg-[#0e3a63] border border-[#6fb7ff] rounded-2xl p-6 h-fit">
 
-        <h2 class="text-2xl font-bold text-gray-900">Order Summary</h2>
+        <h2 class="text-2xl font-bold">Order Summary</h2>
 
-        <div class="text-gray-500 mt-2">Total</div>
+        <div class="text-gray-400 mt-2">
+            {{ cart|length }} items
+        </div>
 
-        <div class="text-3xl font-bold text-green-600" id="order-total">
-            ${{ ns.total }}
+        <div class="flex justify-between mt-4 text-gray-300">
+            <span>Subtotal</span>
+            <span id="subtotal">${{ "%.2f"|format(ns.total) }}</span>
+        </div>
+
+        <div class="flex justify-between text-gray-300 mt-2">
+            <span>Shipping</span>
+            <span>$5.00</span>
+        </div>
+
+        <div class="border-t border-[#6fb7ff] mt-4 pt-4 flex justify-between text-xl font-bold">
+            <span>Total</span>
+            <span id="order-total">${{ "%.2f"|format(ns.total + 5) }}</span>
         </div>
 
         <form method="post" action="/checkout" class="mt-6 space-y-3">
 
             <input type="text" name="street" placeholder="Street"
-                   class="w-full border rounded-lg px-3 py-2 text-gray-900" required>
+                   class="w-full rounded-lg px-3 py-2 bg-[#0b2c4d] border border-[#6fb7ff]" required>
 
             <input type="text" name="city" placeholder="City"
-                   class="w-full border rounded-lg px-3 py-2 text-gray-900" required>
+                   class="w-full rounded-lg px-3 py-2 bg-[#0b2c4d] border border-[#6fb7ff]" required>
 
             <div class="grid grid-cols-2 gap-2">
                 <input type="text" name="state" placeholder="State"
-                       class="w-full border rounded-lg px-3 py-2 text-gray-900" required>
+                       class="rounded-lg px-3 py-2 bg-[#0b2c4d] border border-[#6fb7ff]" required>
 
                 <input type="text" name="zip" placeholder="ZIP"
-                       class="w-full border rounded-lg px-3 py-2 text-gray-900" required>
+                       class="rounded-lg px-3 py-2 bg-[#0b2c4d] border border-[#6fb7ff]" required>
             </div>
 
             <button type="submit"
-                    class="w-full bg-green-500 hover:bg-green-600 text-white font-bold py-3 rounded-lg">
+                    class="w-full bg-[#6fb7ff] hover:bg-[#5aa7f0] text-[#0b2c4d] font-bold py-3 rounded-lg shadow-lg">
                 Place Order
             </button>
 
@@ -113,27 +126,58 @@
 </main>
 
 <script>
-const inputs = document.querySelectorAll('.quantity-input');
-const totalEl = document.querySelector('#order-total');
+document.addEventListener("DOMContentLoaded", () => {
 
-function update() {
-    let total = 0;
+    const totalEl = document.getElementById("order-total");
+    const subtotalEl = document.getElementById("subtotal");
 
-    document.querySelectorAll('.cart-item').forEach(item => {
-        const price = parseFloat(item.dataset.price);
-        const qty = parseInt(item.querySelector('.quantity-input').value);
-        const sub = price * qty;
+    function updateTotals() {
+        let subtotal = 0;
 
-        item.querySelector('.subtotal').textContent =
-            `Subtotal: $${sub.toFixed(2)}`;
+        document.querySelectorAll('.cart-item').forEach(item => {
+            const price = parseFloat(item.dataset.price);
+            const qty = parseInt(item.querySelector('.quantity-input').value);
+            const sub = price * qty;
 
-        total += sub;
+            item.querySelector('.subtotal').textContent =
+                `Subtotal: $${sub.toFixed(2)}`;
+
+            subtotal += sub;
+        });
+
+        subtotalEl.textContent = `$${subtotal.toFixed(2)}`;
+        totalEl.textContent = `$${(subtotal + 5).toFixed(2)}`;
+    }
+
+    document.querySelectorAll('.quantity-input').forEach(input => {
+        input.addEventListener('input', async function () {
+
+            const item = this.closest('.cart-item');
+            const productId = item.dataset.id;
+            const quantity = this.value;
+
+            updateTotals();
+
+            // 🔥 AJAX update
+            await fetch(`/cart/update`, {
+                method: "POST",
+                headers: {
+                    "Content-Type": "application/json"
+                },
+                body: JSON.stringify({
+                    product_id: productId,
+                    quantity: quantity
+                })
+            });
+        });
     });
 
-    totalEl.textContent = `$${total.toFixed(2)}`;
-}
+});
 
-inputs.forEach(i => i.addEventListener('input', update));
+function removeItem(id) {
+    fetch(`/cart/${id}/remove`, { method: "POST" })
+        .then(() => location.reload());
+}
 </script>
 
 {% include "components/footer.html.jinja" %}
