@@ -5,17 +5,17 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <script src="https://cdn.jsdelivr.net/npm/@tailwindcss/browser@4"></script>
   <title>Thank You</title>
-    <link rel="icon" href="/static/products/Blueprint Logo.png" type="image/png">
+  <link rel="icon" href="/static/products/Blueprint Logo.png" type="image/png">
 </head>
 
 <body class="bg-[#0b2c4d] text-[#d6ecff] min-h-screen flex items-center justify-center">
 
-  <div class="bg-white rounded-2xl shadow-xl max-w-lg w-full p-10 text-center">
+  <div class="bg-[#0e3a63] border border-[#6fb7ff] rounded-2xl shadow-xl max-w-lg w-full p-10 text-center">
 
     <!-- Check Icon -->
-    <div class="mx-auto mb-6 flex items-center justify-center w-16 h-16 rounded-full bg-green-100">
+    <div class="mx-auto mb-6 flex items-center justify-center w-16 h-16 rounded-full bg-[#6fb7ff]/20 border border-[#6fb7ff]">
       <svg xmlns="http://www.w3.org/2000/svg"
-           class="h-8 w-8 text-green-600"
+           class="h-8 w-8 text-[#6fb7ff]"
            fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
         <path stroke-linecap="round" stroke-linejoin="round"
               d="M5 13l4 4L19 7" />
@@ -23,41 +23,34 @@
     </div>
 
     <!-- Title -->
-    <h1 class="text-3xl font-extrabold text-gray-800 mb-2">
+    <h1 class="text-3xl font-bold mb-2 text-[#6fb7ff]">
       Thank You for Your Order!
     </h1>
 
-
     <!-- Message -->
-    <p class="text-gray-600 text-lg mb-6">
+    <p class="text-gray-300 text-lg mb-8 leading-relaxed">
       Your purchase was successful.  
       We are carefully preparing your items for shipment.
     </p>
 
-
-   
-      </ul>
-
     <!-- Buttons -->
-    <div class="flex justify-center gap-4">
-      <a href="/" class="px-6 py-3 rounded-full bg-gray-900 text-white font-semibold
-                hover:bg-gray-800 transition">
+    <div class="flex flex-col sm:flex-row justify-center gap-4">
+
+      <a href="/"
+         class="px-6 py-3 rounded-lg bg-[#6fb7ff] text-[#0b2c4d] font-bold
+                hover:bg-[#5aa7f0] transition">
         Back to Home
       </a>
 
-      <a href="/browse" class="px-6 py-3 rounded-full border-2 border-gray-900 text-gray-900
-                font-semibold hover:bg-gray-100 transition">
-        Continue Shopping
+      <a href="/orders"
+         class="px-6 py-3 rounded-lg border border-[#6fb7ff] text-[#6fb7ff]
+                font-semibold hover:bg-[#6fb7ff]/10 transition">
+        Check Your Orders
       </a>
-    </div>
 
-    <!-- Footer Note -->
-    <p class="text-sm text-gray-400 mt-8">
-      Order confirmation has been sent to your email.
-    </p>
+    </div>
 
   </div>
 
 </body>
-
 </html>
