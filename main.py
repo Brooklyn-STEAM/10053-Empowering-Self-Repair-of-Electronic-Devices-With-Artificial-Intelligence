@@ -5,6 +5,10 @@ from dynaconf import Dynaconf
 from ai_agent import run_agent
 from datetime import datetime
 import mysql.connector
+import re
+from openai import OpenAI
+
+
 
 
 
@@ -533,35 +537,7 @@ def ai_help():
     return jsonify({
         "reply": str(result)
     })
-@app.route("/profile/update", methods=["POST"])
-@login_required
-def update_profile():
-    name = request.form["full_name"]
-    email = request.form["email"]
-    address = request.form["address"]
 
-    connection = connect_db()
-    cursor = connection.cursor()
-
-    try:
-        cursor.execute("""
-            UPDATE `User`
-            SET `Name` = %s, `Email` = %s, `Address` = %s
-            WHERE `ID` = %s
-        """, (name, email, address, current_user.id))
-        connection.commit()
-    except pymysql.err.IntegrityError:
-        flash("Email is already in use")
-    finally:
-        cursor.close()
-        connection.close()
-
-    return redirect("/profile")
-
-
-def format_date(value, format='%B %d, %Y, %I:%M %p'):
-    try:
-        return value.strftime(format)
 @app.route("/edit_profile")
 @login_required
 def edit_profile():
@@ -580,6 +556,7 @@ def edit_profile():
 
     return render_template("edit_profile.html.jinja", user=user)
 
+
 @app.route("/profile/update", methods=["POST"])
 @login_required
 def update_profile():
@@ -587,7 +564,6 @@ def update_profile():
     email = request.form.get("email", "").strip()
     address = request.form.get("address", "").strip()
 
-    #  validation
     if not name or not email:
         flash("Name and Email cannot be empty", "error")
         return redirect("/edit_profile")
@@ -598,7 +574,6 @@ def update_profile():
     cursor = connection.cursor(pymysql.cursors.DictCursor)
 
     try:
-        # get current data
         cursor.execute(
             "SELECT Name, Email, Address FROM User WHERE ID = %s",
             (current_user.id,)
@@ -614,7 +589,6 @@ def update_profile():
             flash("No changes detected", "error")
             return redirect("/edit_profile")
 
-        # update DB
         cursor.execute("""
             UPDATE User
             SET Name = %s,
@@ -636,19 +610,20 @@ def update_profile():
 
     return redirect("/edit_profile")
 
+
 def format_date(value, format='%B %d, %Y, %I:%M %p'):
     try:
         return value.strftime(format)
     except:
         return ""
 
-user_sessions = {}
 
 user_sessions = {}
 
-def call_ai(user_input, image_path=None):
-    knowledge = load_repair_knowledge()
 
+@app.route("/orders")
+@login_required
+def orders():
     connection = connect_db()
     cursor = connection.cursor(pymysql.cursors.DictCursor)
 
@@ -745,3 +720,5 @@ def call_ai(user_input, image_path=None):
 
     return render_template("orders.html.jinja", orders=list(orders_dict.values()))
 
+client = OpenAI(api_key=config.get("OPENAI_API_KEY"))
+app.secret_key = config.secret_key

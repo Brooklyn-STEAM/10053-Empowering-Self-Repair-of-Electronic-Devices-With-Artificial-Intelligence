@@ -1,115 +1,90 @@
 <!DOCTYPE html>
 <html lang="en">
-
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Profile</title>
+    <title>Control Center</title>
 
-    <script src="https://cdn.tailwindcss.com"></script>
     <link href="/static/style.css" rel="stylesheet">
     <link rel="icon" href="/static/products/Blueprint Logo.png" type="image">
-
-
-    <style>
-        .glass {
-            backdrop-filter: blur(10px);
-            background: rgba(11, 44, 77, 0.7);
-        }
-
-        .soft-glow {
-            box-shadow: 0 0 35px rgba(111, 183, 255, 0.18);
-        }
-
-        .hover-lift {
-            transition: 0.25s ease;
-        }
-
-        .hover-lift:hover {
-            transform: translateY(-4px);
-        }
-
-        .toast {
-            position: fixed;
-            bottom: 20px;
-            right: 20px;
-            background: #0e3a63;
-            border: 1px solid #6fb7ff;
-            padding: 12px 16px;
-            border-radius: 12px;
-            display: none;
-        }
-
-        .avatar {
-            width: 70px;
-            height: 70px;
-            border-radius: 50%;
-            background: #6fb7ff;
-            color: #0b2c4d;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            font-weight: bold;
-            font-size: 22px;
-        }
-    </style>
+    <script src="https://cdn.jsdelivr.net/npm/@tailwindcss/browser@4"></script>
 </head>
 
 <body class="min-h-screen flex flex-col bg-[#0b2c4d] text-[#d6ecff] font-[Inter]">
 
-    {% include "components/navbar.html.jinja" %}
+{% include "components/navbar.html.jinja" %}
 
-    <main class="flex-grow px-6 lg:px-20 py-10">
+<div class="flex-1 flex items-center justify-center p-6">
 
-        <!-- Header -->
-        <header class="py-16 px-6 lg:px-20 bg-[#0e3a63] border-b border-dashed border-[#6fb7ff] text-center">
-            <h1 class="text-4xl mb-4 border-b border-dashed border-[#6fb7ff] inline-block pb-2">
-                Hey {{ current_user.name }}!
-            </h1>
-            <p class="max-w-xl mx-auto text-lg text-gray-300">
-                View and track your orders below.
-            </p>
+    <div class="w-full max-w-5xl grid grid-cols-1 md:grid-cols-3 gap-6">
+
+        <!-- PROFILE CARD -->
+        <div class="bg-gray-900 rounded-2xl shadow-2xl p-6 md:col-span-1">
+
+            <h2 class="text-2xl font-bold text-blue-300 mb-4">Profile</h2>
+
+            <div class="space-y-3 text-sm">
+
+                <div class="bg-black p-3 rounded">
+                    <p class="text-gray-400">Name</p>
+                    <p class="font-semibold">{{ User.Name }}</p>
+                </div>
+
+                <div class="bg-black p-3 rounded">
+                    <p class="text-gray-400">Email</p>
+                    <p class="font-semibold">{{ User.Email }}</p>
+                </div>
+
+                <div class="bg-black p-3 rounded">
+                    <p class="text-gray-400">Address</p>
+                    <p class="font-semibold">{{ User.Address }}</p>
+                </div>
+
+            </div>
+
         </div>
 
-        <!-- Content -->
-        <div class="py-10 px-4 lg:px-20 grid grid-cols-1 lg:grid-cols-3 gap-8">
+        <!-- ACTION CENTER -->
+        <div class="bg-gray-900 rounded-2xl shadow-2xl p-6 md:col-span-2">
 
-            <!-- Account Card -->
-            <div class="bg-[#0e3a63] p-6 rounded-xl shadow-lg border border-[#6fb7ff]">
-                <h2 class="text-2xl mb-4 border-b border-[#6fb7ff] pb-2">
-                    Account Details
-                </h2>
+            <h2 class="text-2xl font-bold text-blue-300 mb-6">Control Center</h2>
 
-                <p class="text-sm text-gray-300">Name</p>
-                <p class="mb-4 font-semibold">{{ current_user.name }}</p>
+            <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
 
-                <p class="text-sm text-gray-300">Email</p>
-                <p class="mb-6 font-semibold">{{ current_user.email }}</p>
-
-                <a href="/edit_profile" class="block text-center bg-[#6fb7ff] text-[#0b2c4d] py-2 rounded font-semibold hover:bg-blue-700 hover:text-white transition mb-3">
-                    Edit Profile
+                <!-- EDIT PROFILE -->
+                <a href="/edit_profile"
+                   class="bg-black hover:bg-blue-600 transition p-5 rounded-xl border border-gray-700 hover:border-blue-400">
+                    <h3 class="font-bold text-lg">Edit Profile</h3>
+                    <p class="text-sm text-gray-400">Update your name, email, or address</p>
                 </a>
 
-                <a href="/logout" class="block text-center bg-red-500 text-white py-2 rounded font-semibold hover:bg-red-700 transition">
-                    Logout
-                </a>
-            </div>
+                <!-- SECURITY -->
+                <div class="bg-black p-5 rounded-xl border border-gray-700 opacity-70">
+                    <h3 class="font-bold text-lg">Security</h3>
+                    <p class="text-sm text-gray-400">Password & login settings</p>
+                </div>
+
+                <!-- ORDER HISTORY (placeholder) -->
+                <div class="bg-black p-5 rounded-xl border border-gray-700 opacity-70">
+                    <h3 class="font-bold text-lg">Activity</h3>
+                    <p class="text-sm text-gray-400">View recent actions</p>
+                </div>
+
+                <!-- SETTINGS -->
+                <div class="bg-black p-5 rounded-xl border border-gray-700 opacity-70">
+                    <h3 class="font-bold text-lg">Settings</h3>
+                    <p class="text-sm text-gray-400">Customize your experience</p>
+                </div>
 
             </div>
 
-            <!-- Orders -->
-            <div class="lg:col-span-2 space-y-8">
+        </div>
 
-                <div class="bg-[#0e3a63] p-6 rounded-xl shadow-lg border border-[#6fb7ff]">
-                    <h2 class="text-2xl mb-4 border-b border-[#6fb7ff] pb-2">
-                         Orders progress
-                    </h2>
-                    <p class="text-gray-300">You have no orders yet.</p>
-                
+    </div>
 
+</div>
 
-
-    </main>
+{% include "components/footer.html.jinja" %}
 
 </body>
 </html>
