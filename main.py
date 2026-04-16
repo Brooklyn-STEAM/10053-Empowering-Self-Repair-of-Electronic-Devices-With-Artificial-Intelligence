@@ -5,6 +5,9 @@ from dynaconf import Dynaconf
 from ai_agent import run_agent
 from datetime import datetime
 import mysql.connector
+
+
+from anthropic import Anthropic
 import re
 from openai import OpenAI
 
@@ -12,9 +15,11 @@ from openai import OpenAI
 
 app = Flask(__name__)
 
-config = Dynaconf(settings_file =["settings.toml"])
+config = Dynaconf(settings_file =["settings.toml", ".env"])
 
 client = OpenAI(api_key=config.get("OPENAI_API_KEY"))
+client = Anthropic(api_key=config.get("ANTHROPIC_API_KEY"))
+
 app.secret_key = config.secret_key
 
 
@@ -63,8 +68,6 @@ def connect_db():
     )
     return conn
 
-if __name__ == "__main__":
-    app.run(debug=True)
 
 @app.route("/")
 def index():
@@ -518,22 +521,25 @@ def profile():
 
 @app.route('/ai-help', methods=['POST'])
 def ai_help():
-    user_input = request.form.get("message", "")
-    image = request.files.get("image")
+    try:
+        user_input = request.form.get("message", "")
+        image = request.files.get("image")
 
-    if image:
-        image_path = f"static/uploads/{image.filename}"
-        image.save(image_path)
-        user_input += "\nUser uploaded an image (image processing not enabled yet)."
+        if image:
+            image_path = f"static/uploads/{image.filename}"
+            image.save(image_path)
+            user_input += "\nUser uploaded an image."
 
-    result = run_agent(user_input)
+        result = run_agent(user_input)
 
-    # return clean string to frontend
-    if isinstance(result, dict) and "summary" in result:
         return jsonify({
-            "reply": result["summary"]
+            "reply": result.get("summary", str(result))
         })
 
+    except Exception as e:
+        return jsonify({
+            "reply": f"Server error: {str(e)}"
+        }), 500
     return jsonify({
         "reply": str(result)
     })
@@ -715,3 +721,8 @@ def orders():
         }.get(status, 10)
 
     return render_template("orders.html.jinja", orders=list(orders_dict.values()))
+
+
+
+if __name__ == "__main__":
+    app.run(debug=True)
