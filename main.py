@@ -14,7 +14,6 @@ app = Flask(__name__)
 
 config = Dynaconf(settings_file =["settings.toml"])
 
-client = OpenAI(api_key=config.get("OPENAI_API_KEY"))
 app.secret_key = config.secret_key
 
 login_manager = LoginManager(app)
