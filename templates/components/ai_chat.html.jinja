@@ -1,6 +1,6 @@
 <!-- Floating Button (OUTSIDE chat window) -->
 <button onclick="toggleChat()"
-    class="fixed bottom-6 right-6 bg-blue-500 text-white px-4 py-3 rounded-full shadow-lg z-50">
+    class="fixed bottom-6 right-6 bg-blue-500 text-white px-4 py-3 rounded-full shadow-lg z-50 hover:bg-sky-700 active:bg-blue-800">
     AI Help
 </button>
 
@@ -47,7 +47,7 @@ document.addEventListener("DOMContentLoaded", () => {
 
     sendBtn.addEventListener("click", sendMsg);
 
-    // 🔥 ENTER KEY SUPPORT
+    // ENTER KEY SUPPORT
     msgInput.addEventListener("keydown", function(e) {
         if (e.key === "Enter") {
             e.preventDefault();
@@ -65,59 +65,100 @@ document.addEventListener("DOMContentLoaded", () => {
             ? "bg-blue-500 text-white p-2 rounded-lg self-end ml-auto max-w-[75%]"
             : "bg-gray-300 text-black p-2 rounded-lg self-start mr-auto max-w-[75%]";
 
-        // 🔥 FIXED LINK HANDLING (/guide/ID)
-        msgDiv.innerHTML = text.replace(
-            /(\/guide\/\d+)/g,
-            '<a href="$1" class="text-blue-600 underline" target="_blank">Open Guide</a>'
-        );
+        // Apply link formatting immediately (for user messages or static content)
+        msgDiv.innerHTML = formatLinks(text);
 
         chatBox.appendChild(msgDiv);
         chatBox.scrollTop = chatBox.scrollHeight;
+        return msgDiv;
+    }
+
+    function formatLinks(text) {
+        // Replace /guide/ID with clickable link
+        return text.replace(
+            /(\/guide\/\d+)/g,
+            '<a href="$1" class="text-blue-600 underline" target="_blank">Open Guide</a>'
+        );
+    }
+
+    // Typewriter effect
+    function typeText(element, fullText, speed = 30) {
+        return new Promise((resolve) => {
+            let i = 0;
+            element.textContent = "";  // start empty
+
+            function typeNextChar() {
+                if (i < fullText.length) {
+                    element.textContent += fullText.charAt(i);
+                    i++;
+                    // Auto-scroll as text grows
+                    const chatBox = document.getElementById("chatBox");
+                    chatBox.scrollTop = chatBox.scrollHeight;
+                    setTimeout(typeNextChar, speed);
+                } else {
+                    // When done, apply link formatting (so /guide/ID becomes clickable)
+                    element.innerHTML = formatLinks(fullText);
+                    resolve();
+                }
+            }
+
+            typeNextChar();
+        });
     }
 
     async function sendMsg() {
-        try {
-            const fileInput = document.getElementById("imageUpload");
+    try {
+        const fileInput = document.getElementById("imageUpload");
+        const msg = msgInput.value.trim();
+        const file = fileInput.files[0];
 
-            const msg = msgInput.value.trim();
-            const file = fileInput.files[0];
+        if (!msg && !file) return;
 
-            if (!msg && !file) return;
+        if (msg) addMessage(msg, "user");
+        if (file) addMessage("📷 Image uploaded", "user");
 
-            if (msg) addMessage(msg, "user");
-            if (file) addMessage("📷 Image uploaded", "user");
+        // Create and show "Thinking..." placeholder
+        const thinkingDiv = addMessage("Thinking...", "ai");
 
-            addMessage("Thinking...", "ai");
+        const formData = new FormData();
+        formData.append("message", msg);
+        if (file) formData.append("image", file);
 
-            const formData = new FormData();
-            formData.append("message", msg);
-            if (file) formData.append("image", file);
+        msgInput.value = "";
+        fileInput.value = "";
 
-            msgInput.value = "";
-            fileInput.value = "";
+        const res = await fetch("/ai-help", {
+            method: "POST",
+            body: formData
+        });
 
-            const res = await fetch("/ai-help", {
-                method: "POST",
-                body: formData
-            });
-
-            if (!res.ok) {
-                throw new Error("Server error");
-            }
-
-            const data = await res.json();
-
-            // Remove "Thinking..."
-            const chatBox = document.getElementById("chatBox");
-            chatBox.removeChild(chatBox.lastChild);
-
-            addMessage(data.reply, "ai");
-
-        } catch (err) {
-            console.error(err);
-            addMessage("⚠️ Error connecting to AI", "ai");
+        if (!res.ok) {
+            throw new Error("Server error");
         }
+
+        const data = await res.json();
+
+        // Remove the "Thinking..." message
+        thinkingDiv.remove();
+
+        // Create a new AI message div and start typing
+        const aiMsgDiv = document.createElement("div");
+        aiMsgDiv.className = "bg-gray-300 text-black p-2 rounded-lg self-start mr-auto max-w-[75%]";
+        document.getElementById("chatBox").appendChild(aiMsgDiv);
+
+        await typeText(aiMsgDiv, data.reply, 10);  // ⚡ Faster typing speed
+
+    } catch (err) {
+        console.error(err);
+        // Remove "Thinking..." if present
+        const chatBox = document.getElementById("chatBox");
+        const lastChild = chatBox.lastChild;
+        if (lastChild && lastChild.textContent === "Thinking...") {
+            lastChild.remove();
+        }
+        addMessage("⚠️ Error connecting to AI", "ai");
     }
+}
 
 });
 </script>

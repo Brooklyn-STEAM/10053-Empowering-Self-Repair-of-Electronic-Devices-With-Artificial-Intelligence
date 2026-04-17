@@ -1,76 +1,74 @@
-import langchain
 from dotenv import load_dotenv
-from pydantic import BaseModel
-from langchain_anthropic import ChatAnthropic
-from langchain_core.prompts import ChatPromptTemplate
-from langchain_core.output_parsers import PydanticOutputParser
-from langchain_classic.agents import create_tool_calling_agent, AgentExecutor
-from tools import search_tool, wiki_tool, save_tool
+from langchain_community.chat_models import ChatOllama
+from langchain_core.messages import HumanMessage, SystemMessage
 
 load_dotenv()
 
-
-class RepairGuide(BaseModel):
-    topic: str
-    summary: str
-    sources: list[str]
-    tools_used: list[str]
-
-
-llm = ChatAnthropic(
-    model="claude-3-5-haiku-20240620",
-    temperature=0.7
+# -----------------------
+# LOCAL OLLAMA MODEL
+# -----------------------
+llm = ChatOllama(
+    model="llama3",
+    base_url="http://localhost:11434"
 )
 
-parser = PydanticOutputParser(pydantic_object=RepairGuide)
+# -----------------------
+# SYSTEM PROMPT
+# -----------------------
+SYSTEM_PROMPT = """
+You are a structured diagnostic AI repair assistant.
 
-prompt = ChatPromptTemplate.from_messages(
-    [
-        ("system",
-         """
+You MUST follow this strict conversation flow:
 
-         You are a helpful assistant that provides repair guides for electronic devices.
-         Answer the user query and use neccessary tools to find the answer. Always provide a summary of the answer, sources used, and tools used in the process.
-         Wrapp the output in this format and provide no other text\n{format_instructions}
+========================
+RULE 1: MEMORY BEHAVIOR
+========================
+- If the user already gave device info (model, type, etc.), DO NOT ask again
+- Never repeat questions that have already been answered
 
-         """
-         ),
-        ("placeholder", "{chat_history}"),
-        ("human", "{query}"),
-        ("placeholder", "{agent_scratchpad}"),
-    ]
-).partial(format_instructions=parser.get_format_instructions())
+========================
+RULE 2: CONVERSATION FLOW
+========================
+Step 1: Identify device (ONLY if unknown)
+Step 2: Identify issue (ONLY if unknown)
+Step 3: Give troubleshooting steps
 
+========================
+RULE 3: NO LOOPING
+========================
+- Do NOT re-ask for device type if it is already mentioned
+- Do NOT restart the diagnosis process mid-conversation
+- Continue from last known information
 
-tools = [search_tool, wiki_tool, save_tool]
+========================
+RULE 4: BE STATEFUL
+========================
+Assume all previous user messages are part of context
+and do not ignore them.
 
-agent = create_tool_calling_agent(
-    llm=llm,
-    prompt=prompt,
-    tools=tools,
-)
+========================
+STYLE:
+========================
+- Be structured
+- Be calm and technical
+- Be step-by-step
+"""
 
-agent_executor = AgentExecutor(
-    agent=agent,
-    tools=tools,
-    verbose=True
-)
-
-
+# -----------------------
+# MAIN FUNCTION
+# -----------------------
 def run_agent(query: str):
-    """
-    Flask-safe function wrapper for your AI agent
-    """
-    raw_response = agent_executor.invoke({"query": query})
-
     try:
-        structured_response = parser.parse(
-            raw_response.get("output")
-        )
-        return structured_response.model_dump()
+        response = llm.invoke([
+            SystemMessage(content=SYSTEM_PROMPT),
+            HumanMessage(content=query)
+        ])
+
+        return {
+            "summary": response.content
+        }
 
     except Exception as e:
         return {
-            "error": str(e),
-            "raw_output": raw_response
+            "summary": f"Error: {str(e)}"
         }
