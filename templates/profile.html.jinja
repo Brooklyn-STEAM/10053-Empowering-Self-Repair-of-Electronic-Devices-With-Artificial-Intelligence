@@ -111,6 +111,7 @@
 
         </div>
 
+        <!-- RIGHT -->
         <div class="lg:col-span-2 glass p-6 rounded-xl border border-[#6fb7ff]/30 soft-glow">
 
             <h2 class="text-xl mb-4 border-b border-[#6fb7ff]/30 pb-2">
@@ -148,6 +149,7 @@
                     📦 My Orders
                 </a>
 
+                <!-- DELETE NOW MATCHES OTHER TILES -->
                 <button onclick="openDeleteModal()"
                     class="bg-[#0b2c4d] border border-red-500/40 text-red-400 
                            p-5 rounded-xl font-bold text-center hover-lift
@@ -205,12 +207,52 @@
     </div>
 </div>
 
+<!-- DELETE MODAL -->
+<div id="deleteModal"
+     class="hidden fixed inset-0 bg-black/70 flex items-center justify-center z-50">
+
+    <div class="bg-[#0e3a63] border border-red-500/40 rounded-xl p-6 w-full max-w-md text-center">
+
+        <h2 class="text-2xl font-bold text-red-400 mb-3">
+            Delete Account?
+        </h2>
+
+        <p class="text-gray-300 mb-6">
+            This action is permanent.
+        </p>
+
+        <div class="flex gap-4 justify-center">
+
+            <button onclick="closeDeleteModal()"
+                class="px-4 py-2 rounded bg-gray-700 hover:bg-gray-600">
+                Cancel
+            </button>
+
+            <form method="POST" action="/delete_account">
+                <button class="px-4 py-2 rounded bg-red-500 hover:bg-red-600 font-bold">
+                    Delete
+                </button>
+            </form>
+
+        </div>
+
+    </div>
+</div>
+
 <!-- JS -->
 <script>
 function showToast() {
     const toast = document.getElementById("toast");
     toast.style.display = "block";
     setTimeout(() => toast.style.display = "none", 2500);
+}
+
+function openDeleteModal() {
+    document.getElementById("deleteModal").classList.remove("hidden");
+}
+
+function closeDeleteModal() {
+    document.getElementById("deleteModal").classList.add("hidden");
 }
 
 function openDeleteModal() {

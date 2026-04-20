@@ -4,10 +4,14 @@ import pymysql, re, sqlite3, mysql.connector
 from dynaconf import Dynaconf
 from ai_agent import run_agent
 from datetime import datetime
+import mysql.connector
+
 from anthropic import Anthropic
 from openai import OpenAI
-import pdfplumber
 
+from openai import OpenAI
+
+import sqlite3
 
 
 app = Flask(__name__)
@@ -569,6 +573,8 @@ def checkout():
         return redirect("/thank_you")
 
     return render_template("checkout.html.jinja", cart=cart_items)
+
+
 
 @app.route("/thank_you")
 @login_required
