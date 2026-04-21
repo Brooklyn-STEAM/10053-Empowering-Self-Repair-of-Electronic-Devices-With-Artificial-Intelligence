@@ -8,9 +8,7 @@ import mysql.connector
 
 from anthropic import Anthropic
 from openai import OpenAI
-
-from openai import OpenAI
-
+1
 import sqlite3
 
 
@@ -574,8 +572,6 @@ def checkout():
 
     return render_template("checkout.html.jinja", cart=cart_items)
 
-
-
 @app.route("/thank_you")
 @login_required
 def thank_you():
@@ -615,12 +611,9 @@ def ai_help():
         return jsonify({
             "reply": f"Server error: {str(e)}"
         }), 500
-
-@app.route("/profile")
-@login_required
-def profile():
-    user = get_user(current_user.id)
-    return render_template("profile.html.jinja", user=user)
+    return jsonify({
+        "reply": str(result)
+    })
 
 @app.route("/profile")
 @login_required
