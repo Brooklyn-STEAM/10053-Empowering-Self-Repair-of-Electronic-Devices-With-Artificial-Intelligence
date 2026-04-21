@@ -588,13 +588,26 @@ def ai_help():
     try:
         user_input = request.form.get("message", "")
         image = request.files.get("image")
+        guide_id = request.form.get("guide_id")        # <-- New
 
         if image:
             image_path = f"static/uploads/{image.filename}"
             image.save(image_path)
             user_input += "\nUser uploaded an image."
 
-        result = run_agent(user_input)
+        if "chat_history" not in session:
+            session["chat_history"] = []
+
+        session["chat_history"].append({"role": "user", "content": user_input})
+
+        # Pass guide_id to run_agent
+        result = run_agent(
+            user_input,
+            session["chat_history"],
+            guide_id=guide_id                         # <-- New
+        )
+
+        session["chat_history"].append({"role": "ai", "content": result["summary"]})
 
         return jsonify({
             "reply": result.get("summary", str(result))
@@ -604,9 +617,6 @@ def ai_help():
         return jsonify({
             "reply": f"Server error: {str(e)}"
         }), 500
-    return jsonify({
-        "reply": str(result)
-    })
 
 @app.route("/profile")
 @login_required

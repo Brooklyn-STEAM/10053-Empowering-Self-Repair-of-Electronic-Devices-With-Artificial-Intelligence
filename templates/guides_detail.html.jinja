@@ -5,10 +5,12 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Home</title>
     <link href="/static/style.css" rel="stylesheet">
-        <link rel="icon" href="/static/products/Blueprint Logo.png" type="image">
+    <link rel="icon" href="/static/products/Blueprint Logo.png" type="image">
+
+    <!-- 🔽 NEW: Expose the guide ID for the AI assistant -->
+    <meta name="guide-id" content="{{ guide.ID }}">
 
     <script src="https://cdn.jsdelivr.net/npm/@tailwindcss/browser@4"></script>
-
 </head>
 
 {% include "components/ai_chat.html.jinja" %}
@@ -16,13 +18,9 @@
     {% include "components/navbar.html.jinja" %}
 
   <main class="flex-grow">
-
-  <div>
-  <iframe lodading= "lazy"class="w-full h-185 "src="{{ url_for('static', filename=guide['PDF_Path']) }}"></iframe>
-   
-  </div>
-
-      
+      <div>
+          <iframe loading="lazy" class="w-full h-185" src="{{ url_for('static', filename=guide['PDF_Path']) }}"></iframe>
+      </div>
   </main>
 
     <!-- FOOTER -->
