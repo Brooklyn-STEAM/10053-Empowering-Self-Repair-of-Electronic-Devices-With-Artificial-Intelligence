@@ -20,9 +20,9 @@
 
         <h2 class="text-2xl font-bold text-center mb-6">Sign In</h2>
 
-        <!-- FLASH MESSAGES -->
+        <!-- FLASH MESSAGES (FIXED) -->
         {% for message in get_flashed_messages() %}
-            <p class="bg-red-500 text-white text-sm p-3 rounded-lg mb-4 font-semibold">
+            <p class="flash-msg bg-red-500 text-white text-sm p-3 rounded-lg mb-4 font-semibold">
                 {{ message }}
             </p>
         {% endfor %}
@@ -72,6 +72,26 @@
     </div>
 
 </main>
+
+<!-- AUTO DISAPPEAR SCRIPT -->
+<script>
+document.addEventListener("DOMContentLoaded", () => {
+  setTimeout(() => {
+    const messages = document.querySelectorAll('.flash-msg');
+
+    messages.forEach(msg => {
+      msg.style.transition = "all 0.5s ease";
+      msg.style.opacity = "0";
+      msg.style.transform = "translateY(-10px)";
+
+      setTimeout(() => {
+        msg.remove();
+      }, 500);
+    });
+
+  }, 3000);
+});
+</script>
 
 </body>
 </html>

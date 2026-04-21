@@ -40,6 +40,10 @@
             font-size: 22px;
         }
 
+        .flash-msg {
+            transition: all 0.5s ease;
+        }
+
         .toast {
             position: fixed;
             bottom: 20px;
@@ -107,12 +111,29 @@
 
         </div>
 
-        <!-- RIGHT -->
         <div class="lg:col-span-2 glass p-6 rounded-xl border border-[#6fb7ff]/30 soft-glow">
 
             <h2 class="text-xl mb-4 border-b border-[#6fb7ff]/30 pb-2">
                 Actions
             </h2>
+
+            <!--  FLASH MESSAGES -->
+            {% with messages = get_flashed_messages(with_categories=true) %}
+              {% if messages %}
+                <div class="mb-4 space-y-3">
+                  {% for category, message in messages %}
+                    <div class="flash-msg p-3 rounded-lg text-center font-semibold
+                        {% if category == 'success' %}
+                            bg-green-500 text-white
+                        {% else %}
+                            bg-green-500 text-white
+                        {% endif %}">
+                        {{ message }}
+                    </div>
+                  {% endfor %}
+                </div>
+              {% endif %}
+            {% endwith %}
 
             <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
 
@@ -127,7 +148,6 @@
                     📦 My Orders
                 </a>
 
-                <!-- DELETE NOW MATCHES OTHER TILES -->
                 <button onclick="openDeleteModal()"
                     class="bg-[#0b2c4d] border border-red-500/40 text-red-400 
                            p-5 rounded-xl font-bold text-center hover-lift
@@ -185,6 +205,7 @@
     </div>
 </div>
 
+<!-- JS -->
 <script>
 function showToast() {
     const toast = document.getElementById("toast");
@@ -199,6 +220,22 @@ function openDeleteModal() {
 function closeDeleteModal() {
     document.getElementById("deleteModal").classList.add("hidden");
 }
+
+// AUTO DISAPPEAR FLASH MESSAGES
+setTimeout(() => {
+    const messages = document.querySelectorAll('.flash-msg');
+
+    messages.forEach(msg => {
+        msg.style.opacity = '0';
+        msg.style.transform = 'translateY(-10px)';
+        msg.style.transition = 'all 0.5s ease';
+
+        setTimeout(() => {
+            msg.remove();
+        }, 500);
+    });
+
+}, 3000);
 </script>
 
 {% include "components/footer.html.jinja" %}
