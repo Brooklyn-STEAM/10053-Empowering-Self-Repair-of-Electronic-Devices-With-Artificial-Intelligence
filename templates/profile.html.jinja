@@ -12,11 +12,11 @@
     <style>
         .glass {
             backdrop-filter: blur(10px);
-            background: rgba(11, 44, 77, 0.7);
+            background: rgba(11, 44, 77, 0.6);
         }
 
         .soft-glow {
-            box-shadow: 0 0 35px rgba(111, 183, 255, 0.18);
+            box-shadow: 0 0 25px rgba(111, 183, 255, 0.12);
         }
 
         .hover-lift {
@@ -45,7 +45,7 @@
             bottom: 20px;
             right: 20px;
             background: #0e3a63;
-            border: 1px solid #6fb7ff;
+            border: 1px solid rgba(111,183,255,0.4);
             padding: 12px 16px;
             border-radius: 12px;
             display: none;
@@ -61,46 +61,44 @@
 
     <!-- HEADER -->
     <div class="text-center mb-10">
-
         <div class="flex justify-center mb-4">
             <div class="avatar">
                 {{ current_user.name[0]|upper }}
             </div>
         </div>
 
-        <h1 class="text-4xl font-bold border-b border-dashed border-[#6fb7ff] inline-block pb-2">
+        <h1 class="text-4xl font-bold border-b border-dashed border-[#6fb7ff]/40 inline-block pb-2">
             Hey {{ current_user.name }}!
         </h1>
 
         <p class="text-gray-300 mt-3">
             Manage your account and activity
         </p>
-
     </div>
 
     <!-- GRID -->
     <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
 
-        <!-- LEFT CARD -->
-        <div class="glass p-6 rounded-xl border border-[#6fb7ff] soft-glow">
+        <!-- LEFT -->
+        <div class="glass p-6 rounded-xl border border-[#6fb7ff]/30 soft-glow">
 
-            <h2 class="text-xl mb-4 border-b border-[#6fb7ff] pb-2">
+            <h2 class="text-xl mb-4 border-b border-[#6fb7ff]/30 pb-2">
                 Account Info
             </h2>
 
             <div class="space-y-4">
 
-                <div class="bg-[#0b2c4d] p-3 rounded border border-white/5">
+                <div class="bg-[#0b2c4d] p-3 rounded border border-white/10">
                     <p class="text-xs text-gray-400">Name</p>
                     <p class="font-semibold">{{ current_user.name }}</p>
                 </div>
 
-                <div class="bg-[#0b2c4d] p-3 rounded border border-white/5">
+                <div class="bg-[#0b2c4d] p-3 rounded border border-white/10">
                     <p class="text-xs text-gray-400">Email</p>
                     <p class="font-semibold">{{ current_user.email }}</p>
                 </div>
 
-                <div class="bg-[#0b2c4d] p-3 rounded border border-white/5">
+                <div class="bg-[#0b2c4d] p-3 rounded border border-white/10">
                     <p class="text-xs text-gray-400">Status</p>
                     <p class="font-semibold text-green-400">Active</p>
                 </div>
@@ -109,14 +107,14 @@
 
         </div>
 
-        <!-- RIGHT CARD -->
-        <div class="lg:col-span-2 glass p-6 rounded-xl border border-[#6fb7ff] soft-glow">
+        <!-- RIGHT -->
+        <div class="lg:col-span-2 glass p-6 rounded-xl border border-[#6fb7ff]/30 soft-glow">
 
-            <h2 class="text-xl mb-4 border-b border-[#6fb7ff] pb-2">
+            <h2 class="text-xl mb-4 border-b border-[#6fb7ff]/30 pb-2">
                 Actions
             </h2>
 
-            <div class="grid grid-cols-2 gap-4">
+            <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
 
                 <a href="/edit_profile"
                    onclick="showToast()"
@@ -125,12 +123,20 @@
                 </a>
 
                 <a href="/orders"
-                   class="bg-[#0b2c4d] border border-[#6fb7ff] p-5 rounded-xl text-center hover-lift">
+                   class="bg-[#0b2c4d] border border-[#6fb7ff]/30 p-5 rounded-xl text-center hover-lift">
                     📦 My Orders
                 </a>
 
+                <!-- DELETE NOW MATCHES OTHER TILES -->
+                <button onclick="openDeleteModal()"
+                    class="bg-[#0b2c4d] border border-red-500/40 text-red-400 
+                           p-5 rounded-xl font-bold text-center hover-lift
+                           hover:bg-red-500 hover:text-white transition">
+                    🗑 Delete Account
+                </button>
+
                 <a href="/browse"
-                   class="bg-[#0b2c4d] border border-[#6fb7ff] p-5 rounded-xl text-center hover-lift">
+                   class="bg-[#0b2c4d] border border-[#6fb7ff]/30 p-5 rounded-xl text-center hover-lift">
                     🛒 Shop
                 </a>
 
@@ -147,14 +153,51 @@
     Opening Edit Profile...
 </div>
 
+<!-- DELETE MODAL -->
+<div id="deleteModal"
+     class="hidden fixed inset-0 bg-black/70 flex items-center justify-center z-50">
+
+    <div class="bg-[#0e3a63] border border-red-500/40 rounded-xl p-6 w-full max-w-md text-center">
+
+        <h2 class="text-2xl font-bold text-red-400 mb-3">
+            Delete Account?
+        </h2>
+
+        <p class="text-gray-300 mb-6">
+            This action is permanent.
+        </p>
+
+        <div class="flex gap-4 justify-center">
+
+            <button onclick="closeDeleteModal()"
+                class="px-4 py-2 rounded bg-gray-700 hover:bg-gray-600">
+                Cancel
+            </button>
+
+            <form method="POST" action="/delete_account">
+                <button class="px-4 py-2 rounded bg-red-500 hover:bg-red-600 font-bold">
+                    Delete
+                </button>
+            </form>
+
+        </div>
+
+    </div>
+</div>
+
 <script>
 function showToast() {
     const toast = document.getElementById("toast");
     toast.style.display = "block";
+    setTimeout(() => toast.style.display = "none", 2500);
+}
 
-    setTimeout(() => {
-        toast.style.display = "none";
-    }, 2500);
+function openDeleteModal() {
+    document.getElementById("deleteModal").classList.remove("hidden");
+}
+
+function closeDeleteModal() {
+    document.getElementById("deleteModal").classList.add("hidden");
 }
 </script>
 

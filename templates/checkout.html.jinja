@@ -3,137 +3,150 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Checkout</title>
+    <title> Checkout </title>
     <script src="https://cdn.tailwindcss.com"></script>
     <link href="/static/style.css" rel="stylesheet">
     <link rel="icon" href="/static/products/Blueprint Logo.png" type="image">
 </head>
 
-<body class="min-h-screen flex flex-col bg-[#0b2c4d] text-[#d6ecff] font-[Inter]">
+<body class="bg-[#0b2c4d] text-white font-sans min-h-screen flex flex-col">
 
 {% include "components/navbar.html.jinja" %}
 
-<main class="flex-grow">
+<main class="flex-1 max-w-6xl mx-auto p-6 space-y-8">
 
-<h1 class="text-4xl font-bold mb-8 text-white">Checkout</h1>
+    <div class="text-center">
+        <h1 class="text-4xl font-bold">Checkout</h1>
+        <p class="text-gray-300 mt-2">Review your items before placing your order</p>
+    </div>
 
-{% if cart|length == 0 %}
-    <p class="text-gray-400 text-lg">Your cart is empty.</p>
-{% else %}
+    {% if cart|length == 0 %}
 
-{% set ns = namespace(total=0) %}
+        <p class="text-center text-gray-400 mt-20 text-lg">
+            Your cart is empty.
+        </p>
 
-<div class="grid grid-cols-1 lg:grid-cols-3 gap-8">
+    {% else %}
 
-    <!-- CART ITEMS -->
-    <div class="lg:col-span-2 space-y-6">
+    {% set ns = namespace(total=0) %}
 
-        {% for x in cart %}
+    <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
 
+        <!-- CART -->
+        <div class="lg:col-span-2 space-y-4">
+
+            {% for x in cart %}
             {% set ns.total = ns.total + (x['price'] * x['quantity']) %}
 
-            <div class="cart-item grid grid-cols-6 items-center bg-white rounded-2xl shadow-md p-4 gap-4"
+            <!-- IMPORTANT: data-price FIX -->
+            <div class="bg-[#0e3a63] border border-[#6fb7ff] rounded-xl shadow-lg p-4 flex items-center gap-4"
                  data-price="{{ x['price'] }}">
 
-                <img src="{{ x['image'] }}"
-                     class="h-28 w-28 object-contain rounded-lg border">
-
-                <div class="col-span-2 font-semibold text-gray-900 text-lg">
-                    {{ x['name'] }}
+                <div class="w-20 h-20 bg-[#0b2c4d] rounded overflow-hidden border border-[#1f4f7a]">
+                    <img src="{{ x['image'] }}" class="w-full h-full object-cover">
                 </div>
 
-                <div class="col-span-1 flex flex-col items-center">
+                <div class="flex-1">
+                    <p class="font-semibold">{{ x['name'] }}</p>
+                    <p class="text-sm text-gray-300">Unit: ${{ x['price'] }}</p>
+                </div>
+
+                <div class="text-center">
                     <input type="number"
-                           class="quantity-input w-16 border rounded-lg px-2 py-1 text-center text-gray-900"
+                           class="quantity-input w-16 bg-[#0b2c4d] border border-[#6fb7ff] rounded px-2 py-1 text-center"
                            value="{{ x['quantity'] }}" min="1">
 
                     <form method="post" action="/cart/{{ x['product_id'] }}/remove">
-                        <button class="bg-red-500 text-white px-3 py-1 mt-2 rounded">
+                        <button class="text-red-400 text-xs mt-2 hover:text-red-300">
                             Remove
                         </button>
                     </form>
                 </div>
 
-                <div class="col-span-2 text-right">
-                    <div class="text-gray-900 font-semibold">
-                        ${{ x['price'] }}
-                    </div>
-
-                    <div class="text-sm text-gray-500 subtotal">
-                        Subtotal: ${{ x['price'] * x['quantity'] }}
-                    </div>
+                <div class="text-right">
+                    <p class="text-xs text-gray-300">Subtotal</p>
+                    <p class="subtotal font-bold">
+                        ${{ x['price'] * x['quantity'] }}
+                    </p>
                 </div>
 
             </div>
 
-        {% endfor %}
+            {% endfor %}
 
-    </div>
-
-    <!-- SUMMARY -->
-    <div class="bg-white rounded-2xl shadow-lg p-6 h-fit">
-
-        <h2 class="text-2xl font-bold text-gray-900">Order Summary</h2>
-
-        <div class="text-gray-500 mt-2">Total</div>
-
-        <div class="text-3xl font-bold text-green-600" id="order-total">
-            ${{ ns.total }}
         </div>
 
-        <form method="post" action="/checkout" class="mt-6 space-y-3">
+        <!-- SUMMARY -->
+        <div class="bg-[#0e3a63] border border-[#6fb7ff] rounded-xl shadow-lg p-6 h-fit sticky top-6">
 
-            <input type="text" name="street" placeholder="Street"
-                   class="w-full border rounded-lg px-3 py-2 text-gray-900" required>
+            <h2 class="text-xl font-bold border-b border-[#6fb7ff] pb-2 mb-4">
+                Order Summary
+            </h2>
 
-            <input type="text" name="city" placeholder="City"
-                   class="w-full border rounded-lg px-3 py-2 text-gray-900" required>
+            <p class="text-gray-300 text-sm">Total</p>
 
-            <div class="grid grid-cols-2 gap-2">
-                <input type="text" name="state" placeholder="State"
-                       class="w-full border rounded-lg px-3 py-2 text-gray-900" required>
-
-                <input type="text" name="zip" placeholder="ZIP"
-                       class="w-full border rounded-lg px-3 py-2 text-gray-900" required>
+            <div class="text-3xl font-bold text-green-400 mb-6" id="order-total">
+                ${{ ns.total }}
             </div>
 
-            <button type="submit"
-                    class="w-full bg-green-500 hover:bg-green-600 text-white font-bold py-3 rounded-lg">
-                Place Order
-            </button>
+            <form method="post" action="/checkout" class="space-y-3">
 
-        </form>
+                <input type="text" name="street" placeholder="Street"
+                       class="w-full bg-[#0b2c4d] border border-[#6fb7ff] rounded px-3 py-2" required>
+
+                <input type="text" name="city" placeholder="City"
+                       class="w-full bg-[#0b2c4d] border border-[#6fb7ff] rounded px-3 py-2" required>
+
+                <div class="grid grid-cols-2 gap-2">
+                    <input type="text" name="state" placeholder="State"
+                           class="w-full bg-[#0b2c4d] border border-[#6fb7ff] rounded px-3 py-2" required>
+
+                    <input type="text" name="zip" placeholder="ZIP"
+                           class="w-full bg-[#0b2c4d] border border-[#6fb7ff] rounded px-3 py-2" required>
+                </div>
+
+                <button type="submit"
+                        class="w-full bg-[#6fb7ff] text-[#0b2c4d] font-bold py-3 rounded hover:bg-blue-400 transition">
+                    Place Order
+                </button>
+
+            </form>
+
+        </div>
 
     </div>
 
-</div>
-
-{% endif %}
+    {% endif %}
 
 </main>
 
+<!-- FIXED JS -->
 <script>
-const inputs = document.querySelectorAll('.quantity-input');
-const totalEl = document.querySelector('#order-total');
-
 function update() {
     let total = 0;
 
-    document.querySelectorAll('.cart-item').forEach(item => {
-        const price = parseFloat(item.dataset.price);
-        const qty = parseInt(item.querySelector('.quantity-input').value);
+    document.querySelectorAll('[data-price]').forEach(card => {
+
+        const price = parseFloat(card.dataset.price) || 0;
+        const input = card.querySelector('.quantity-input');
+        const qty = parseInt(input.value) || 1;
+
         const sub = price * qty;
 
-        item.querySelector('.subtotal').textContent =
-            `Subtotal: $${sub.toFixed(2)}`;
+        const subtotalEl = card.querySelector('.subtotal');
+        subtotalEl.textContent = `$${sub.toFixed(2)}`;
 
         total += sub;
     });
 
-    totalEl.textContent = `$${total.toFixed(2)}`;
+    document.getElementById("order-total").textContent =
+        `$${total.toFixed(2)}`;
 }
 
-inputs.forEach(i => i.addEventListener('input', update));
+document.querySelectorAll('.quantity-input')
+    .forEach(i => i.addEventListener('input', update));
+
+update();
 </script>
 
 {% include "components/footer.html.jinja" %}

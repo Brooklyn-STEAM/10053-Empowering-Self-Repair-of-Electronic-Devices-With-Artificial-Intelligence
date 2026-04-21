@@ -6,14 +6,19 @@ from ai_agent import run_agent
 from datetime import datetime
 import mysql.connector
 
-
 from anthropic import Anthropic
 import re
 from openai import OpenAI
 
 from openai import OpenAI
 
+import sqlite3
+
+
 app = Flask(__name__)
+
+if __name__ == "__main__":
+    app.run(debug=True)
 
 config = Dynaconf(settings_file =["settings.toml", ".env"])
 
@@ -447,7 +452,6 @@ def checkout():
     connection = connect_db()
     cursor = connection.cursor()
 
-    # GET CART ITEMS
     cursor.execute("""
         SELECT 
             Cart.ProductID AS product_id,
@@ -464,21 +468,44 @@ def checkout():
 
     if request.method == "POST":
 
+        if not cart_items:
+            return redirect("/cart")
+
         total = 0
 
-        # CREATE ORDER FIRST
+        # ADDRESS (NOW VALID)
+        street = request.form.get("street")
+        city = request.form.get("city")
+        state = request.form.get("state")
+        zip_code = request.form.get("zip")
+
+        # CREATE ORDER
         cursor.execute("""
-            INSERT INTO orders (user_id, total_amount, status, created_at)
-            VALUES (%s, %s, %s, NOW())
-        """, (current_user.id, 0, "Pending"))
+            INSERT INTO orders (
+                user_id, total_amount, status,
+                street, city, state, zip, created_at
+            )
+            VALUES (%s, %s, %s, %s, %s, %s, %s, NOW())
+        """, (
+            current_user.id,
+            0,
+            "Pending",
+            street,
+            city,
+            state,
+            zip_code
+        ))
 
         order_id = cursor.lastrowid
 
-        # ADD ITEMS TO SalesCart
+        # ITEMS
         for item in cart_items:
             product_id = item["product_id"]
-            quantity = item["quantity"]
-            price = item["price"]
+            price = float(item["price"])
+            quantity = int(request.form.get(f"quantity_{product_id}", item["quantity"]))
+
+            if quantity <= 0:
+                continue
 
             total += price * quantity
 
@@ -487,7 +514,7 @@ def checkout():
                 VALUES (%s, %s, %s)
             """, (order_id, product_id, quantity))
 
-        # UPDATE ORDER TOTAL
+        # UPDATE TOTAL
         cursor.execute("""
             UPDATE orders
             SET total_amount = %s
@@ -506,6 +533,8 @@ def checkout():
         return redirect("/thank_you")
 
     return render_template("checkout.html.jinja", cart=cart_items)
+
+
 
 @app.route("/thank_you")
 @login_required
@@ -721,8 +750,45 @@ def orders():
         }.get(status, 10)
 
     return render_template("orders.html.jinja", orders=list(orders_dict.values()))
+@app.route("/delete_account", methods=["POST"])
+@login_required
+def delete_account():
+    connection = connect_db()
+    cursor = connection.cursor()
 
+    user_id = current_user.id
 
+    # 1. Delete order tracking (if you have it)
+    cursor.execute("""
+        DELETE FROM order_tracking
+        WHERE order_id IN (
+            SELECT ID FROM orders WHERE user_id = %s
+        )
+    """, (user_id,))
 
-if __name__ == "__main__":
-    app.run(debug=True)
+    # 2. Delete sales cart items
+    cursor.execute("""
+        DELETE FROM SalesCart
+        WHERE order_id IN (
+            SELECT ID FROM orders WHERE user_id = %s
+        )
+    """, (user_id,))
+
+    # 3. Delete orders
+    cursor.execute("DELETE FROM orders WHERE user_id = %s", (user_id,))
+
+    # 4. Delete reviews
+    cursor.execute("DELETE FROM Review WHERE UserID = %s", (user_id,))
+
+    # 5. Delete cart items
+    cursor.execute("DELETE FROM Cart WHERE UserID = %s", (user_id,))
+
+    # 6. Finally delete user
+    cursor.execute("DELETE FROM User WHERE ID = %s", (user_id,))
+
+    connection.commit()
+    connection.close()
+
+    logout_user()
+
+    return redirect("/login")
