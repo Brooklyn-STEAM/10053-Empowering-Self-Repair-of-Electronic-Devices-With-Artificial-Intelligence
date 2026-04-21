@@ -1,72 +1,85 @@
-
 <!DOCTYPE html>
 <html lang="en">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Home</title>
+
     <link href="/static/style.css" rel="stylesheet">
     <link rel="icon" href="/static/products/Blueprint Logo.png" type="image">
     <script src="https://cdn.jsdelivr.net/npm/@tailwindcss/browser@4"></script>
 
+    <style>
+        .flash-msg {
+            transition: all 0.5s ease;
+        }
+    </style>
 </head>
 
 {% include "components/ai_chat.html.jinja" %}
-<body class="min-h-screen flex flex-col text-sm lg:text-xl">
-    {% include "components/navbar.html.jinja" %}
 
-  <main class="flex-grow">
-  <!-- HERO SECTION -->
-      <div class="flex flex-col lg:flex-row items-center justify-between px-6 py-12 lg:px-20 lg:py-20 space-y-6 lg:space-y-0 lg:space-x-10">
+<body class="min-h-screen flex flex-col text-sm lg:text-xl bg-[#0b2c4d] text-[#d6ecff]">
 
-          <!-- LEFT PANEL -->
-          <div style="
-              border:2px dashed #6fb7ff; padding:25px; " class="w-full lg:w-[30%]">
-              <h1 style="font-size:28px; margin-bottom:15px; text-transform:uppercase; letter-spacing:2px; ">
-                  Project Overview
-              </h1>
-              <p style="line-height:1.6;"> 
-                  aI-powered repair guides designed to help users safely
-                  diagnose and repair electronic devices while reducing
-                  electronic waste.
-              </p>
-          </div>
+{% include "components/navbar.html.jinja" %}
 
+<main class="flex-grow">
 
-          <!-- CENTER VIDEO -->
-          <div style="
-              border:2px dashed #6fb7ff; display:flex; align-items:center; justify-content:center; background-color:#0b2c4d; " 
-              class="w-64 h-64 lg:w-65 lg:h-65">
-              <img src="/static/products/Blueprint Logo.png" style="width:100%; height:100;">
-          </div>
+    {% with messages = get_flashed_messages(with_categories=true) %}
+      {% if messages %}
+        <div class="px-6 lg:px-20 pt-6 space-y-3">
 
+          {% for category, message in messages %}
+            <div class="flash-msg px-4 py-3 rounded-lg font-semibold shadow-md
+                {% if category == 'success' %}
+                    bg-green-500 text-white
+                {% else %}
+                    bg-red-500 text-white
+                {% endif %}">
+                {{ message }}
+            </div>
+          {% endfor %}
 
+        </div>
+      {% endif %}
+    {% endwith %}
 
-  <!-- RIGHT PANEL -->
-          <div style="
-              border:2px dashed #6fb7ff;
-              padding:25px;
-          " class="w-full lg:w-[30%]">
-              <h1 style="
-                  font-size:28px;
-                  margin-bottom:15px;
-                  text-transform:uppercase;
-                  letter-spacing:2px; ">
+    <div class="flex flex-col lg:flex-row items-center justify-between px-6 py-12 lg:px-20 lg:py-20 space-y-6 lg:space-y-0 lg:space-x-10">
 
-             System Goal
-              </h1>
-              <p style="line-height:1.6;">
-                  Enable users to repair devices independently using
-                  step-by-step visual instructions and intelligent diagnostics.
-              </p>
-          </div>
+        <div style="border:2px dashed #6fb7ff; padding:25px;" class="w-full lg:w-[30%]">
+            <h1 style="font-size:28px; margin-bottom:15px; text-transform:uppercase; letter-spacing:2px;">
+                Project Overview
+            </h1>
+            <p style="line-height:1.6;">
+                AI-powered repair guides designed to help users safely
+                diagnose and repair electronic devices while reducing
+                electronic waste.
+            </p>
+        </div>
+
+        <!-- CENTER LOGO -->
+        <div style="
+            border:2px dashed #6fb7ff;
+            display:flex;
+            align-items:center;
+            justify-content:center;
+            background-color:#0b2c4d;"
+            class="w-64 h-64 lg:w-65 lg:h-65">
+
+            <img src="/static/products/Blueprint Logo.png" style="width:100%; height:100%;">
+        </div>
+
+        <!-- RIGHT PANEL -->
+        <div style="border:2px dashed #6fb7ff; padding:25px;" class="w-full lg:w-[30%]">
+            <h1 style="font-size:28px; margin-bottom:15px; text-transform:uppercase; letter-spacing:2px;">
+                System Goal
+            </h1>
+            <p style="line-height:1.6;">
+                Enable users to repair devices independently using
+                step-by-step visual instructions and intelligent diagnostics.
+            </p>
+        </div>
 
     </div>
-
-
-    
-        
-               
 
     <!-- SECTION LABEL -->
     <div style="
@@ -76,36 +89,52 @@
         border-bottom:2px dashed #6fb7ff;
         text-align:center;
         letter-spacing:3px;
-        font-size:18px;
-    ">
+        font-size:18px;">
         POPULAR FIXES — MODULE VIEW
     </div>
 
-    <!-- POPULAR FIXES GRID -->
-    <div class=" flex flex-col lg:flex-row items-center justify-center gap-8 lg:gap-12 px-6 py-12 lg:px-20">
+    <!-- GRID -->
+    <div class="flex flex-col lg:flex-row items-center justify-center gap-8 lg:gap-12 px-6 py-12 lg:px-20">
 
-    <div class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-3 sm:gap-4 items-center justify-center">
-    {% for x in guides %}
-        <a href="/repair-item/{{ x['ID'] }}" class="bg-[#1a3a5a] rounded-xl overflow-hidden hover:ring-2 hover:ring-[#6fb7ff] transition-all duration-200">
-            
-            <img src="{{ x['Image'] }}" alt="{{ x['Name'] }}" class="aspect-square bg-white p-4 flex items-center justify-center max-w-full max-h-full object-contain">
+        <div class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-3 sm:gap-4">
 
-            <div class="p-3">
-                <p class="text-white text-base leading-tight font-bold">
-                    {{ x["Name"] }}
-                </p>
-            </div>
-        
-        </a>
-    {% endfor %}
+            {% for x in guides %}
+            <a href="/repair-item/{{ x['ID'] }}"
+               class="bg-[#1a3a5a] rounded-xl overflow-hidden hover:ring-2 hover:ring-[#6fb7ff] transition-all duration-200">
+
+                <img src="{{ x['Image'] }}"
+                     class="aspect-square bg-white p-4 object-contain w-full">
+
+                <div class="p-3">
+                    <p class="text-white text-base font-bold">
+                        {{ x["Name"] }}
+                    </p>
+                </div>
+
+            </a>
+            {% endfor %}
+
+        </div>
+
     </div>
-    
-    </div> 
 
 </main>
 
-    <!-- FOOTER -->
-    {% include "components/footer.html.jinja" %}
+{% include "components/footer.html.jinja" %}
+
+<!-- ⏱ AUTO DISAPPEAR SCRIPT -->
+<script>
+document.addEventListener("DOMContentLoaded", () => {
+    setTimeout(() => {
+        document.querySelectorAll('.flash-msg').forEach(msg => {
+            msg.style.opacity = "0";
+            msg.style.transform = "translateY(-10px)";
+
+            setTimeout(() => msg.remove(), 500);
+        });
+    }, 3000);
+});
+</script>
 
 </body>
 </html>

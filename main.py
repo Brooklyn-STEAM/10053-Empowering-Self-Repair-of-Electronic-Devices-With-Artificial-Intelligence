@@ -9,8 +9,9 @@ import mysql.connector
 from anthropic import Anthropic
 import re
 from openai import OpenAI
+1
+import sqlite3
 
-from openai import OpenAI
 
 import sqlite3
 
@@ -73,7 +74,6 @@ def connect_db():
     )
     return conn
 
-
 @app.route("/")
 def index():
     
@@ -89,32 +89,50 @@ def index():
 
     return render_template("homepage.html.jinja", guides=result)
 
-@app.route("/login", methods=["POST","GET"])
+@app.route("/login", methods=["POST", "GET"])
 def login_page():
-    if request.method == 'POST':
-        email = request.form['email']
-        password = request.form['password']
 
+    if request.method == "POST":
 
-        connection = connect_db()
-        cursor = connection.cursor()
+        email = request.form["email"]
+        password = request.form["password"]
 
-        cursor.execute("SELECT * FROM `User`  WHERE `Email` = %s", (email,))
-        result = cursor.fetchone()
-        connection.close()
+        connection = None
+        cursor = None
+
+        try:
+            connection = connect_db()
+            cursor = connection.cursor()
+
+            cursor.execute(
+                "SELECT * FROM User WHERE Email = %s",
+                (email,)
+            )
+
+            result = cursor.fetchone()
+
+        finally:
+            if cursor:
+                cursor.close()
+            if connection:
+                connection.close()
 
         if result is None:
-            flash("No user found. The email address and/or password you entered are invalid.")
-        elif password != result["Password"]:
-            flash("Incorrect Password")
-        else:
-            login_user(User(result))
-            
-            if "has_seen_greeting"  not in session:
-                session["has_seen_greeting"] = False
-            
-            
-            return redirect("/")
+            flash("No user found. Please check your email or password.", "error")
+            return render_template("login.html.jinja")
+
+        if password != result["Password"]:
+            flash("Incorrect password.", "error")
+            return render_template("login.html.jinja")
+
+        # ✅ success
+        login_user(User(result))
+
+        session["has_seen_greeting"] = False
+
+        flash("Welcome back!", "success")
+
+        return redirect("/")
 
     return render_template("login.html.jinja")
 
@@ -154,9 +172,11 @@ def signup_page():
 @app.route("/logout")
 @login_required
 def logout():
+
     session.pop("has_seen_greeting", None)
     logout_user()
-    flash("You have been Logged Out")
+
+    flash("You have been logged out successfully.", "success")
 
     return redirect("/")
 
@@ -369,7 +389,7 @@ def add_to_cart(product_id):
         if quantity <= 0:
             raise ValueError
     except (ValueError, TypeError):
-        flash("Invalid quantity")
+        flash("Invalid quantity", "error")
         return redirect(url_for("product_page", product_id=product_id))
 
     connection = connect_db()
@@ -386,8 +406,9 @@ def add_to_cart(product_id):
     cursor.close()
     connection.close()
 
-    flash("Product added to cart successfully!")
-    return redirect('/cart')
+    flash("Product added to cart successfully!", "cart_success")
+
+    return redirect(url_for("cart"))
 
 @app.route("/cart/<int:product_id>/update_qty", methods=["POST"])
 @login_required
@@ -397,10 +418,10 @@ def update_quantity(product_id):
     cursor = None
 
     try:
-        quantity = int(request.form.get("quantity"))
+        quantity = int(request.form.get("quantity", 1))
 
-        if quantity <= 0:
-            flash("Quantity must be at least 1.")
+        if quantity < 1:
+            flash("Quantity must be at least 1.", "error")
             return redirect("/cart")
 
         connection = connect_db()
@@ -414,11 +435,16 @@ def update_quantity(product_id):
 
         connection.commit()
 
+        flash("Cart updated successfully!", "cart_success")
+
+    except ValueError:
+        flash("Invalid quantity.", "error")
+
     except Exception as e:
         if connection:
             connection.rollback()
         print(e)
-        flash("Error updating quantity.")
+        flash("Error updating quantity.", "error")
 
     finally:
         if cursor:
@@ -432,17 +458,33 @@ def update_quantity(product_id):
 @login_required
 def remove_from_cart(product_id):
 
-    connection = connect_db()
-    cursor = connection.cursor()
+    connection = None
+    cursor = None
 
-    cursor.execute("""
-        DELETE FROM Cart
-        WHERE ProductID = %s AND UserID = %s
-    """, (product_id, current_user.id))
+    try:
+        connection = connect_db()
+        cursor = connection.cursor()
 
-    connection.commit()
-    cursor.close()
-    connection.close()
+        cursor.execute("""
+            DELETE FROM Cart
+            WHERE ProductID = %s AND UserID = %s
+        """, (product_id, current_user.id))
+
+        connection.commit()
+
+        flash("Item removed from cart.", "cart_success")
+
+    except Exception as e:
+        if connection:
+            connection.rollback()
+        print(e)
+        flash("Error removing item from cart.", "error")
+
+    finally:
+        if cursor:
+            cursor.close()
+        if connection:
+            connection.close()
 
     return redirect("/cart")
 
@@ -541,13 +583,6 @@ def checkout():
 def thank_you():
     return render_template("thank_you.html.jinja")
 
-@app.route("/profile")
-@login_required
-def profile():
-    user = get_user(current_user.id)
-    return render_template("profile.html.jinja", user=user)
-
-
 @app.route('/ai-help', methods=['POST'])
 def ai_help():
     try:
@@ -573,12 +608,15 @@ def ai_help():
         "reply": str(result)
     })
 
+@app.route("/profile")
+@login_required
+def profile():
+    user = get_user(current_user.id)
+    return render_template("profile.html.jinja", user=user)
+
 @app.route("/profile/update", methods=["POST"])
 @login_required
 def update_profile():
-
-    import re
-
     name = re.sub(r'\s+', ' ', request.form.get("full_name", "").strip()).title()
     email = request.form.get("email", "").strip()
     address = request.form.get("address", "").strip()
@@ -587,7 +625,6 @@ def update_profile():
     cursor = connection.cursor(pymysql.cursors.DictCursor)
 
     try:
-        # get old data
         cursor.execute(
             "SELECT Name, Email, Address FROM User WHERE ID=%s",
             (current_user.id,)
@@ -595,7 +632,6 @@ def update_profile():
 
         old_user = cursor.fetchone()
 
-        # FIXED: dictionary keys (NO [0], [1], [2])
         if old_user:
             if (
                 old_user["Name"] == name and
@@ -605,18 +641,15 @@ def update_profile():
                 flash("No changes detected", "error")
                 return redirect("/edit_profile")
 
-        # update DB
         cursor.execute("""
             UPDATE User
-            SET Name=%s,
-                Email=%s,
-                Address=%s
+            SET Name=%s, Email=%s, Address=%s
             WHERE ID=%s
         """, (name, email, address, current_user.id))
 
         connection.commit()
 
-        flash("Profile updated successfully!", "success")
+        flash("Profile updated successfully!", "profile_success")
 
     except pymysql.err.IntegrityError:
         connection.rollback()
@@ -627,14 +660,11 @@ def update_profile():
         connection.close()
 
     return redirect("/profile")
-
-
 @app.route("/edit_profile")
 @login_required
 def edit_profile():
     user = get_user(current_user.id)
     return render_template("edit_profile.html.jinja", user=user)
-
 
 def get_user(user_id):
     connection = connect_db()
@@ -756,7 +786,49 @@ def delete_account():
     connection = connect_db()
     cursor = connection.cursor()
 
+@app.route("/delete_account", methods=["POST"])
+@login_required
+def delete_account():
+    connection = connect_db()
+    cursor = connection.cursor()
+
     user_id = current_user.id
+
+    # 1. Delete order tracking (if you have it)
+    cursor.execute("""
+        DELETE FROM order_tracking
+        WHERE order_id IN (
+            SELECT ID FROM orders WHERE user_id = %s
+        )
+    """, (user_id,))
+
+    # 2. Delete sales cart items
+    cursor.execute("""
+        DELETE FROM SalesCart
+        WHERE order_id IN (
+            SELECT ID FROM orders WHERE user_id = %s
+        )
+    """, (user_id,))
+
+    # 3. Delete orders
+    cursor.execute("DELETE FROM orders WHERE user_id = %s", (user_id,))
+
+    # 4. Delete reviews
+    cursor.execute("DELETE FROM Review WHERE UserID = %s", (user_id,))
+
+    # 5. Delete cart items
+    cursor.execute("DELETE FROM Cart WHERE UserID = %s", (user_id,))
+
+    # 6. Finally delete user
+    cursor.execute("DELETE FROM User WHERE ID = %s", (user_id,))
+
+    connection.commit()
+    connection.close()
+
+    logout_user()
+
+    return redirect("/login")
+    
 
     # 1. Delete order tracking (if you have it)
     cursor.execute("""
