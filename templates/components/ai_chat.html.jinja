@@ -114,15 +114,22 @@ document.addEventListener("DOMContentLoaded", () => {
 
         if (!msg && !file) return;
 
+        // --- Get current guide ID from meta tag ---
+        let guideId = null;
+        const metaGuide = document.querySelector('meta[name="guide-id"]');
+        if (metaGuide) {
+            guideId = metaGuide.getAttribute('content');
+        }
+
         if (msg) addMessage(msg, "user");
         if (file) addMessage("📷 Image uploaded", "user");
 
-        // Create and show "Thinking..." placeholder
         const thinkingDiv = addMessage("Thinking...", "ai");
 
         const formData = new FormData();
         formData.append("message", msg);
         if (file) formData.append("image", file);
+        if (guideId) formData.append("guide_id", guideId);   // <-- Send guide ID
 
         msgInput.value = "";
         fileInput.value = "";
@@ -138,19 +145,16 @@ document.addEventListener("DOMContentLoaded", () => {
 
         const data = await res.json();
 
-        // Remove the "Thinking..." message
         thinkingDiv.remove();
 
-        // Create a new AI message div and start typing
         const aiMsgDiv = document.createElement("div");
         aiMsgDiv.className = "bg-gray-300 text-black p-2 rounded-lg self-start mr-auto max-w-[75%]";
         document.getElementById("chatBox").appendChild(aiMsgDiv);
 
-        await typeText(aiMsgDiv, data.reply, 10);  // ⚡ Faster typing speed
+        await typeText(aiMsgDiv, data.reply, 10);
 
     } catch (err) {
         console.error(err);
-        // Remove "Thinking..." if present
         const chatBox = document.getElementById("chatBox");
         const lastChild = chatBox.lastChild;
         if (lastChild && lastChild.textContent === "Thinking...") {
