@@ -6,6 +6,7 @@ from ai_agent import run_agent
 from datetime import datetime
 from anthropic import Anthropic
 from openai import OpenAI
+import sqlite3
 import pdfplumber
 
 
@@ -616,6 +617,12 @@ def profile():
     user = get_user(current_user.id)
     return render_template("profile.html.jinja", user=user)
 
+@app.route("/profile")
+@login_required
+def profile():
+    user = get_user(current_user.id)
+    return render_template("profile.html.jinja", user=user)
+
 @app.route("/profile/update", methods=["POST"])
 @login_required
 def update_profile():
@@ -782,7 +789,7 @@ def orders():
         }.get(status, 10)
 
     return render_template("orders.html.jinja", orders=list(orders_dict.values()))
-
+  
 @app.route("/delete_account", methods=["POST"])
 @login_required
 def delete_account():
