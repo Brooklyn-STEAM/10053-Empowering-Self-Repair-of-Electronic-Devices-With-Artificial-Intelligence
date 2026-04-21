@@ -13,6 +13,9 @@ from openai import OpenAI
 import sqlite3
 
 
+import sqlite3
+
+
 app = Flask(__name__)
 
 if __name__ == "__main__":
@@ -573,6 +576,8 @@ def checkout():
 
     return render_template("checkout.html.jinja", cart=cart_items)
 
+
+
 @app.route("/thank_you")
 @login_required
 def thank_you():
@@ -775,6 +780,11 @@ def orders():
         }.get(status, 10)
 
     return render_template("orders.html.jinja", orders=list(orders_dict.values()))
+@app.route("/delete_account", methods=["POST"])
+@login_required
+def delete_account():
+    connection = connect_db()
+    cursor = connection.cursor()
 
 @app.route("/delete_account", methods=["POST"])
 @login_required
@@ -820,4 +830,37 @@ def delete_account():
     return redirect("/login")
     
 
+    # 1. Delete order tracking (if you have it)
+    cursor.execute("""
+        DELETE FROM order_tracking
+        WHERE order_id IN (
+            SELECT ID FROM orders WHERE user_id = %s
+        )
+    """, (user_id,))
 
+    # 2. Delete sales cart items
+    cursor.execute("""
+        DELETE FROM SalesCart
+        WHERE order_id IN (
+            SELECT ID FROM orders WHERE user_id = %s
+        )
+    """, (user_id,))
+
+    # 3. Delete orders
+    cursor.execute("DELETE FROM orders WHERE user_id = %s", (user_id,))
+
+    # 4. Delete reviews
+    cursor.execute("DELETE FROM Review WHERE UserID = %s", (user_id,))
+
+    # 5. Delete cart items
+    cursor.execute("DELETE FROM Cart WHERE UserID = %s", (user_id,))
+
+    # 6. Finally delete user
+    cursor.execute("DELETE FROM User WHERE ID = %s", (user_id,))
+
+    connection.commit()
+    connection.close()
+
+    logout_user()
+
+    return redirect("/login")
