@@ -611,9 +611,6 @@ def ai_help():
         return jsonify({
             "reply": f"Server error: {str(e)}"
         }), 500
-    return jsonify({
-        "reply": str(result)
-    })
 
 @app.route("/profile")
 @login_required
