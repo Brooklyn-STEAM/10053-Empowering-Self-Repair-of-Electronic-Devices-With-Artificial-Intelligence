@@ -4,12 +4,10 @@ import pymysql, re, sqlite3, mysql.connector
 from dynaconf import Dynaconf
 from ai_agent import run_agent
 from datetime import datetime
-import mysql.connector
-
 from anthropic import Anthropic
 from openai import OpenAI
-1
-import sqlite3
+import pdfplumber
+
 
 
 app = Flask(__name__)
