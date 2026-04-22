@@ -5,8 +5,12 @@ from dynaconf import Dynaconf
 from ai_agent import run_agent
 from datetime import datetime
 from anthropic import Anthropic
+import re
 from openai import OpenAI
+import sqlite3
 import pdfplumber
+
+
 
 
 
@@ -784,7 +788,7 @@ def orders():
         }.get(status, 10)
 
     return render_template("orders.html.jinja", orders=list(orders_dict.values()))
-
+  
 @app.route("/delete_account", methods=["POST"])
 @login_required
 def delete_account():
