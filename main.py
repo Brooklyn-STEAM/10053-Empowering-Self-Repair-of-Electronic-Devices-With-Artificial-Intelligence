@@ -802,45 +802,66 @@ def delete_account():
 @app.route("/delete_account", methods=["POST"])
 @login_required
 def delete_account():
-    connection = connect_db()
-    cursor = connection.cursor()
 
-    user_id = current_user.id
+    connection = None
+    cursor = None
 
-    # 1. Delete order tracking (if you have it)
-    cursor.execute("""
-        DELETE FROM order_tracking
-        WHERE order_id IN (
-            SELECT ID FROM orders WHERE user_id = %s
-        )
-    """, (user_id,))
+    try:
+        connection = connect_db()
+        cursor = connection.cursor()
 
-    # 2. Delete sales cart items
-    cursor.execute("""
-        DELETE FROM SalesCart
-        WHERE order_id IN (
-            SELECT ID FROM orders WHERE user_id = %s
-        )
-    """, (user_id,))
+        user_id = current_user.id
 
-    # 3. Delete orders
-    cursor.execute("DELETE FROM orders WHERE user_id = %s", (user_id,))
+        # 1. Delete order tracking
+        cursor.execute("""
+            DELETE FROM order_tracking
+            WHERE order_id IN (
+                SELECT ID FROM orders WHERE user_id = %s
+            )
+        """, (user_id,))
 
-    # 4. Delete reviews
-    cursor.execute("DELETE FROM Review WHERE UserID = %s", (user_id,))
+        # 2. Delete sales cart items
+        cursor.execute("""
+            DELETE FROM SalesCart
+            WHERE order_id IN (
+                SELECT ID FROM orders WHERE user_id = %s
+            )
+        """, (user_id,))
 
-    # 5. Delete cart items
-    cursor.execute("DELETE FROM Cart WHERE UserID = %s", (user_id,))
+        # 3. Delete orders
+        cursor.execute("DELETE FROM orders WHERE user_id = %s", (user_id,))
 
-    # 6. Finally delete user
-    cursor.execute("DELETE FROM User WHERE ID = %s", (user_id,))
+        # 4. Delete reviews
+        cursor.execute("DELETE FROM Review WHERE UserID = %s", (user_id,))
 
-    connection.commit()
-    connection.close()
+        # 5. Delete cart items
+        cursor.execute("DELETE FROM Cart WHERE UserID = %s", (user_id,))
 
+        # 6. Delete user
+        cursor.execute("DELETE FROM User WHERE ID = %s", (user_id,))
+
+        connection.commit()
+
+    except Exception as e:
+        if connection:
+            connection.rollback()
+
+        print(e)
+        flash("Error deleting account. Please try again.", "error")
+        return redirect("/profile")
+
+    finally:
+        if cursor:
+            cursor.close()
+        if connection:
+            connection.close()
+
+    # logout AFTER deletion
     logout_user()
 
-    return redirect("/login")
+    flash("Account deleted successfully.", "success")
+
+    return redirect("/")
     
 
     # 1. Delete order tracking (if you have it)
