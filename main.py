@@ -1,17 +1,13 @@
 from flask import Flask, render_template, request, flash, redirect, abort, url_for, session, jsonify
 from flask_login import LoginManager, login_user, logout_user, login_required, current_user
-import pymysql
+import pymysql, re, sqlite3, mysql.connector
 from dynaconf import Dynaconf
 from ai_agent import run_agent
 from datetime import datetime
-import mysql.connector
-
 from anthropic import Anthropic
-import re
 from openai import OpenAI
+import pdfplumber
 
-
-import sqlite3
 
 
 app = Flask(__name__)
@@ -796,12 +792,6 @@ def orders():
 @app.route("/delete_account", methods=["POST"])
 @login_required
 def delete_account():
-    connection = connect_db()
-    cursor = connection.cursor()
-
-@app.route("/delete_account", methods=["POST"])
-@login_required
-def delete_account():
 
     connection = None
     cursor = None
@@ -862,39 +852,3 @@ def delete_account():
     flash("Account deleted successfully.", "success")
 
     return redirect("/")
-    
-
-    # 1. Delete order tracking (if you have it)
-    cursor.execute("""
-        DELETE FROM order_tracking
-        WHERE order_id IN (
-            SELECT ID FROM orders WHERE user_id = %s
-        )
-    """, (user_id,))
-
-    # 2. Delete sales cart items
-    cursor.execute("""
-        DELETE FROM SalesCart
-        WHERE order_id IN (
-            SELECT ID FROM orders WHERE user_id = %s
-        )
-    """, (user_id,))
-
-    # 3. Delete orders
-    cursor.execute("DELETE FROM orders WHERE user_id = %s", (user_id,))
-
-    # 4. Delete reviews
-    cursor.execute("DELETE FROM Review WHERE UserID = %s", (user_id,))
-
-    # 5. Delete cart items
-    cursor.execute("DELETE FROM Cart WHERE UserID = %s", (user_id,))
-
-    # 6. Finally delete user
-    cursor.execute("DELETE FROM User WHERE ID = %s", (user_id,))
-
-    connection.commit()
-    connection.close()
-
-    logout_user()
-
-    return redirect("/login")
