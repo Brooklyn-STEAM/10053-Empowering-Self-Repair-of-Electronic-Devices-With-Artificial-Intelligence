@@ -1,53 +1,225 @@
 <!-- Floating Button (OUTSIDE chat window) -->
 <button onclick="toggleChat()"
-    class="fixed bottom-6 right-6 bg-blue-500 text-white px-4 py-3 rounded-full shadow-lg z-50 hover:bg-sky-700 active:bg-blue-800">
+    class="fixed bottom-6 right-6 bg-blue-500 text-white px-4 py-3 rounded-full shadow-lg z-50 hover:bg-sky-700 active:bg-blue-800"
+    style="font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; font-size: 14px;">
     AI Help
 </button>
 
+<!-- Main content wrapper - this will be resized -->
+<div id="mainContent" class="transition-all duration-300" style="margin-right: 0;">
+    <!-- All your existing website content goes here -->
+    <!-- This div should wrap your entire main content -->
+</div>
+
 <!-- Chat Window -->
 <div id="chatWindow"
-     class="hidden fixed bottom-20 right-6 w-96 bg-[#1a3a5a] rounded-xl shadow-lg flex flex-col h-[500px] z-50">
+    class="hidden fixed bottom-20 right-6 w-96 bg-[#1a3a5a] rounded-xl shadow-lg flex flex-col h-[500px] z-50 transition-all duration-300"
+    style="font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;">
 
     <!-- Header -->
-    <div class="p-3 border-b border-[#2a4a6a] text-white flex justify-between">
-        AI Repair Assistant
-        <button onclick="toggleChat()">✕</button>
+    <div class="p-3 border-b border-[#2a4a6a] text-white flex justify-between items-center"
+        style="font-size: 16px; font-weight: 500;">
+        <span>AI Repair Assistant</span>
+        <div class="flex gap-2">
+            <button onclick="toggleExpandedView()" 
+                    id="expandBtn"
+                    class="text-gray-300 hover:text-white text-sm px-2"
+                    style="font-size: 12px;" 
+                    title="Expand to split screen">📱 Split View</button>
+            <button onclick="clearChat()" 
+                    class="text-gray-300 hover:text-white text-sm px-2"
+                    style="font-size: 12px;">🗑️ Clear</button>
+            <button onclick="toggleChat()" 
+                    style="font-size: 16px;">✕</button>
+        </div>
     </div>
 
     <!-- Chat Messages -->
-    <div id="chatBox" class="flex-1 overflow-y-auto p-3 space-y-2 text-sm flex flex-col">
+    <div id="chatBox" class="flex-1 overflow-y-auto p-3 space-y-2 text-sm flex flex-col"
+        style="font-size: 14px; line-height: 1.4;">
     </div>
 
     <!-- Input Area -->
     <div class="p-3 border-t border-[#2a4a6a]">
-
-        <input type="file" id="imageUpload" class="mb-2 text-white text-xs">
+        <input type="file" id="imageUpload" 
+            class="mb-2 text-white text-xs"
+            style="font-size: 12px;">
 
         <input id="msg"
-               class="w-full p-2 rounded text-black mb-2"
-               placeholder="Describe your issue...">
+            class="w-full p-2 rounded text-black mb-2"
+            placeholder="Describe your issue..."
+            style="font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; font-size: 14px;">
 
         <button id="sendBtn"
-                class="bg-blue-500 px-4 py-2 rounded text-white w-full">
+                class="bg-blue-500 px-4 py-2 rounded text-white w-full"
+                style="font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; font-size: 14px; font-weight: 500;">
             Send
         </button>
     </div>
+
+    <!-- Resize Handle (only visible in split view) -->
+    <div id="resizeHandle" class="hidden absolute left-0 top-0 w-2 h-full cursor-ew-resize bg-transparent hover:bg-blue-400 hover:opacity-30 z-10"></div>
 </div>
 
 <script>
+// Chat visibility and expansion state
+let isChatVisible = false;
+let isExpanded = false;
+let currentChatWidth = 40; // Default split screen width percentage
+
+// Toggle chat visibility
 function toggleChat() {
-    const chat = document.getElementById("chatWindow");
-    chat.classList.toggle("hidden");
+    const chatWindow = document.getElementById("chatWindow");
+    const mainContent = document.getElementById("mainContent");
+    
+    isChatVisible = !isChatVisible;
+    
+    if (isChatVisible) {
+        chatWindow.classList.remove("hidden");
+    } else {
+        chatWindow.classList.add("hidden");
+        // Reset main content when closing
+        if (isExpanded) {
+            mainContent.style.marginRight = "0";
+            isExpanded = false;
+        }
+    }
+}
+
+// Toggle between normal and split screen view
+function toggleExpandedView() {
+    const chatWindow = document.getElementById("chatWindow");
+    const mainContent = document.getElementById("mainContent");
+    const expandBtn = document.getElementById("expandBtn");
+    const resizeHandle = document.getElementById("resizeHandle");
+    
+    isExpanded = !isExpanded;
+    
+    if (isExpanded) {
+        // Switch to split screen mode
+        chatWindow.classList.remove("bottom-20", "right-6", "w-96", "h-[500px]", "rounded-xl");
+        chatWindow.classList.add("top-0", "right-0", "h-full", "rounded-none");
+        chatWindow.style.width = currentChatWidth + "%";
+        
+        // Resize main content to make room for chat
+        mainContent.style.marginRight = currentChatWidth + "%";
+        
+        expandBtn.innerHTML = "📱 Window";
+        expandBtn.title = "Return to window view";
+        resizeHandle.classList.remove("hidden");
+    } else {
+        // Switch back to window mode
+        chatWindow.classList.add("bottom-20", "right-6", "w-96", "h-[500px]", "rounded-xl");
+        chatWindow.classList.remove("top-0", "right-0", "h-full", "rounded-none");
+        chatWindow.style.width = ""; // Reset inline width
+        
+        // Reset main content
+        mainContent.style.marginRight = "0";
+        
+        expandBtn.innerHTML = "📱 Split View";
+        expandBtn.title = "Expand to split screen";
+        resizeHandle.classList.add("hidden");
+    }
+}
+
+// Resize functionality
+let isResizing = false;
+
+document.getElementById("resizeHandle").addEventListener("mousedown", (e) => {
+    isResizing = true;
+    document.addEventListener("mousemove", handleResize);
+    document.addEventListener("mouseup", stopResize);
+    e.preventDefault();
+});
+
+function handleResize(e) {
+    if (!isResizing || !isExpanded) return;
+    
+    const chatWindow = document.getElementById("chatWindow");
+    const mainContent = document.getElementById("mainContent");
+    const windowWidth = window.innerWidth;
+    const mouseX = e.clientX;
+    
+    // Calculate new width as percentage of window width
+    const newWidth = ((windowWidth - mouseX) / windowWidth) * 100;
+    
+    // Constrain between 20% and 40% of screen width
+    const constrainedWidth = Math.max(20, Math.min(40, newWidth));
+    
+    // Update chat window and main content
+    chatWindow.style.width = constrainedWidth + "%";
+    mainContent.style.marginRight = constrainedWidth + "%";
+    
+    // Store current width
+    currentChatWidth = constrainedWidth;
+}
+
+function stopResize() {
+    isResizing = false;
+    document.removeEventListener("mousemove", handleResize);
+    document.removeEventListener("mouseup", stopResize);
+}
+
+// Handle window resize
+window.addEventListener("resize", () => {
+    if (isExpanded) {
+        const chatWindow = document.getElementById("chatWindow");
+        const mainContent = document.getElementById("mainContent");
+        // Maintain current width percentage
+        chatWindow.style.width = currentChatWidth + "%";
+        mainContent.style.marginRight = currentChatWidth + "%";
+    }
+});
+
+// Format links helper (moved outside for reuse)
+function formatLinks(text) {
+    return text.replace(
+        /(\/guide\/\d+)/g,
+        '<a href="$1" class="text-blue-600 underline" target="_blank">Open Guide</a>'
+    );
+}
+
+// Load history from server and display
+async function loadChatHistory() {
+    try {
+        const res = await fetch('/chat-history');
+        const data = await res.json();
+        const history = data.history || [];
+        const chatBox = document.getElementById("chatBox");
+        chatBox.innerHTML = "";
+        for (const msg of history) {
+            const msgDiv = document.createElement("div");
+            msgDiv.className = msg.role === "user" 
+                ? "bg-blue-500 text-white p-2 rounded-lg self-end ml-auto max-w-[75%]"
+                : "bg-gray-300 text-black p-2 rounded-lg self-start mr-auto max-w-[75%]";
+            // Apply consistent font styling to messages
+            msgDiv.style.fontFamily = "-apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif";
+            msgDiv.style.fontSize = "14px";
+            msgDiv.style.lineHeight = "1.4";
+            msgDiv.innerHTML = formatLinks(msg.content);
+            chatBox.appendChild(msgDiv);
+        }
+        chatBox.scrollTop = chatBox.scrollHeight;
+    } catch (err) {
+        console.error("Failed to load chat history:", err);
+    }
+}
+
+// Clear chat history
+async function clearChat() {
+    try {
+        await fetch('/clear-chat', { method: 'POST' });
+        document.getElementById("chatBox").innerHTML = "";
+    } catch (err) {
+        console.error("Failed to clear chat:", err);
+    }
 }
 
 document.addEventListener("DOMContentLoaded", () => {
-
     const sendBtn = document.getElementById("sendBtn");
     const msgInput = document.getElementById("msg");
 
     sendBtn.addEventListener("click", sendMsg);
-
-    // ENTER KEY SUPPORT
     msgInput.addEventListener("keydown", function(e) {
         if (e.key === "Enter") {
             e.preventDefault();
@@ -57,112 +229,128 @@ document.addEventListener("DOMContentLoaded", () => {
 
     function addMessage(text, sender) {
         const chatBox = document.getElementById("chatBox");
-
         const msgDiv = document.createElement("div");
-
-        msgDiv.className =
-            sender === "user"
+        msgDiv.className = sender === "user"
             ? "bg-blue-500 text-white p-2 rounded-lg self-end ml-auto max-w-[75%]"
             : "bg-gray-300 text-black p-2 rounded-lg self-start mr-auto max-w-[75%]";
-
-        // Apply link formatting immediately (for user messages or static content)
+        // Apply consistent font styling
+        msgDiv.style.fontFamily = "-apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif";
+        msgDiv.style.fontSize = "14px";
+        msgDiv.style.lineHeight = "1.4";
         msgDiv.innerHTML = formatLinks(text);
-
         chatBox.appendChild(msgDiv);
         chatBox.scrollTop = chatBox.scrollHeight;
         return msgDiv;
     }
 
-    function formatLinks(text) {
-        // Replace /guide/ID with clickable link
-        return text.replace(
-            /(\/guide\/\d+)/g,
-            '<a href="$1" class="text-blue-600 underline" target="_blank">Open Guide</a>'
-        );
-    }
-
-    // Typewriter effect
     function typeText(element, fullText, speed = 30) {
         return new Promise((resolve) => {
             let i = 0;
-            element.textContent = "";  // start empty
-
+            element.textContent = "";
             function typeNextChar() {
                 if (i < fullText.length) {
                     element.textContent += fullText.charAt(i);
                     i++;
-                    // Auto-scroll as text grows
                     const chatBox = document.getElementById("chatBox");
                     chatBox.scrollTop = chatBox.scrollHeight;
                     setTimeout(typeNextChar, speed);
                 } else {
-                    // When done, apply link formatting (so /guide/ID becomes clickable)
                     element.innerHTML = formatLinks(fullText);
                     resolve();
                 }
             }
-
             typeNextChar();
         });
     }
 
     async function sendMsg() {
-    try {
-        const fileInput = document.getElementById("imageUpload");
-        const msg = msgInput.value.trim();
-        const file = fileInput.files[0];
+        try {
+            const fileInput = document.getElementById("imageUpload");
+            const msg = msgInput.value.trim();
+            const file = fileInput.files[0];
 
-        if (!msg && !file) return;
+            if (!msg && !file) return;
 
-        // --- Get current guide ID from meta tag ---
-        let guideId = null;
-        const metaGuide = document.querySelector('meta[name="guide-id"]');
-        if (metaGuide) {
-            guideId = metaGuide.getAttribute('content');
+            let guideId = null;
+            const metaGuide = document.querySelector('meta[name="guide-id"]');
+            if (metaGuide) guideId = metaGuide.getAttribute('content');
+
+            if (msg) addMessage(msg, "user");
+            if (file) addMessage("📷 Image uploaded", "user");
+
+            const thinkingDiv = addMessage("Thinking...", "ai");
+
+            const formData = new FormData();
+            formData.append("message", msg);
+            if (file) formData.append("image", file);
+            if (guideId) formData.append("guide_id", guideId);
+
+            msgInput.value = "";
+            fileInput.value = "";
+
+            const res = await fetch("/ai-help", {
+                method: "POST",
+                body: formData
+            });
+
+            if (!res.ok) throw new Error("Server error");
+
+            const data = await res.json();
+            thinkingDiv.remove();
+
+            const aiMsgDiv = document.createElement("div");
+            aiMsgDiv.className = "bg-gray-300 text-black p-2 rounded-lg self-start mr-auto max-w-[75%]";
+            // Apply consistent font styling
+            aiMsgDiv.style.fontFamily = "-apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif";
+            aiMsgDiv.style.fontSize = "14px";
+            aiMsgDiv.style.lineHeight = "1.4";
+            document.getElementById("chatBox").appendChild(aiMsgDiv);
+
+            await typeText(aiMsgDiv, data.reply, 10);
+
+        } catch (err) {
+            console.error(err);
+            const chatBox = document.getElementById("chatBox");
+            const lastChild = chatBox.lastChild;
+            if (lastChild && lastChild.textContent === "Thinking...") {
+                lastChild.remove();
+            }
+            addMessage("⚠️ Error connecting to AI", "ai");
         }
-
-        if (msg) addMessage(msg, "user");
-        if (file) addMessage("📷 Image uploaded", "user");
-
-        const thinkingDiv = addMessage("Thinking...", "ai");
-
-        const formData = new FormData();
-        formData.append("message", msg);
-        if (file) formData.append("image", file);
-        if (guideId) formData.append("guide_id", guideId);   // <-- Send guide ID
-
-        msgInput.value = "";
-        fileInput.value = "";
-
-        const res = await fetch("/ai-help", {
-            method: "POST",
-            body: formData
-        });
-
-        if (!res.ok) {
-            throw new Error("Server error");
-        }
-
-        const data = await res.json();
-
-        thinkingDiv.remove();
-
-        const aiMsgDiv = document.createElement("div");
-        aiMsgDiv.className = "bg-gray-300 text-black p-2 rounded-lg self-start mr-auto max-w-[75%]";
-        document.getElementById("chatBox").appendChild(aiMsgDiv);
-
-        await typeText(aiMsgDiv, data.reply, 10);
-
-    } catch (err) {
-        console.error(err);
-        const chatBox = document.getElementById("chatBox");
-        const lastChild = chatBox.lastChild;
-        if (lastChild && lastChild.textContent === "Thinking...") {
-            lastChild.remove();
-        }
-        addMessage("⚠️ Error connecting to AI", "ai");
     }
-}
 
+    // Load chat history on page load
+    loadChatHistory();
 });
 </script>
+
+<style>
+/* Additional styles for better resize handle visibility */
+#resizeHandle:hover::before {
+    content: '';
+    position: absolute;
+    left: 50%;
+    top: 50%;
+    transform: translateX(-50%) translateY(-50%);
+    width: 4px;
+    height: 40px;
+    background-color: #3b82f6;
+    border-radius: 2px;
+    opacity: 0.7;
+}
+
+/* Smooth transitions */
+#chatWindow, #mainContent {
+    transition: all 0.3s ease;
+}
+
+/* Ensure the chat window stays on top */
+#chatWindow {
+    z-index: 1000;
+}
+
+/* Prevent horizontal scrollbar when content is resized */
+body {
+    overflow-x: hidden;
+}
+</style>
