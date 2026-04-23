@@ -722,7 +722,22 @@ def orders():
 
     return render_template("orders.html.jinja", orders=list(orders_dict.values()))
 
+@app.route("/map", methods=["GET"])
+def map():
+    connection = connect_db() 
+
+    cursor = connection.cursor()
+
+    cursor.execute("""SELECT * FROM `ShopLocation`""")
+
+    result = [{"lat": row["Latitude"], "lng": row["Longitude"], "name": row["Name"], "address": row["Address"], "image": row["Image"]} for row in cursor.fetchall()]
+
+    cursor.close()
+
+    connection.close()
+
+    return render_template("map.html.jinja", centers=result)
 
 
-if __name__ == "__main__":
+if __name__ == '__main__':
     app.run(debug=True)
