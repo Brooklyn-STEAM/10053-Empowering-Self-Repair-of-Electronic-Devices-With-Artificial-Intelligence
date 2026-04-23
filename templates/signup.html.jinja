@@ -7,6 +7,12 @@
     <link href="/static/style.css" rel="stylesheet">
     <link rel="icon" href="/static/products/Blueprint Logo.png" type="image">
     <script src="https://cdn.tailwindcss.com"></script>
+
+    <style>
+        .flash-msg {
+            transition: all 0.5s ease;
+        }
+    </style>
 </head>
 
 <body class="min-h-screen flex flex-col bg-[#0b2c4d] text-[#d6ecff] font-[Inter]">
@@ -21,72 +27,66 @@
             Create Account
         </h2>
 
-        <!-- FLASH MESSAGES -->
-        {% for message in get_flashed_messages() %}
-            <p class="bg-red-500 text-white text-sm p-3 rounded-lg mb-4 font-semibold">
-                {{ message }}
-            </p>
-        {% endfor %}
+        <!-- ✅ FLASH MESSAGES (FIXED) -->
+        {% with messages = get_flashed_messages(with_categories=true) %}
+          {% if messages %}
+            <div class="mb-4 space-y-3">
+
+              {% for category, message in messages %}
+                <div class="flash-msg p-3 rounded-lg font-semibold text-sm shadow-md
+                    {% if category == 'success' %}
+                        bg-green-500 text-white
+                    {% else %}
+                        bg-red-500 text-white
+                    {% endif %}">
+                    {{ message }}
+                </div>
+              {% endfor %}
+
+            </div>
+          {% endif %}
+        {% endwith %}
 
         <form method="post" class="flex flex-col gap-4">
 
             <!-- FULL NAME -->
             <div>
                 <label class="block text-sm mb-1 text-gray-300">Full Name</label>
-                <input
-                    required
-                    name="full_name"
-                    class="w-full px-4 py-2 rounded-lg bg-[#0b2c4d] border border-[#6fb7ff] text-white focus:outline-none focus:ring-2 focus:ring-[#6fb7ff]"
-                >
+                <input required name="full_name"
+                    class="w-full px-4 py-2 rounded-lg bg-[#0b2c4d] border border-[#6fb7ff] text-white focus:outline-none focus:ring-2 focus:ring-[#6fb7ff]">
             </div>
 
             <!-- EMAIL -->
             <div>
                 <label class="block text-sm mb-1 text-gray-300">Email</label>
-                <input
-                    required
-                    type="email"
-                    name="email"
-                    class="w-full px-4 py-2 rounded-lg bg-[#0b2c4d] border border-[#6fb7ff] text-white focus:outline-none focus:ring-2 focus:ring-[#6fb7ff]"
-                >
+                <input required type="email" name="email"
+                    class="w-full px-4 py-2 rounded-lg bg-[#0b2c4d] border border-[#6fb7ff] text-white focus:outline-none focus:ring-2 focus:ring-[#6fb7ff]">
             </div>
 
             <!-- PASSWORD -->
             <div>
                 <label class="block text-sm mb-1 text-gray-300">Password</label>
-                <input
-                    required
-                    type="password"
-                    name="password"
-                    class="w-full px-4 py-2 rounded-lg bg-[#0b2c4d] border border-[#6fb7ff] text-white focus:outline-none focus:ring-2 focus:ring-[#6fb7ff]"
-                >
+                <input required type="password" name="password"
+                    class="w-full px-4 py-2 rounded-lg bg-[#0b2c4d] border border-[#6fb7ff] text-white focus:outline-none focus:ring-2 focus:ring-[#6fb7ff]">
             </div>
 
             <!-- CONFIRM PASSWORD -->
             <div>
                 <label class="block text-sm mb-1 text-gray-300">Confirm Password</label>
-                <input
-                    type="password"
-                    name="confirm_password"
-                    class="w-full px-4 py-2 rounded-lg bg-[#0b2c4d] border border-[#6fb7ff] text-white focus:outline-none focus:ring-2 focus:ring-[#6fb7ff]"
-                >
+                <input type="password" name="confirm_password"
+                    class="w-full px-4 py-2 rounded-lg bg-[#0b2c4d] border border-[#6fb7ff] text-white focus:outline-none focus:ring-2 focus:ring-[#6fb7ff]">
             </div>
 
             <!-- ADDRESS -->
             <div>
                 <label class="block text-sm mb-1 text-gray-300">Address</label>
-                <input
-                    required
-                    name="address"
-                    class="w-full px-4 py-2 rounded-lg bg-[#0b2c4d] border border-[#6fb7ff] text-white focus:outline-none focus:ring-2 focus:ring-[#6fb7ff]"
-                >
+                <input required name="address"
+                    class="w-full px-4 py-2 rounded-lg bg-[#0b2c4d] border border-[#6fb7ff] text-white focus:outline-none focus:ring-2 focus:ring-[#6fb7ff]">
             </div>
 
             <!-- BUTTON -->
-            <button
-                type="submit"
-                class="mt-2 bg-[#6fb7ff] hover:bg-[#5aa7f0] text-[#0b2c4d] font-bold py-2 rounded-lg transition"
-            >
+            <button type="submit"
+                class="mt-2 bg-[#6fb7ff] hover:bg-[#5aa7f0] text-[#0b2c4d] font-bold py-2 rounded-lg transition">
                 Create Account
             </button>
 
@@ -95,6 +95,19 @@
     </div>
 
 </main>
+
+<!-- ⏱ AUTO DISAPPEAR SCRIPT -->
+<script>
+document.addEventListener("DOMContentLoaded", () => {
+    setTimeout(() => {
+        document.querySelectorAll('.flash-msg').forEach(msg => {
+            msg.style.opacity = "0";
+            msg.style.transform = "translateY(-10px)";
+            setTimeout(() => msg.remove(), 500);
+        });
+    }, 3000);
+});
+</script>
 
 </body>
 </html>

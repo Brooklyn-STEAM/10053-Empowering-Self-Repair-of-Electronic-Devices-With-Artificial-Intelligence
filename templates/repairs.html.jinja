@@ -4,63 +4,74 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Repair</title>
+
     <script src="https://cdn.tailwindcss.com"></script>
     <link href="/static/style.css" rel="stylesheet">
     <link rel="icon" href="/static/products/Blueprint Logo.png" type="image">
 </head>
-{% include "components/ai_chat.html.jinja" %}
+
 <body class="bg-[#0b2c4d] text-[#d6ecff] min-h-screen flex flex-col text-sm lg:text-xl">
-  <main class="flex-grow">
-    <!-- NAVBAR -->
-    {% include "components/navbar.html.jinja" %}
 
-    <header class="py-[70px] px-[80px] bg-[#0e3a63] border-b-2 border-dashed border-[#6fb7ff] text-center">
-        <h1 class="text-4xl mb-6 border-b-2 border-dashed border-[#6fb7ff] inline-block pb-[10px]">
-            Welcome to the Repair Page
-        </h1>
-        <p class="max-w-[700px] mx-auto text-lg leading-relaxed">
-            Step-by-step guides and equipment to help you repair your device safely and correctly.
-        </p>
-    </header>
+    <!-- AI CHAT -->
+    {% include "components/ai_chat.html.jinja" %}
 
-    <div class="grid grid-cols-1 md:grid-cols-2 gap-10 items-center">
+    <main class="flex-grow">
 
-   
-        <div class="grid grid-cols-2 gap-4 mb-6 ml-24">
-            
-            <div class="hover:text-[#6fb7ff] transition bg-[#0e3a63] p-4 mr-20 rounded-lg border-2 border-dashed border-[#6fb7ff]">
-                <a href="/phone_guides"> Phone Guides </a>
+        <!-- NAVBAR -->
+        {% include "components/navbar.html.jinja" %}
+
+        <!-- HEADER -->
+        <header class="bg-[#0e3a63] border-b-2 border-dashed border-[#6fb7ff]">
+            <div class="max-w-6xl mx-auto py-14 px-6 text-center">
+                <h1 class="text-3xl md:text-4xl mb-4 border-b-2 border-dashed border-[#6fb7ff] inline-block pb-2">
+                    Welcome to the Repair Page
+                </h1>
+                <p class="max-w-2xl mx-auto text-base md:text-lg leading-relaxed">
+                    Step-by-step guides and equipment to help you repair your device safely and correctly.
+                </p>
             </div>
-            
-            <div class="hover:text-[#6fb7ff] transition bg-[#0e3a63] p-4 mr-20 rounded-lg border-2 border-dashed border-[#6fb7ff]">
-                <a href="/browse"> Repair Equipment </a>
+        </header>
+
+        <!-- CONTENT -->
+        <section class="max-w-6xl mx-auto grid grid-cols-1 md:grid-cols-2 gap-10 px-6 py-12">
+
+            <!-- LINKS -->
+            <div class="flex flex-col gap-5">
+                <a href="/phone_guides"
+                   class="bg-[#0e3a63] p-5 rounded-lg border-2 border-dashed border-[#6fb7ff] text-center hover:bg-[#123f6b] transition">
+                    Phone Guides
+                </a>
+
+                <a href="/browse"
+                   class="bg-[#0e3a63] p-5 rounded-lg border-2 border-dashed border-[#6fb7ff] text-center hover:bg-[#123f6b] transition">
+                    Repair Equipment
+                </a>
             </div>
 
-        </div>
+            <!-- TEXT -->
+            <div class="bg-[#0e3a63] p-6 rounded-lg border-2 border-dashed border-[#6fb7ff]">
+                <h2 class="text-2xl md:text-3xl mb-4 border-b-2 border-dashed border-[#6fb7ff] inline-block pb-2">
+                    Repair Tips
+                </h2>
 
-        <!-- Text -->
-        <div>
-            <h2 class="text-3xl mb-6 mt-6 border-b-2 border-dashed border-[#6fb7ff] inline-block pb-[10px]">
-                Repair Tips
-            </h2>
+                <p class="text-base md:text-lg leading-relaxed mb-4">
+                    Use the links to find detailed guides and equipment for your repair. Follow these general tips for a successful repair:
+                </p>
 
-            <p class="text-lg leading-relaxed mb-4">
-                Use the links on the left to find detailed guides and equipment for your repair. Follow these general tips for a successful repair:
-            </p>
+                <ul class="list-disc pl-6 space-y-2 text-base">
+                    <li>Turn off the device first</li>
+                    <li>Use the correct screwdriver size</li>
+                    <li>Keep screws organized</li>
+                    <li>Follow steps in order</li>
+                </ul>
+            </div>
 
-            <ul class="list-disc pl-6 space-y-2 text-base">
-                <li>Turn off the device first</li>
-                <li>Use the correct screwdriver size</li>
-                <li>Keep screws organized</li>
-                <li>Follow steps in order</li>
-            </ul>
-        </div>
+        </section>
 
-    </div>
-  </main>
+    </main>
 
-<!-- FOOTER -->
-{% include "components/footer.html.jinja" %}
+    <!-- FOOTER -->
+    {% include "components/footer.html.jinja" %}
 
 </body>
 </html>

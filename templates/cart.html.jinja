@@ -4,6 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Cart</title>
+
     <script src="https://cdn.tailwindcss.com"></script>
     <link href="/static/style.css" rel="stylesheet">
     <link rel="icon" href="/static/products/Blueprint Logo.png" type="image">
@@ -18,6 +19,19 @@
 <main class="flex-grow px-4 lg:px-8 py-6 max-w-5xl mx-auto w-full">
 
     <h1 class="text-3xl font-bold mb-6">Your Shopping Cart</h1>
+
+    <!-- FLASH MESSAGES (FIXED + AUTO DISAPPEAR READY) -->
+    {% with messages = get_flashed_messages(with_categories=true) %}
+      {% if messages %}
+        <div class="space-y-3 mb-6">
+          {% for category, message in messages %}
+            <div class="flash-msg px-4 py-3 rounded-lg font-semibold shadow-md bg-green-500 text-white">
+              {{ message }}
+            </div>
+          {% endfor %}
+        </div>
+      {% endif %}
+    {% endwith %}
 
     {% if cart|length == 0 %}
         <p class="text-lg text-gray-400">Your cart is empty.</p>
@@ -132,8 +146,8 @@
 
     {% endfor %}
 
-    <!-- TOTAL BOX -->
-    <div class="mt-6 flex justify-end" data-aos="fade-up" data-aos-duration="800">
+    <!-- TOTAL -->
+    <div class="mt-6 flex justify-end">
 
         <div class="bg-[#0e3a63] border border-[#6fb7ff] rounded-xl p-4 w-full max-w-xs shadow-lg text-left">
             <div class="text-gray-400 text-sm">
@@ -144,17 +158,14 @@
                 Total: ${{ "%.2f"|format(ns.total) }}
             </h2>
 
-<a href="{{ url_for('checkout') }}"
-   class="block mt-4 w-full text-center font-semibold px-4 py-2 rounded-lg
-          bg-[#6fb7ff] hover:bg-[#5aa7f0]
-          text-[#0b2c4d]
-          transition-all duration-200
-          hover:shadow-md active:scale-95">
-
-    Checkout
-
-</a>
-
+            <a href="{{ url_for('checkout') }}"
+               class="block mt-4 w-full text-center font-semibold px-4 py-2 rounded-lg
+                      bg-[#6fb7ff] hover:bg-[#5aa7f0]
+                      text-[#0b2c4d]
+                      transition-all duration-200
+                      hover:shadow-md active:scale-95">
+                Checkout
+            </a>
         </div>
 
     </div>
@@ -171,6 +182,26 @@
 </main>
 
 {% include "components/footer.html.jinja" %}
+
+<!-- AUTO DISAPPEAR SCRIPT (FIXED) -->
+<script>
+document.addEventListener("DOMContentLoaded", () => {
+  setTimeout(() => {
+    const messages = document.querySelectorAll('.flash-msg');
+
+    messages.forEach(msg => {
+      msg.style.transition = "all 0.5s ease";
+      msg.style.opacity = "0";
+      msg.style.transform = "translateY(-10px)";
+
+      setTimeout(() => {
+        msg.remove();
+      }, 500);
+    });
+
+  }, 3000);
+});
+</script>
 
 </body>
 </html>
