@@ -28,6 +28,12 @@ client = Anthropic(api_key=config.get("ANTHROPIC_API_KEY"))
 
 app.secret_key = config.secret_key
 
+app.config.update(
+    SESSION_COOKIE_SECURE=False,  # Set to True in production with HTTPS
+    SESSION_COOKIE_HTTPONLY=True,
+    SESSION_COOKIE_SAMESITE='Lax',
+    PERMANENT_SESSION_LIFETIME=3600  # 1 hour
+)
 
 login_manager = LoginManager(app)
 
@@ -219,15 +225,25 @@ def products():
 @app.route("/search", methods=["GET"])
 def search():
     query = request.args.get("q", "").strip()
-    print(f"Search query: '{query}'")   # keep debug
-
     connection = connect_db()
     cursor = connection.cursor(pymysql.cursors.DictCursor)
 
     results = []
     if query:
-        # Union products and repair items
-        sql = """
+        # Split into keywords, remove empty strings
+        keywords = [word.strip() for word in query.split() if word.strip()]
+        if not keywords:
+            return render_template("search_results.html.jinja", query=query, results=[])
+
+        # Build dynamic SQL with multiple LIKE conditions (AND logic)
+        conditions = []
+        params = []
+        for kw in keywords:
+            conditions.append("Name LIKE %s")
+            params.append(f"%{kw}%")
+        where_clause = " AND ".join(conditions)
+
+        sql = f"""
             SELECT 
                 ID,
                 Name,
@@ -235,7 +251,7 @@ def search():
                 Price,
                 'product' AS type
             FROM Product
-            WHERE Name LIKE %s
+            WHERE {where_clause}
 
             UNION ALL
 
@@ -243,15 +259,14 @@ def search():
                 ID,
                 Name,
                 Image,
-                NULL AS Price,      -- RepairItems might not have price
+                NULL AS Price,
                 'repair_item' AS type
             FROM RepairItems
-            WHERE Name LIKE %s
+            WHERE {where_clause}
         """
-        params = [f"%{query}%", f"%{query}%"]
-        cursor.execute(sql, params)
+        # Duplicate params for UNION (two sets of conditions)
+        cursor.execute(sql, params + params)
         results = cursor.fetchall()
-        print(f"Found {len(results)} total results")
 
     connection.close()
     return render_template("search_results.html.jinja", query=query, results=results)
@@ -586,9 +601,12 @@ def thank_you():
 @app.route('/ai-help', methods=['POST'])
 def ai_help():
     try:
+        # Make session permanent
+        session.permanent = True
+        
         user_input = request.form.get("message", "")
         image = request.files.get("image")
-        guide_id = request.form.get("guide_id")        # <-- New
+        guide_id = request.form.get("guide_id")
 
         if image:
             image_path = f"static/uploads/{image.filename}"
@@ -604,10 +622,13 @@ def ai_help():
         result = run_agent(
             user_input,
             session["chat_history"],
-            guide_id=guide_id                         # <-- New
+            guide_id=guide_id
         )
 
         session["chat_history"].append({"role": "ai", "content": result["summary"]})
+        
+        # Explicitly save session
+        session.modified = True
 
         return jsonify({
             "reply": result.get("summary", str(result))
@@ -617,6 +638,19 @@ def ai_help():
         return jsonify({
             "reply": f"Server error: {str(e)}"
         }), 500
+
+@app.route('/chat-history', methods=['GET'])
+def get_chat_history():
+    session.permanent = True
+    history = session.get("chat_history", [])
+    return jsonify({"history": history})
+
+@app.route('/clear-chat', methods=['POST'])
+def clear_chat():
+    session.permanent = True
+    session["chat_history"] = []
+    session.modified = True
+    return jsonify({"status": "cleared"})
 
 @app.route("/profile")
 @login_required
@@ -790,11 +824,7 @@ def orders():
         }.get(status, 10)
 
     return render_template("orders.html.jinja", orders=list(orders_dict.values()))
-@app.route("/delete_account", methods=["POST"])
-@login_required
-def delete_account():
-    connection = connect_db()
-    cursor = connection.cursor()
+
 
 @app.route("/delete_account", methods=["POST"])
 @login_required
