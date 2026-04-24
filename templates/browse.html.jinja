@@ -10,93 +10,95 @@
 </head>
 
 <body class="min-h-screen flex flex-col bg-[#0b2c4d] text-[#d6ecff] text-sm lg:text-base">
+<div id="mainContent" class="transition-all duration-300" style="margin-right: 0;">
 
+    {% include "components/ai_chat.html.jinja" %}
 {% include "components/navbar.html.jinja" %}
 
 <main class="flex-grow px-4 py-6 lg:px-8">
 
-<!-- HEADER -->
-<section class="max-w-7xl mx-auto mb-8">
+    <!-- HEADER -->
+    <section class="max-w-7xl mx-auto mb-8">
 
-<div class="flex flex-col gap-3 lg:flex-row lg:items-end lg:justify-between">
+    <div class="flex flex-col gap-3 lg:flex-row lg:items-end lg:justify-between">
 
-<div>
-<h1 class="text-3xl font-bold text-[#6fb7ff]">
-Products
-</h1>
-<p class="text-gray-300 text-sm">
-Browse and select your favorite items.
-</p>
-</div>
+        <div>
+            <h1 class="text-3xl font-bold text-[#6fb7ff]">
+            Products
+            </h1>
+            <p class="text-gray-300 text-sm">
+            Browse and select your favorite items.
+            </p>
+        </div>
 
-<a href="/cart"
-class="px-5 py-2 rounded-lg bg-[#6fb7ff] text-[#0b2c4d] font-semibold hover:bg-[#5aa7f0] transition">
-Go to Cart →
-</a>
-
-</div>
-
-</section>
-
-<!-- GRID -->
-<section class="max-w-7xl mx-auto">
-
-<div class="grid grid-cols-2 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-6">
-
-{% for x in products %}
-
-<div class="bg-[#0e3a63] border border-[#6fb7ff] rounded-2xl overflow-hidden shadow-lg flex flex-col hover:scale-[1.02] transition">
-
-<!-- IMAGE -->
-<a href="/product/{{ x['ID'] }}"
-   class="m-3 p-4 h-44 flex items-center justify-center
-          bg-white
-          
-          rounded-xl overflow-hidden">
-
-    <img src="{{ x['Image'] }}"
-         class="max-h-full object-contain transition hover:scale-105">
-
-</a>
-
-<!-- CONTENT -->
-<div class="p-3 flex flex-col flex-1">
-
-<a href="/product/{{ x['ID'] }}">
-<h3 class="font-semibold text-[#d6ecff] hover:text-[#6fb7ff] transition">
-{{ x['Name'] }}
-</h3>
-</a>
-
-<div class="flex-grow"></div>
-
-<!-- BOTTOM -->
-<div class="flex items-center justify-between mt-4">
-
-<span class="font-bold text-[#6fb7ff]">
-${{ "%.2f"|format(x['Price']) }}
-</span>
-
-<a href="/product/{{ x['ID'] }}"
-class="px-3 py-1 rounded-lg bg-[#6fb7ff] text-[#0b2c4d] font-semibold text-sm hover:bg-[#5aa7f0] transition">
-View
-</a>
-
-</div>
+        <a href="/cart"
+        class="px-5 py-2 rounded-lg bg-[#6fb7ff] text-[#0b2c4d] font-semibold hover:bg-[#5aa7f0] transition">
+        Go to Cart →
+        </a>
 
     </div>
 
+    </section>
+
+    <!-- GRID -->
+    <section class="max-w-7xl mx-auto">
+
+        <div class="grid grid-cols-2 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-6">
+
+            {% for x in products %}
+
+            <div class="bg-[#0e3a63] border border-[#6fb7ff] rounded-2xl overflow-hidden shadow-lg flex flex-col hover:scale-[1.02] transition">
+
+                <!-- IMAGE -->
+                <a href="/product/{{ x['ID'] }}"
+                class="m-3 p-4 h-44 flex items-center justify-center
+                        bg-white
+                        
+                        rounded-xl overflow-hidden">
+
+                    <img src="{{ x['Image'] }}"
+                        class="max-h-full object-contain transition hover:scale-105">
+
+                </a>
+
+                <!-- CONTENT -->
+                <div class="p-3 flex flex-col flex-1">
+
+                    <a href="/product/{{ x['ID'] }}">
+                    <h3 class="font-semibold text-[#d6ecff] hover:text-[#6fb7ff] transition">
+                    {{ x['Name'] }}
+                    </h3>
+                    </a>
+
+            <div class="flex-grow"></div>
+
+            <!-- BOTTOM -->
+            <div class="flex items-center justify-between mt-4">
+
+            <span class="font-bold text-[#6fb7ff]">
+            ${{ "%.2f"|format(x['Price']) }}
+            </span>
+
+            <a href="/product/{{ x['ID'] }}"
+            class="px-3 py-1 rounded-lg bg-[#6fb7ff] text-[#0b2c4d] font-semibold text-sm hover:bg-[#5aa7f0] transition">
+            View
+            </a>
+
+            </div>
+
+                </div>
+
+                    </div>
+
+            {% endfor %}
+
         </div>
 
-{% endfor %}
-
-</div>
-
-</section>
+    </section>
 
 </main>
 
 {% include "components/footer.html.jinja" %}
-
+</div>
 </body>
 </html>

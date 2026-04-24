@@ -1,3 +1,8 @@
+<!-- Markdown parser -->
+<script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
+<!-- Sanitizer for safe HTML rendering -->
+<script src="https://cdn.jsdelivr.net/npm/dompurify@3.0.6/dist/purify.min.js"></script>
+
 <!-- Floating Button (OUTSIDE chat window) -->
 <button onclick="toggleChat()"
     class="fixed bottom-6 right-6 bg-blue-500 text-white px-4 py-3 rounded-full shadow-lg z-50 hover:bg-sky-700 active:bg-blue-800"
@@ -35,15 +40,14 @@
     </div>
 
     <!-- Chat Messages -->
-    <div id="chatBox" class="flex-1 overflow-y-auto p-3 space-y-2 text-sm flex flex-col"
-        style="font-size: 14px; line-height: 1.4;">
+    <div id="chatBox" class="flex-1 overflow-y-auto p-3 space-y-2 flex flex-col">
     </div>
 
     <!-- Input Area -->
     <div class="p-3 border-t border-[#2a4a6a]">
-        <input type="file" id="imageUpload" 
+        <!--<input type="file" id="imageUpload" 
             class="mb-2 text-white text-xs"
-            style="font-size: 12px;">
+            style="font-size: 12px;">-->
 
         <input id="msg"
             class="w-full p-2 rounded text-black mb-2"
@@ -156,6 +160,13 @@ function handleResize(e) {
 
 function stopResize() {
     isResizing = false;
+    
+    // Restore smooth transitions after dragging stops (faster: 0.1s)
+    const chatWindow = document.getElementById("chatWindow");
+    const mainContent = document.getElementById("mainContent");
+    chatWindow.style.transition = "width 0.1s ease, margin-right 0.1s ease";
+    mainContent.style.transition = "width 0.1s ease, margin-right 0.1s ease";
+    
     document.removeEventListener("mousemove", handleResize);
     document.removeEventListener("mouseup", stopResize);
 }
@@ -171,12 +182,18 @@ window.addEventListener("resize", () => {
     }
 });
 
-// Format links helper (moved outside for reuse)
-function formatLinks(text) {
-    return text.replace(
+// Convert Markdown to safe HTML and also auto-link /guide/### URLs
+function renderMarkdown(text) {
+    if (!text) return "";
+    // First, convert markdown -> HTML
+    let html = marked.parse(text, { breaks: true, gfm: true });
+    // Then auto-link guide URLs
+    html = html.replace(
         /(\/guide\/\d+)/g,
         '<a href="$1" class="text-blue-600 underline" target="_blank">Open Guide</a>'
     );
+    // Sanitize before injecting
+    return DOMPurify.sanitize(html);
 }
 
 // Load history from server and display
@@ -189,14 +206,10 @@ async function loadChatHistory() {
         chatBox.innerHTML = "";
         for (const msg of history) {
             const msgDiv = document.createElement("div");
-            msgDiv.className = msg.role === "user" 
-                ? "bg-blue-500 text-white p-2 rounded-lg self-end ml-auto max-w-[75%]"
-                : "bg-gray-300 text-black p-2 rounded-lg self-start mr-auto max-w-[75%]";
-            // Apply consistent font styling to messages
-            msgDiv.style.fontFamily = "-apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif";
-            msgDiv.style.fontSize = "14px";
-            msgDiv.style.lineHeight = "1.4";
-            msgDiv.innerHTML = formatLinks(msg.content);
+            msgDiv.className = msg.role === "user"
+                ? "chat-bubble user-bubble bg-blue-500 text-white p-3 rounded-lg self-end ml-auto max-w-[85%]"
+                : "chat-bubble ai-bubble bg-gray-100 text-black p-3 rounded-lg self-start mr-auto max-w-[90%]";
+            msgDiv.innerHTML = renderMarkdown(msg.content);
             chatBox.appendChild(msgDiv);
         }
         chatBox.scrollTop = chatBox.scrollHeight;
@@ -231,35 +244,26 @@ document.addEventListener("DOMContentLoaded", () => {
         const chatBox = document.getElementById("chatBox");
         const msgDiv = document.createElement("div");
         msgDiv.className = sender === "user"
-            ? "bg-blue-500 text-white p-2 rounded-lg self-end ml-auto max-w-[75%]"
-            : "bg-gray-300 text-black p-2 rounded-lg self-start mr-auto max-w-[75%]";
-        // Apply consistent font styling
-        msgDiv.style.fontFamily = "-apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif";
-        msgDiv.style.fontSize = "14px";
-        msgDiv.style.lineHeight = "1.4";
-        msgDiv.innerHTML = formatLinks(text);
+            ? "chat-bubble user-bubble bg-blue-500 text-white p-3 rounded-lg self-end ml-auto max-w-[85%]"
+            : "chat-bubble ai-bubble bg-gray-100 text-black p-3 rounded-lg self-start mr-auto max-w-[90%]";
+        msgDiv.innerHTML = renderMarkdown(text);
         chatBox.appendChild(msgDiv);
         chatBox.scrollTop = chatBox.scrollHeight;
         return msgDiv;
     }
 
-    function typeText(element, fullText, speed = 30) {
+    // Reveal AI response with a clean fade-in (replaces typewriter effect)
+    function revealMessage(element, fullText) {
         return new Promise((resolve) => {
-            let i = 0;
-            element.textContent = "";
-            function typeNextChar() {
-                if (i < fullText.length) {
-                    element.textContent += fullText.charAt(i);
-                    i++;
-                    const chatBox = document.getElementById("chatBox");
-                    chatBox.scrollTop = chatBox.scrollHeight;
-                    setTimeout(typeNextChar, speed);
-                } else {
-                    element.innerHTML = formatLinks(fullText);
-                    resolve();
-                }
-            }
-            typeNextChar();
+            element.innerHTML = renderMarkdown(fullText);
+            element.style.opacity = 0;
+            element.style.transition = "opacity 0.4s ease";
+            requestAnimationFrame(() => {
+                element.style.opacity = 1;
+            });
+            const chatBox = document.getElementById("chatBox");
+            chatBox.scrollTop = chatBox.scrollHeight;
+            setTimeout(resolve, 400);
         });
     }
 
@@ -278,7 +282,7 @@ document.addEventListener("DOMContentLoaded", () => {
             if (msg) addMessage(msg, "user");
             if (file) addMessage("📷 Image uploaded", "user");
 
-            const thinkingDiv = addMessage("Thinking...", "ai");
+            const thinkingDiv = addMessage("_Thinking..._", "ai");
 
             const formData = new FormData();
             formData.append("message", msg);
@@ -299,20 +303,16 @@ document.addEventListener("DOMContentLoaded", () => {
             thinkingDiv.remove();
 
             const aiMsgDiv = document.createElement("div");
-            aiMsgDiv.className = "bg-gray-300 text-black p-2 rounded-lg self-start mr-auto max-w-[75%]";
-            // Apply consistent font styling
-            aiMsgDiv.style.fontFamily = "-apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif";
-            aiMsgDiv.style.fontSize = "14px";
-            aiMsgDiv.style.lineHeight = "1.4";
+            aiMsgDiv.className = "chat-bubble ai-bubble bg-gray-100 text-black p-3 rounded-lg self-start mr-auto max-w-[90%]";
             document.getElementById("chatBox").appendChild(aiMsgDiv);
 
-            await typeText(aiMsgDiv, data.reply, 10);
+            await revealMessage(aiMsgDiv, data.reply);
 
         } catch (err) {
             console.error(err);
             const chatBox = document.getElementById("chatBox");
             const lastChild = chatBox.lastChild;
-            if (lastChild && lastChild.textContent === "Thinking...") {
+            if (lastChild && lastChild.textContent.trim() === "Thinking...") {
                 lastChild.remove();
             }
             addMessage("⚠️ Error connecting to AI", "ai");
@@ -325,6 +325,89 @@ document.addEventListener("DOMContentLoaded", () => {
 </script>
 
 <style>
+/* ===== Chat Bubble Typography ===== */
+.chat-bubble {
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+    font-size: 14px;
+    line-height: 1.5;
+    word-wrap: break-word;
+}
+
+/* Headings inside AI responses */
+.ai-bubble h1,
+.ai-bubble h2,
+.ai-bubble h3 {
+    font-weight: 600;
+    margin: 10px 0 6px 0;
+    color: #1a3a5a;
+}
+.ai-bubble h1 { font-size: 16px; }
+.ai-bubble h2 { font-size: 15px; }
+.ai-bubble h3 { font-size: 14px; }
+
+/* Paragraphs */
+.ai-bubble p {
+    margin: 6px 0;
+}
+
+/* Bulleted & numbered lists */
+.ai-bubble ul,
+.ai-bubble ol {
+    margin: 6px 0 8px 0;
+    padding-left: 22px;
+}
+.ai-bubble li {
+    margin-bottom: 4px;
+}
+
+/* Bold & emphasis */
+.ai-bubble strong { font-weight: 600; color: #0f2d4a; }
+.ai-bubble em { font-style: italic; }
+
+/* Code / inline snippets */
+.ai-bubble code {
+    background: #e5e7eb;
+    padding: 1px 5px;
+    border-radius: 4px;
+    font-size: 13px;
+    font-family: "SF Mono", Menlo, Consolas, monospace;
+}
+.ai-bubble pre {
+    background: #1f2937;
+    color: #f3f4f6;
+    padding: 10px;
+    border-radius: 6px;
+    overflow-x: auto;
+    margin: 8px 0;
+    font-size: 12.5px;
+}
+
+/* Blockquotes */
+.ai-bubble blockquote {
+    border-left: 3px solid #3b82f6;
+    padding-left: 10px;
+    margin: 8px 0;
+    color: #374151;
+    font-style: italic;
+}
+
+/* Remove extra top/bottom space from first/last items */
+.ai-bubble > *:first-child { margin-top: 0; }
+.ai-bubble > *:last-child { margin-bottom: 0; }
+
+/* Links inside AI messages */
+.ai-bubble a {
+    color: #2563eb;
+    text-decoration: underline;
+}
+
+/* Horizontal rule */
+.ai-bubble hr {
+    border: none;
+    border-top: 1px solid #d1d5db;
+    margin: 10px 0;
+}
+
 /* Additional styles for better resize handle visibility */
 #resizeHandle:hover::before {
     content: '';
@@ -341,7 +424,7 @@ document.addEventListener("DOMContentLoaded", () => {
 
 /* Smooth transitions */
 #chatWindow, #mainContent {
-    transition: all 0.3s ease;
+    transition: width 0.3s ease, margin-right 0.3s ease;
 }
 
 /* Ensure the chat window stays on top */
