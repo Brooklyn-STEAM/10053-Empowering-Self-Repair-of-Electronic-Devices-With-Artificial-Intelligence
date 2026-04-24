@@ -13,8 +13,11 @@
     <script src="https://cdn.jsdelivr.net/npm/@tailwindcss/browser@4"></script>
 </head>
 
-{% include "components/ai_chat.html.jinja" %}
+
 <body class="min-h-screen flex flex-col text-sm lg:text-xl">
+<div id="mainContent" class="transition-all duration-300" style="margin-right: 0;">
+
+{% include "components/ai_chat.html.jinja" %}
     {% include "components/navbar.html.jinja" %}
 
   <main class="flex-grow">
@@ -25,6 +28,6 @@
 
     <!-- FOOTER -->
     {% include "components/footer.html.jinja" %}
-
+</div>
 </body>
 </html>
