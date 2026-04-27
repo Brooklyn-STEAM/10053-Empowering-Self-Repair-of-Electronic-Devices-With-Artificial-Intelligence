@@ -11,12 +11,18 @@
             padding: 0;
             height: 100vh;
         }
+       .navbar {
+    position: relative; 
+    z-index: 10;
+
+                }
+
+    /* Adjust the map to avoid overlapping */
         #map {
-            flex: 1;
-            margin: 0;
-            height: 500px; /* Adjust height as needed */
-            width: 100%;
-        }
+    margin-top: 40px; /* Adjust this value based on the navbar height */
+    height: calc(100vh - 60px); /* Full height minus the navbar height */
+    width: 100%;
+                }
     </style>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -27,7 +33,12 @@
 </head>
 
 <body class="bg-[#0b2c4d] text-[#d6ecff] font-mono min-h-screen flex flex-col text-sm lg:text-lg">
-    {% include "components/navbar.html.jinja" %}
+    <div class="navbar">
+        {% include "components/navbar.html.jinja" %}
+    </div>
+    <br>
+    <h1 class="text-3xl md:text-4xl mb-4 border-b-2 border-dashed border-[#6fb7ff] inline-block pb-2 text-center">
+        Find Repair Centers Near You 
 
     <div id="map"></div>
 
