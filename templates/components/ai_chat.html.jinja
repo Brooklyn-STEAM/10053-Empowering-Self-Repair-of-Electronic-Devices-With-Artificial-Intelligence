@@ -13,7 +13,6 @@
 <!-- Main content wrapper - this will be resized -->
 <div id="mainContent" class="transition-all duration-300" style="margin-right: 0;">
     <!-- All your existing website content goes here -->
-    <!-- This div should wrap your entire main content -->
 </div>
 
 <!-- Chat Window -->
@@ -45,12 +44,8 @@
 
     <!-- Input Area -->
     <div class="p-3 border-t border-[#2a4a6a]">
-        <!--<input type="file" id="imageUpload" 
-            class="mb-2 text-white text-xs"
-            style="font-size: 12px;">-->
-
         <input id="msg"
-            class="w-full p-2 rounded text-black mb-2"
+            class="w-full p-2 rounded text-black bg-white mb-2"
             placeholder="Describe your issue..."
             style="font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; font-size: 14px;">
 
@@ -69,20 +64,16 @@
 // Chat visibility and expansion state
 let isChatVisible = false;
 let isExpanded = false;
-let currentChatWidth = 40; // Default split screen width percentage
+let currentChatWidth = 40;
 
-// Toggle chat visibility
 function toggleChat() {
     const chatWindow = document.getElementById("chatWindow");
     const mainContent = document.getElementById("mainContent");
-    
     isChatVisible = !isChatVisible;
-    
     if (isChatVisible) {
         chatWindow.classList.remove("hidden");
     } else {
         chatWindow.classList.add("hidden");
-        // Reset main content when closing
         if (isExpanded) {
             mainContent.style.marginRight = "0";
             isExpanded = false;
@@ -90,45 +81,32 @@ function toggleChat() {
     }
 }
 
-// Toggle between normal and split screen view
 function toggleExpandedView() {
     const chatWindow = document.getElementById("chatWindow");
     const mainContent = document.getElementById("mainContent");
     const expandBtn = document.getElementById("expandBtn");
     const resizeHandle = document.getElementById("resizeHandle");
-    
     isExpanded = !isExpanded;
-    
     if (isExpanded) {
-        // Switch to split screen mode
         chatWindow.classList.remove("bottom-20", "right-6", "w-96", "h-[500px]", "rounded-xl");
         chatWindow.classList.add("top-0", "right-0", "h-full", "rounded-none");
         chatWindow.style.width = currentChatWidth + "%";
-        
-        // Resize main content to make room for chat
         mainContent.style.marginRight = currentChatWidth + "%";
-        
         expandBtn.innerHTML = "📱 Window";
         expandBtn.title = "Return to window view";
         resizeHandle.classList.remove("hidden");
     } else {
-        // Switch back to window mode
         chatWindow.classList.add("bottom-20", "right-6", "w-96", "h-[500px]", "rounded-xl");
         chatWindow.classList.remove("top-0", "right-0", "h-full", "rounded-none");
-        chatWindow.style.width = ""; // Reset inline width
-        
-        // Reset main content
+        chatWindow.style.width = "";
         mainContent.style.marginRight = "0";
-        
         expandBtn.innerHTML = "📱 Split View";
         expandBtn.title = "Expand to split screen";
         resizeHandle.classList.add("hidden");
     }
 }
 
-// Resize functionality
 let isResizing = false;
-
 document.getElementById("resizeHandle").addEventListener("mousedown", (e) => {
     isResizing = true;
     document.addEventListener("mousemove", handleResize);
@@ -138,65 +116,46 @@ document.getElementById("resizeHandle").addEventListener("mousedown", (e) => {
 
 function handleResize(e) {
     if (!isResizing || !isExpanded) return;
-    
     const chatWindow = document.getElementById("chatWindow");
     const mainContent = document.getElementById("mainContent");
     const windowWidth = window.innerWidth;
     const mouseX = e.clientX;
-    
-    // Calculate new width as percentage of window width
     const newWidth = ((windowWidth - mouseX) / windowWidth) * 100;
-    
-    // Constrain between 20% and 40% of screen width
     const constrainedWidth = Math.max(20, Math.min(40, newWidth));
-    
-    // Update chat window and main content
     chatWindow.style.width = constrainedWidth + "%";
     mainContent.style.marginRight = constrainedWidth + "%";
-    
-    // Store current width
     currentChatWidth = constrainedWidth;
 }
 
 function stopResize() {
     isResizing = false;
-    
-    // Restore smooth transitions after dragging stops (faster: 0.1s)
     const chatWindow = document.getElementById("chatWindow");
     const mainContent = document.getElementById("mainContent");
     chatWindow.style.transition = "width 0.1s ease, margin-right 0.1s ease";
     mainContent.style.transition = "width 0.1s ease, margin-right 0.1s ease";
-    
     document.removeEventListener("mousemove", handleResize);
     document.removeEventListener("mouseup", stopResize);
 }
 
-// Handle window resize
 window.addEventListener("resize", () => {
     if (isExpanded) {
         const chatWindow = document.getElementById("chatWindow");
         const mainContent = document.getElementById("mainContent");
-        // Maintain current width percentage
         chatWindow.style.width = currentChatWidth + "%";
         mainContent.style.marginRight = currentChatWidth + "%";
     }
 });
 
-// Convert Markdown to safe HTML and also auto-link /guide/### URLs
 function renderMarkdown(text) {
     if (!text) return "";
-    // First, convert markdown -> HTML
     let html = marked.parse(text, { breaks: true, gfm: true });
-    // Then auto-link guide URLs
     html = html.replace(
         /(\/guide\/\d+)/g,
         '<a href="$1" class="text-blue-600 underline" target="_blank">Open Guide</a>'
     );
-    // Sanitize before injecting
     return DOMPurify.sanitize(html);
 }
 
-// Load history from server and display
 async function loadChatHistory() {
     try {
         const res = await fetch('/chat-history');
@@ -218,7 +177,6 @@ async function loadChatHistory() {
     }
 }
 
-// Clear chat history
 async function clearChat() {
     try {
         await fetch('/clear-chat', { method: 'POST' });
@@ -252,18 +210,34 @@ document.addEventListener("DOMContentLoaded", () => {
         return msgDiv;
     }
 
-    // Reveal AI response with a clean fade-in (replaces typewriter effect)
+    // ===== TYPEWRITER EFFECT =====
+    // Reveals the AI message character-by-character.
+    // Tweak CHARS_PER_TICK and TICK_MS to adjust speed:
+    //   - higher CHARS_PER_TICK = faster
+    //   - lower TICK_MS = faster
     function revealMessage(element, fullText) {
         return new Promise((resolve) => {
-            element.innerHTML = renderMarkdown(fullText);
-            element.style.opacity = 0;
-            element.style.transition = "opacity 0.4s ease";
-            requestAnimationFrame(() => {
-                element.style.opacity = 1;
-            });
             const chatBox = document.getElementById("chatBox");
-            chatBox.scrollTop = chatBox.scrollHeight;
-            setTimeout(resolve, 400);
+            const CHARS_PER_TICK = 3;   // characters added per frame
+            const TICK_MS = 12;         // delay between frames (ms)
+
+            let i = 0;
+            element.classList.add("typewriter-cursor");
+
+            const interval = setInterval(() => {
+                i = Math.min(i + CHARS_PER_TICK, fullText.length);
+                element.innerHTML = renderMarkdown(fullText.slice(0, i));
+
+                // Auto-scroll only if user is near the bottom
+                const nearBottom = chatBox.scrollHeight - chatBox.scrollTop - chatBox.clientHeight < 80;
+                if (nearBottom) chatBox.scrollTop = chatBox.scrollHeight;
+
+                if (i >= fullText.length) {
+                    clearInterval(interval);
+                    element.classList.remove("typewriter-cursor");
+                    resolve();
+                }
+            }, TICK_MS);
         });
     }
 
@@ -271,7 +245,7 @@ document.addEventListener("DOMContentLoaded", () => {
         try {
             const fileInput = document.getElementById("imageUpload");
             const msg = msgInput.value.trim();
-            const file = fileInput.files[0];
+            const file = fileInput && fileInput.files ? fileInput.files[0] : null;
 
             if (!msg && !file) return;
 
@@ -290,7 +264,7 @@ document.addEventListener("DOMContentLoaded", () => {
             if (guideId) formData.append("guide_id", guideId);
 
             msgInput.value = "";
-            fileInput.value = "";
+            if (fileInput) fileInput.value = "";
 
             const res = await fetch("/ai-help", {
                 method: "POST",
@@ -319,7 +293,6 @@ document.addEventListener("DOMContentLoaded", () => {
         }
     }
 
-    // Load chat history on page load
     loadChatHistory();
 });
 </script>
@@ -333,10 +306,7 @@ document.addEventListener("DOMContentLoaded", () => {
     word-wrap: break-word;
 }
 
-/* Headings inside AI responses */
-.ai-bubble h1,
-.ai-bubble h2,
-.ai-bubble h3 {
+.ai-bubble h1, .ai-bubble h2, .ai-bubble h3 {
     font-weight: 600;
     margin: 10px 0 6px 0;
     color: #1a3a5a;
@@ -345,26 +315,14 @@ document.addEventListener("DOMContentLoaded", () => {
 .ai-bubble h2 { font-size: 15px; }
 .ai-bubble h3 { font-size: 14px; }
 
-/* Paragraphs */
-.ai-bubble p {
-    margin: 6px 0;
-}
+.ai-bubble p { margin: 6px 0; }
 
-/* Bulleted & numbered lists */
-.ai-bubble ul,
-.ai-bubble ol {
-    margin: 6px 0 8px 0;
-    padding-left: 22px;
-}
-.ai-bubble li {
-    margin-bottom: 4px;
-}
+.ai-bubble ul, .ai-bubble ol { margin: 6px 0 8px 0; padding-left: 22px; }
+.ai-bubble li { margin-bottom: 4px; }
 
-/* Bold & emphasis */
 .ai-bubble strong { font-weight: 600; color: #0f2d4a; }
 .ai-bubble em { font-style: italic; }
 
-/* Code / inline snippets */
 .ai-bubble code {
     background: #e5e7eb;
     padding: 1px 5px;
@@ -381,8 +339,6 @@ document.addEventListener("DOMContentLoaded", () => {
     margin: 8px 0;
     font-size: 12.5px;
 }
-
-/* Blockquotes */
 .ai-bubble blockquote {
     border-left: 3px solid #3b82f6;
     padding-left: 10px;
@@ -390,25 +346,24 @@ document.addEventListener("DOMContentLoaded", () => {
     color: #374151;
     font-style: italic;
 }
-
-/* Remove extra top/bottom space from first/last items */
 .ai-bubble > *:first-child { margin-top: 0; }
 .ai-bubble > *:last-child { margin-bottom: 0; }
+.ai-bubble a { color: #2563eb; text-decoration: underline; }
+.ai-bubble hr { border: none; border-top: 1px solid #d1d5db; margin: 10px 0; }
 
-/* Links inside AI messages */
-.ai-bubble a {
-    color: #2563eb;
-    text-decoration: underline;
+/* ===== Typewriter blinking cursor ===== */
+.typewriter-cursor::after {
+    content: "▍";
+    display: inline-block;
+    margin-left: 2px;
+    color: #1a3a5a;
+    animation: blink 1s steps(1) infinite;
+    font-weight: 600;
+}
+@keyframes blink {
+    50% { opacity: 0; }
 }
 
-/* Horizontal rule */
-.ai-bubble hr {
-    border: none;
-    border-top: 1px solid #d1d5db;
-    margin: 10px 0;
-}
-
-/* Additional styles for better resize handle visibility */
 #resizeHandle:hover::before {
     content: '';
     position: absolute;
@@ -422,18 +377,10 @@ document.addEventListener("DOMContentLoaded", () => {
     opacity: 0.7;
 }
 
-/* Smooth transitions */
 #chatWindow, #mainContent {
     transition: width 0.3s ease, margin-right 0.3s ease;
 }
 
-/* Ensure the chat window stays on top */
-#chatWindow {
-    z-index: 1000;
-}
-
-/* Prevent horizontal scrollbar when content is resized */
-body {
-    overflow-x: hidden;
-}
+#chatWindow { z-index: 1000; }
+body { overflow-x: hidden; }
 </style>
