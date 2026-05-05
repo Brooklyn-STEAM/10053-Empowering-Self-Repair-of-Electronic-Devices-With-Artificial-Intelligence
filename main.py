@@ -8,9 +8,7 @@ from anthropic import Anthropic
 import re
 from openai import OpenAI
 import sqlite3
-import pdfplumber
-
-
+from werkzeug.security import generate_password_hash, check_password_hash
 
 
 
@@ -47,6 +45,7 @@ class User:
         self.email = result["Email"]
         self.address = result["Address"]
         self.id = result["ID"]
+        self.password = result["Password"] 
 
     def get_id(self):
         return str(self.id)
@@ -101,13 +100,10 @@ def login_page():
         email = request.form["email"]
         password = request.form["password"]
 
-        connection = None
-        cursor = None
+        connection = connect_db()
+        cursor = connection.cursor()
 
         try:
-            connection = connect_db()
-            cursor = connection.cursor()
-
             cursor.execute(
                 "SELECT * FROM User WHERE Email = %s",
                 (email,)
@@ -116,26 +112,21 @@ def login_page():
             result = cursor.fetchone()
 
         finally:
-            if cursor:
-                cursor.close()
-            if connection:
-                connection.close()
+            cursor.close()
+            connection.close()
 
         if result is None:
-            flash("No user found. Please check your email or password.", "error")
+            flash("No user found.", "error")
             return render_template("login.html.jinja")
 
-        if password != result["Password"]:
+        if not check_password_hash(result["Password"], password):
             flash("Incorrect password.", "error")
             return render_template("login.html.jinja")
 
-        # ✅ success
         login_user(User(result))
-
         session["has_seen_greeting"] = False
 
         flash("Welcome back!", "success")
-
         return redirect("/")
 
     return render_template("login.html.jinja")
@@ -149,27 +140,37 @@ def signup_page():
         password = request.form["password"]
         confirm_password = request.form["confirm_password"]
         address = request.form["address"]
-        
+
         if password != confirm_password:
-            flash("Passwords do not match")
-        elif len(password) < 8:
-            flash("Password is too short")
-        else:
-            connection = connect_db()
+            flash("Passwords do not match", "error")
+            return redirect("/signup")
 
-            cursor = connection.cursor()
-            try:
-                cursor.execute("""
-                    INSERT INTO `User` (`Name`, `Email`, `Password`,  `Address`)
-                    VALUES (%s, %s, %s, %s)
-                """, (name, email, password, address))
-                connection.close()
-            except pymysql.err.IntegrityError:
-                flash("Email is already in use")
-                connection.close()
-            else:
-                return redirect("/login")
+        if len(password) < 8:
+            flash("Password is too short", "error")
+            return redirect("/signup")
 
+        hashed_password = generate_password_hash(password)
+
+        connection = connect_db()
+        cursor = connection.cursor()
+
+        try:
+            cursor.execute("""
+                INSERT INTO User (Name, Email, Password, Address)
+                VALUES (%s, %s, %s, %s)
+            """, (name, email, hashed_password, address))
+
+            connection.commit()
+
+        except Exception as e:
+            print(e)
+            flash("Email is already in use", "error")
+
+        finally:
+            cursor.close()
+            connection.close()
+
+        return redirect("/login")
 
     return render_template("signup.html.jinja")
 
@@ -589,8 +590,6 @@ def checkout():
 
     return render_template("checkout.html.jinja", cart=cart_items)
 
-
-
 @app.route("/thank_you")
 @login_required
 def thank_you():
@@ -702,6 +701,7 @@ def update_profile():
         connection.close()
 
     return redirect("/profile")
+
 @app.route("/edit_profile")
 @login_required
 def edit_profile():
@@ -826,42 +826,30 @@ def orders():
 @app.route("/delete_account", methods=["POST"])
 @login_required
 def delete_account():
-
     connection = None
     cursor = None
 
     try:
+        password = request.form.get("password", "").strip()
+
+        if not password:
+            flash("Password required.", "error")
+            return redirect("/profile")
+
+        if not check_password_hash(current_user.password, password):
+            flash("Incorrect password.", "error")
+            return redirect("/profile")
+
         connection = connect_db()
         cursor = connection.cursor()
 
         user_id = current_user.id
+        print("🔍 Deleting user:", user_id)
 
-        # 1. Delete order tracking
-        cursor.execute("""
-            DELETE FROM order_tracking
-            WHERE order_id IN (
-                SELECT ID FROM orders WHERE user_id = %s
-            )
-        """, (user_id,))
+        # Begin transaction
+        connection.begin()
 
-        # 2. Delete sales cart items
-        cursor.execute("""
-            DELETE FROM SalesCart
-            WHERE order_id IN (
-                SELECT ID FROM orders WHERE user_id = %s
-            )
-        """, (user_id,))
-
-        # 3. Delete orders
-        cursor.execute("DELETE FROM orders WHERE user_id = %s", (user_id,))
-
-        # 4. Delete reviews
-        cursor.execute("DELETE FROM Review WHERE UserID = %s", (user_id,))
-
-        # 5. Delete cart items
-        cursor.execute("DELETE FROM Cart WHERE UserID = %s", (user_id,))
-
-        # 6. Delete user
+        # Delete user only; cascades will handle related records
         cursor.execute("DELETE FROM User WHERE ID = %s", (user_id,))
 
         connection.commit()
@@ -870,21 +858,17 @@ def delete_account():
         if connection:
             connection.rollback()
 
-        print(e)
-        flash("Error deleting account. Please try again.", "error")
+        print("❌ DELETE ERROR:", e)
+        flash("Error deleting account.", "error")
         return redirect("/profile")
-
     finally:
         if cursor:
             cursor.close()
         if connection:
             connection.close()
 
-    # logout AFTER deletion
     logout_user()
-
     flash("Account deleted successfully.", "success")
-
     return redirect("/")
 
 @app.route("/map", methods=["GET"])
@@ -903,6 +887,3 @@ def map():
 
     return render_template("map.html.jinja", centers=result)
 
-
-if __name__ == '__main__':
-    app.run(debug=True)

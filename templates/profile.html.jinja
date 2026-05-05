@@ -1,284 +1,209 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Profile</title>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Profile</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link href="/static/style.css" rel="stylesheet" />
+  <link rel="icon" href="/static/products/Blueprint Logo.png" />
 
-    <script src="https://cdn.tailwindcss.com"></script>
-    <link href="/static/style.css" rel="stylesheet">
-    <link rel="icon" href="/static/products/Blueprint Logo.png">
-
-    <style>
-        .glass {
-            backdrop-filter: blur(10px);
-            background: rgba(11, 44, 77, 0.6);
-        }
-
-        .soft-glow {
-            box-shadow: 0 0 25px rgba(111, 183, 255, 0.12);
-        }
-
-        .hover-lift {
-            transition: 0.25s ease;
-        }
-
-        .hover-lift:hover {
-            transform: translateY(-4px);
-        }
-
-        .avatar {
-            width: 70px;
-            height: 70px;
-            border-radius: 50%;
-            background: #6fb7ff;
-            color: #0b2c4d;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            font-weight: bold;
-            font-size: 22px;
-        }
-
-        .flash-msg {
-            transition: all 0.5s ease;
-        }
-
-        .toast {
-            position: fixed;
-            bottom: 20px;
-            right: 20px;
-            background: #0e3a63;
-            border: 1px solid rgba(111,183,255,0.4);
-            padding: 12px 16px;
-            border-radius: 12px;
-            display: none;
-        }
-    </style>
+  <style>
+    .glass {
+      backdrop-filter: blur(10px);
+      background: rgba(11, 44, 77, 0.6);
+    }
+    .soft-glow {
+      box-shadow: 0 0 25px rgba(111, 183, 255, 0.12);
+    }
+    .hover-lift {
+      transition: 0.25s ease;
+    }
+    .hover-lift:hover {
+      transform: translateY(-4px);
+    }
+    .avatar {
+      width: 70px;
+      height: 70px;
+      border-radius: 50%;
+      background: #6fb7ff;
+      color: #0b2c4d;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-weight: bold;
+      font-size: 22px;
+    }
+    .toast {
+      position: fixed;
+      bottom: 20px;
+      right: 20px;
+      background: #0e3a63;
+      border: 1px solid rgba(111,183,255,0.4);
+      padding: 12px 16px;
+      border-radius: 12px;
+      display: none;
+    }
+  </style>
 </head>
-
-<body class="min-h-screen flex flex-col bg-[#0b2c4d] text-[#d6ecff] font-[Inter]">
+<body class="min-h-screen flex flex-col bg-[#0b2c4d] text-[#d6ecff]">
 
 {% include "components/navbar.html.jinja" %}
 
 <main class="flex-grow px-6 lg:px-20 py-10">
 
-    <!-- HEADER -->
-    <div class="text-center mb-10">
-        <div class="flex justify-center mb-4">
-            <div class="avatar">
-                {{ current_user.name[0]|upper }}
-            </div>
+  <!-- FLASH MESSAGES -->
+  {% with messages = get_flashed_messages(with_categories=true) %}
+    {% if messages %}
+      <div class="mb-6 space-y-2">
+        {% for category, message in messages %}
+          <div class="p-3 rounded
+              {% if category == 'error' %}
+                  bg-red-500/20 text-red-300 border border-red-500/40
+              {% else %}
+                  bg-green-500/20 text-green-300 border border-green-500/40
+              {% endif %}">
+            {{ message }}
+          </div>
+        {% endfor %}
+      </div>
+    {% endif %}
+  {% endwith %}
+
+  <!-- HEADER -->
+  <div class="text-center mb-10">
+    <div class="flex justify-center mb-4">
+      <div class="avatar">
+        {{ current_user.name[0]|upper }}
+      </div>
+    </div>
+    <h1 class="text-4xl font-bold border-b border-dashed border-[#6fb7ff]/40 inline-block pb-2">
+      Hey {{ current_user.name }}!
+    </h1>
+    <p class="text-gray-300 mt-3">Manage your account and activity</p>
+  </div>
+
+  <!-- GRID -->
+  <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+
+    <!-- LEFT -->
+    <div class="glass p-6 rounded-xl border border-[#6fb7ff]/30 soft-glow">
+      <h2 class="text-xl mb-4 border-b border-[#6fb7ff]/30 pb-2">Account Info</h2>
+      <div class="space-y-4">
+        <div class="bg-[#0b2c4d] p-3 rounded border border-white/10">
+          <p class="text-xs text-gray-400">Name</p>
+          <p class="font-semibold">{{ current_user.name }}</p>
         </div>
-
-        <h1 class="text-4xl font-bold border-b border-dashed border-[#6fb7ff]/40 inline-block pb-2">
-            Hey {{ current_user.name }}!
-        </h1>
-
-        <p class="text-gray-300 mt-3">
-            Manage your account and activity
-        </p>
+        <div class="bg-[#0b2c4d] p-3 rounded border border-white/10">
+          <p class="text-xs text-gray-400">Email</p>
+          <p class="font-semibold">{{ current_user.email }}</p>
+        </div>
+        <div class="bg-[#0b2c4d] p-3 rounded border border-white/10">
+          <p class="text-xs text-gray-400">Status</p>
+          <p class="font-semibold text-green-400">Active</p>
+        </div>
+      </div>
     </div>
 
-    <!-- GRID -->
-    <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
-
-        <!-- LEFT -->
-        <div class="glass p-6 rounded-xl border border-[#6fb7ff]/30 soft-glow">
-
-            <h2 class="text-xl mb-4 border-b border-[#6fb7ff]/30 pb-2">
-                Account Info
-            </h2>
-
-            <div class="space-y-4">
-
-                <div class="bg-[#0b2c4d] p-3 rounded border border-white/10">
-                    <p class="text-xs text-gray-400">Name</p>
-                    <p class="font-semibold">{{ current_user.name }}</p>
-                </div>
-
-                <div class="bg-[#0b2c4d] p-3 rounded border border-white/10">
-                    <p class="text-xs text-gray-400">Email</p>
-                    <p class="font-semibold">{{ current_user.email }}</p>
-                </div>
-
-                <div class="bg-[#0b2c4d] p-3 rounded border border-white/10">
-                    <p class="text-xs text-gray-400">Status</p>
-                    <p class="font-semibold text-green-400">Active</p>
-                </div>
-
-            </div>
-
-        </div>
-
-        <div class="lg:col-span-2 glass p-6 rounded-xl border border-[#6fb7ff]/30 soft-glow">
-
-            <h2 class="text-xl mb-4 border-b border-[#6fb7ff]/30 pb-2">
-                Actions
-            </h2>
-
-            <!--  FLASH MESSAGES -->
-            {% with messages = get_flashed_messages(with_categories=true) %}
-              {% if messages %}
-                <div class="mb-4 space-y-3">
-                  {% for category, message in messages %}
-                    <div class="flash-msg p-3 rounded-lg text-center font-semibold
-                        {% if category == 'success' %}
-                            bg-green-500 text-white
-                        {% else %}
-                            bg-green-500 text-white
-                        {% endif %}">
-                        {{ message }}
-                    </div>
-                  {% endfor %}
-                </div>
-              {% endif %}
-            {% endwith %}
-
-            <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
-
-                <a href="/edit_profile"
-                   onclick="showToast()"
-                   class="bg-[#6fb7ff] text-[#0b2c4d] p-5 rounded-xl font-bold text-center hover-lift">
-                    ⚙️ Edit Profile
-                </a>
-
-                <a href="/orders"
-                   class="bg-[#0b2c4d] border border-[#6fb7ff]/30 p-5 rounded-xl text-center hover-lift">
-                    📦 My Orders
-                </a>
-
-                <button onclick="openDeleteModal()"
-                    class="bg-[#0b2c4d] border border-red-500/40 text-red-400 
-                           p-5 rounded-xl font-bold text-center hover-lift
-                           hover:bg-red-500 hover:text-white transition">
-                    🗑 Delete Account
-                </button>
-
-                <a href="/browse"
-                   class="bg-[#0b2c4d] border border-[#6fb7ff]/30 p-5 rounded-xl text-center hover-lift">
-                    🛒 Shop
-                </a>
-
-            </div>
-
-        </div>
-
+    <!-- RIGHT -->
+    <div class="lg:col-span-2 glass p-6 rounded-xl border border-[#6fb7ff]/30 soft-glow">
+      <h2 class="text-xl mb-4 border-b border-[#6fb7ff]/30 pb-2">Actions</h2>
+      <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+        <a href="/edit_profile" class="bg-[#6fb7ff] text-[#0b2c4d] p-5 rounded-xl font-bold text-center hover-lift">
+          ⚙️ Edit Profile
+        </a>
+        <a href="/orders" class="bg-[#0b2c4d] border border-[#6fb7ff]/30 p-5 rounded-xl text-center hover-lift">
+          📦 My Orders
+        </a>
+        <button onclick="openDeleteModal()" class="bg-[#0b2c4d] border border-red-500/40 text-red-400 p-5 rounded-xl font-bold hover-lift hover:bg-red-500 hover:text-white">
+          🗑 Delete Account
+        </button>
+        <a href="/browse" class="bg-[#0b2c4d] border border-[#6fb7ff]/30 p-5 rounded-xl text-center hover-lift">
+          🛒 Shop
+        </a>
+      </div>
     </div>
+
+  </div>
 
 </main>
 
+<!-- DELETE MODAL -->
+<div id="deleteModal" class="hidden fixed inset-0 bg-black/70 flex items-center justify-center z-50">
+  <div class="bg-[#0e3a63] border border-red-500/40 rounded-xl p-6 w-full max-w-md text-center">
+    <h2 class="text-2xl font-bold text-red-400 mb-3">Delete Account?</h2>
+    <p class="text-gray-300 mb-4">Enter your password and type DELETE to confirm.</p>
+    <form method="POST" action="/delete_account" id="deleteForm" class="space-y-4">
+      <!-- Password Input -->
+      <input type="password" name="password" placeholder="Enter password" required class="w-full p-2 rounded bg-[#0b2c4d] border border-white/10 text-white" />
+      
+      <!-- Confirmation Input -->
+      <input type="text" name="confirmation" placeholder='Type "DELETE" to confirm' required class="w-full p-2 rounded bg-[#0b2c4d] border border-white/10 text-white" />
+
+      <div class="flex gap-4 justify-center">
+        <button type="button" onclick="closeDeleteModal()" class="px-4 py-2 rounded bg-gray-700 hover:bg-gray-600">Cancel</button>
+        <button id="deleteBtn" type="submit" class="px-4 py-2 rounded bg-red-500 hover:bg-red-600 font-bold flex items-center gap-2">
+          <span id="btnText">Delete</span>
+          <svg id="spinner" class="hidden w-5 h-5 animate-spin" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+            <circle class="opacity-25" cx="12" cy="12" r="10" stroke="white" stroke-width="4"></circle>
+            <path class="opacity-75" fill="white" d="M4 12a8 8 0 018-8v4a4 4 0 00-4 4H4z"></path>
+          </svg>
+        </button>
+      </div>
+    </form>
+  </div>
+</div>
+
 <!-- TOAST -->
-<div id="toast" class="toast">
-    Opening Edit Profile...
-</div>
+<div id="toast" class="toast">Loading...</div>
 
-<!-- DELETE MODAL -->
-<div id="deleteModal"
-     class="hidden fixed inset-0 bg-black/70 flex items-center justify-center z-50">
-
-    <div class="bg-[#0e3a63] border border-red-500/40 rounded-xl p-6 w-full max-w-md text-center">
-
-        <h2 class="text-2xl font-bold text-red-400 mb-3">
-            Delete Account?
-        </h2>
-
-        <p class="text-gray-300 mb-6">
-            This action is permanent.
-        </p>
-
-        <div class="flex gap-4 justify-center">
-
-            <button onclick="closeDeleteModal()"
-                class="px-4 py-2 rounded bg-gray-700 hover:bg-gray-600">
-                Cancel
-            </button>
-
-            <form method="POST" action="/delete_account">
-                <button class="px-4 py-2 rounded bg-red-500 hover:bg-red-600 font-bold">
-                    Delete
-                </button>
-            </form>
-
-        </div>
-
-    </div>
-</div>
-
-<!-- DELETE MODAL -->
-<div id="deleteModal"
-     class="hidden fixed inset-0 bg-black/70 flex items-center justify-center z-50">
-
-    <div class="bg-[#0e3a63] border border-red-500/40 rounded-xl p-6 w-full max-w-md text-center">
-
-        <h2 class="text-2xl font-bold text-red-400 mb-3">
-            Delete Account?
-        </h2>
-
-        <p class="text-gray-300 mb-6">
-            This action is permanent.
-        </p>
-
-        <div class="flex gap-4 justify-center">
-
-            <button onclick="closeDeleteModal()"
-                class="px-4 py-2 rounded bg-gray-700 hover:bg-gray-600">
-                Cancel
-            </button>
-
-            <form method="POST" action="/delete_account">
-                <button class="px-4 py-2 rounded bg-red-500 hover:bg-red-600 font-bold">
-                    Delete
-                </button>
-            </form>
-
-        </div>
-
-    </div>
-</div>
-
-<!-- JS -->
 <script>
-function showToast() {
-    const toast = document.getElementById("toast");
-    toast.style.display = "block";
-    setTimeout(() => toast.style.display = "none", 2500);
-}
-
 function openDeleteModal() {
-    document.getElementById("deleteModal").classList.remove("hidden");
+  document.getElementById("deleteModal").classList.remove("hidden");
+  // Optionally, focus on the first input
+  document.querySelector("#deleteForm input[name='password']").focus();
 }
 
 function closeDeleteModal() {
-    document.getElementById("deleteModal").classList.add("hidden");
+  document.getElementById("deleteModal").classList.add("hidden");
+  document.getElementById("deleteBtn").disabled = false;
+  document.getElementById("btnText").textContent = "Delete";
+  document.getElementById("spinner").classList.add("hidden");
+  // Clear inputs
+  document.querySelector("#deleteForm input[name='password']").value = "";
+  document.querySelector("#deleteForm input[name='confirmation']").value = "";
 }
 
-function openDeleteModal() {
-    document.getElementById("deleteModal").classList.remove("hidden");
-}
+// Form validation before submission
+document.getElementById("deleteForm").addEventListener("submit", function (e) {
+  const confirmationInput = document.querySelector("input[name='confirmation']");
+  if (confirmationInput.value.trim().toUpperCase() !== "DELETE") {
+    e.preventDefault();
+    alert('Please type "DELETE" to confirm.');
+    return;
+  }
 
-function closeDeleteModal() {
-    document.getElementById("deleteModal").classList.add("hidden");
-}
+  // Show loading state
+  const btn = document.getElementById("deleteBtn");
+  const text = document.getElementById("btnText");
+  const spinner = document.getElementById("spinner");
 
-// AUTO DISAPPEAR FLASH MESSAGES
-setTimeout(() => {
-    const messages = document.querySelectorAll('.flash-msg');
+  btn.disabled = true;
+  text.textContent = "Deleting...";
+  spinner.classList.remove("hidden");
+});
 
-    messages.forEach(msg => {
-        msg.style.opacity = '0';
-        msg.style.transform = 'translateY(-10px)';
-        msg.style.transition = 'all 0.5s ease';
+// Close modal on ESC key
+document.addEventListener("keydown", function(e) {
+  if (e.key === "Escape") closeDeleteModal();
+});
 
-        setTimeout(() => {
-            msg.remove();
-        }, 500);
-    });
-
-}, 3000);
+// Close modal when clicking outside
+document.getElementById("deleteModal").addEventListener("click", function(e) {
+  if (e.target === this) closeDeleteModal();
+});
 </script>
 
 {% include "components/footer.html.jinja" %}
-
 </body>
 </html>
