@@ -18,7 +18,7 @@
 
 
 
-<body class="min-h-screen flex flex-col text-sm lg:text-xl bg-[#0b2c4d] text-[#d6ecff]">
+<body class="min-h-screen flex flex-col text-sm lg:text-xl bg-[#0b2c4d]">
 <div id="mainContent" class="flex-grow flex flex-col transition-all duration-300" style="margin-right: 0;">
 
 {% include "components/ai_chat.html.jinja" %}
@@ -47,14 +47,14 @@
 
     <div class="flex flex-col lg:flex-row items-center justify-between px-6 py-12 lg:px-20 lg:py-20 space-y-6 lg:space-y-0 lg:space-x-10">
 
-        <div style="border:2px dashed #6fb7ff; padding:25px;" class="w-full lg:w-[30%]">
+        <div style="border:2px dashed #6fb7ff; padding:25px;" class="w-full lg:w-[30%] text-[#d6ecff]">
             <h1 style="font-size:28px; margin-bottom:15px; text-transform:uppercase; letter-spacing:2px;">
                 Project Overview
             </h1>
-            <p style="line-height:1.6;">
+            <p style="line-height:1.6; text-[#d6ecff]">
                 Technology repair guides designed to help users safely
                 diagnose and repair electronic devices while reducing
-                electronic waste w
+                electronic waste.
             </p>
         </div>
 
@@ -71,7 +71,7 @@
         </div>
 
         <!-- RIGHT PANEL -->
-        <div style="border:2px dashed #6fb7ff; padding:25px;" class="w-full lg:w-[30%]">
+        <div style="border:2px dashed #6fb7ff; padding:25px;" class="w-full lg:w-[30%] text-[#d6ecff]">
             <h1 style="font-size:28px; margin-bottom:15px; text-transform:uppercase; letter-spacing:2px;">
                 System Goal
             </h1>
@@ -91,7 +91,11 @@
         border-bottom:2px dashed #6fb7ff;
         text-align:center;
         letter-spacing:3px;
-        font-size:18px;">
+        font-size:18px;
+        "
+        class="text-[#d6ecff]"
+        >
+
         POPULAR FIXES — MODULE VIEW
     </div>
 

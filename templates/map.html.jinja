@@ -3,8 +3,10 @@
 <head>
     <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" integrity="sha256-p4NxAoJBhIIN+hmNHrzRCf9tD/miZyoHS5obTRR9BMY=" crossorigin="" />
     <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js" integrity="sha256-20nQCchB9co0qIjJZRGuk2/Z9VM+kNiyxNV1lvTlZBo=" crossorigin=""></script>
+    <link rel="stylesheet" href="https://unpkg.com/leaflet-routing-machine@latest/dist/leaflet-routing-machine.css" />
+    <script src="https://unpkg.com/leaflet-routing-machine@latest/dist/leaflet-routing-machine.js"></script>
     <style>
-/* General body styling */
+
 body {
     display: flex;
     flex-direction: column;
@@ -13,21 +15,41 @@ body {
     height: 100vh;
 }
 
-/* Navbar styling */
-.navbar {
-    position: relative;
-    z-index: 10;
-    padding: 10px;
-    background-color: #0b2c4d; /* Match the body background */
-    color: #d6ecff;
-    text-align: center;
-}
-
 /* Map styling */
 #map {
-    margin-top: 40px; /* Adjust this value based on the navbar height */
-    height: calc(100vh - 100px); /* Full height minus the navbar and header */
+    margin-top: 40px; 
+    height: calc(100vh - 150px); 
     width: 100%;
+}
+
+/* Search bar styling */
+#search-container {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    margin: 10px 0;
+}
+
+#search-input {
+    width: 70%;
+    padding: 10px;
+    border: 1px solid #6fb7ff;
+    border-radius: 5px;
+    font-size: 1rem;
+}
+
+#search-button {
+    padding: 10px 20px;
+    margin-left: 10px;
+    background-color: #6fb7ff;
+    color: #0b2c4d;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+}
+
+#search-button:hover {
+    background-color: #5aa3e0;
 }
 
 /* Responsive typography */
@@ -43,14 +65,9 @@ h1 {
         padding: 10px;
     }
 
-    .navbar {
-        padding: 5px;
-        font-size: 0.9rem; /* Adjust navbar font size */
-    }
-
     #map {
         margin-top: 50px; /* Adjust spacing for smaller screens */
-        height: calc(100vh - 90px); /* Adjust height for smaller screens */
+        height: calc(100vh - 190px); /* Adjust height for smaller screens */
     }
 }
 
@@ -72,13 +89,18 @@ h1 {
     <link rel="icon" href="/static/products/Blueprint Logo.png" type="image">
 </head>
 
-<body class="bg-[#0b2c4d] text-[#d6ecff] font-mono min-h-screen flex flex-col text-sm lg:text-lg">
+<body class="bg-[#0b2c4d] font-mono min-h-screen flex flex-col text-sm lg:text-lg text-[#d6ecff]">
     <div class="navbar">
         {% include "components/navbar.html.jinja" %}
     </div>
-    <h1 class="text-3xl md:text-4xl mb-4 border-b-2 border-dashed border-[#6fb7ff] inline-block pb-2 text-center">
+   
+    <h1 class="text-3xl md:text-4xl mt-8 mb-8 border-b-2 border-dashed border-[#6fb7ff] inline-block pb-2 text-center text-[#d6ecff]">
         Find Repair Centers Near You
     </h1>
+    <div id="search-container" class="mb-4 text-[#d6ecff]">
+        <input id="search-input" type="text" placeholder="Enter an address" />
+        <button id="search-button">Search</button>
+    </div>
     <div id="map"></div>
 
     <script>
@@ -86,7 +108,7 @@ h1 {
 
         var osm = L.tileLayer('https://api.maptiler.com/maps/dataviz-v4/{z}/{x}/{y}.png?key=HWne2349v5WDLtpgx5BN', {
             maxZoom: 19,
-            attribution: '<a href="https://www.maptiler.com/copyright/" target="_blank">&copy; MapTiler</a> <a href="https://www.openstreetmap.org/copyright/" target="_blank">&copy; OpenStreetMap contributors</a>'
+            attribution: '<a href="https://www.maptiler.com/copyright/" target="_blank">&copy; MapTiler </a> <a href="https://www.openstreetmap.org/copyright/" target="_blank">&copy; OpenStreetMap contributors</a>'
         }).addTo(map);
 
         var centers = {{ centers | tojson }};
@@ -96,6 +118,74 @@ h1 {
                 .addTo(map)
                 .bindPopup(center.name + "<br>" + center.address + "<br><br>" + "<img src='" + imageUrl + "' style='width: 200px; height: 200px; object-fit: cover; display: block; margin: 0 auto;'>");
         });
+
+        document.getElementById('search-button').addEventListener('click', function() {
+            var address = document.getElementById('search-input').value;
+            if (address) {
+                fetch(`https://nominatim.openstreetmap.org/search?format=json&q=${encodeURIComponent(address)}`)
+                    .then(response => response.json())
+                    .then(data => {
+                        if (data.length > 0) {
+                            var lat = data[0].lat;
+                            var lon = data[0].lon;
+                            map.setView([lat, lon], 13);
+                                 L.Routing.control({
+                                waypoints: [
+                                    L.latLng(lat, lon), // User's searched location
+                                    L.latLng(40.68738, -73.96323)
+                                            ]
+                            }).addTo(map);
+                            
+                        } else {
+                            alert("Address not found. Please try again.");
+                        }
+                    })
+                    .catch(error => console.error('Error:', error));
+            } else {
+                alert("Please enter an address.");
+            }
+        });
+        
+    function createButton(label, container) {
+        var btn = L.DomUtil.create('button', '', container);
+        btn.setAttribute('type', 'button');
+        btn.innerHTML = label;
+        return btn;
+            }
+
+map.on('click', function(e) {
+    var container = L.DomUtil.create('div'),
+        startBtn = createButton('Start from this location', container),
+        destBtn = createButton('Go to this location', container);
+
+    console.log("Popup buttons created:", startBtn, destBtn); // Debugging
+
+    L.popup()
+        .setContent(container)
+        .setLatLng(e.latlng)
+        .openOn(map);
+
+    // Check if control is defined
+    if (typeof control === 'undefined') {
+        console.error("Error: 'control' is not defined. Ensure it is initialized.");
+        return;
+    }
+
+    // Add event listeners for the buttons
+    L.DomEvent.on(startBtn, 'click', function() {
+        console.log("Start button clicked, setting waypoint:", e.latlng); // Debugging
+        control.spliceWaypoints(0, 1, e.latlng);
+        map.closePopup();
+    });
+
+    L.DomEvent.on(destBtn, 'click', function() {
+        console.log("Destination button clicked, setting waypoint:", e.latlng); // Debugging
+        control.spliceWaypoints(control.getWaypoints().length - 1, 1, e.latlng);
+        map.closePopup();
+    });
+});
+
+
     </script>
 </body>
 </html>
