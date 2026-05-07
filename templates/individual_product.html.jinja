@@ -82,6 +82,8 @@
           action="/cart/{{ product['ID'] }}/add_to_cart"
           class="bg-[#0e3a63] border border-[#6fb7ff]/40 p-6 rounded-xl space-y-4">
 
+          <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+
         <div>
             <label class="block text-sm mb-2 uppercase tracking-wide text-gray-300">
                 Quantity
@@ -175,7 +177,7 @@
 
 </main>
 
-<!-- STICKY ADD TO CART -->
+<!-- STICKY ADD TO CART 
 <div id="sticky-add-to-cart"
      class="fixed bottom-0 left-0 right-0 bg-[#0e3a63]
             border-t border-[#6fb7ff] p-4 z-50 shadow-lg hidden">
@@ -187,7 +189,7 @@
     </button>
 </div>
 
-<!-- JS -->
+<!-- JS 
 <script>
 document.addEventListener("scroll", function () {
     const sticky = document.getElementById("sticky-add-to-cart");
@@ -204,7 +206,7 @@ document.addEventListener("scroll", function () {
     }
 });
 </script>
-
+-->
 {% include "components/footer.html.jinja" %}
 </div>
 </body>

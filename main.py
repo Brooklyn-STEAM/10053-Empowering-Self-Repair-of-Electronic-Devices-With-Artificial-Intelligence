@@ -1,5 +1,7 @@
 from flask import Flask, render_template, request, flash, redirect, abort, url_for, session, jsonify
 from flask_login import LoginManager, login_user, logout_user, login_required, current_user
+from flask_limiter import Limiter
+from flask_limiter.util import get_remote_address
 import pymysql, re, sqlite3, mysql.connector
 from dynaconf import Dynaconf
 from ai_agent import run_agent
@@ -9,15 +11,12 @@ import re
 from openai import OpenAI
 import sqlite3
 import pdfplumber
-
-
-
+from werkzeug.security import generate_password_hash, check_password_hash
+from flask_wtf import CSRFProtect
 
 
 app = Flask(__name__)
-
-if __name__ == "__main__":
-    app.run(debug=True)
+csrf = CSRFProtect(app)
 
 config = Dynaconf(settings_file =["settings.toml", ".env"])
 
@@ -31,6 +30,12 @@ app.config.update(
     SESSION_COOKIE_HTTPONLY=True,
     SESSION_COOKIE_SAMESITE='Lax',
     PERMANENT_SESSION_LIFETIME=3600  # 1 hour
+)
+
+limiter = Limiter(
+    app=app,
+    key_func=get_remote_address,
+    default_limits=["200 per day", "50 per hour"]
 )
 
 login_manager = LoginManager(app)
@@ -93,16 +98,18 @@ def index():
 
     return render_template("homepage.html.jinja", guides=result)
 
+@limiter.limit("5 per minute; 20 per hour")
 @app.route("/login", methods=["POST", "GET"])
 def login_page():
 
     if request.method == "POST":
 
-        email = request.form["email"]
+        email = request.form["email"].strip().lower()
         password = request.form["password"]
 
         connection = None
         cursor = None
+        result = None
 
         try:
             connection = connect_db()
@@ -122,14 +129,15 @@ def login_page():
                 connection.close()
 
         if result is None:
-            flash("No user found. Please check your email or password.", "error")
+            flash("Invalid email or password.", "error")
             return render_template("login.html.jinja")
 
-        if password != result["Password"]:
-            flash("Incorrect password.", "error")
+        if not check_password_hash(result["Password"], password):
+            flash("Invalid email or password.", "error")
             return render_template("login.html.jinja")
 
         # ✅ success
+        session.pop("has_seen_greeting", None)
         login_user(User(result))
 
         session["has_seen_greeting"] = False
@@ -140,6 +148,7 @@ def login_page():
 
     return render_template("login.html.jinja")
 
+@limiter.limit("3 per minute; 10 per hour")
 @app.route("/signup", methods=["POST", "GET"])
 def signup_page():
 
@@ -151,25 +160,30 @@ def signup_page():
         address = request.form["address"]
         
         if password != confirm_password:
-            flash("Passwords do not match")
+            flash("Passwords do not match", "error")
         elif len(password) < 8:
-            flash("Password is too short")
+            flash("Password must be at least 8 characters long", "error")
         else:
             connection = connect_db()
 
             cursor = connection.cursor()
             try:
+                hashed_password = generate_password_hash(password)
+                
                 cursor.execute("""
                     INSERT INTO `User` (`Name`, `Email`, `Password`,  `Address`)
                     VALUES (%s, %s, %s, %s)
-                """, (name, email, password, address))
-                connection.close()
+                """, (name, email, hashed_password, address))
+                
             except pymysql.err.IntegrityError:
-                flash("Email is already in use")
-                connection.close()
+                flash("Email is already in use", "error")
+                
             else:
+                flash("Account created successfully!", "success")
                 return redirect("/login")
-
+            finally:
+                cursor.close()
+                connection.close()
 
     return render_template("signup.html.jinja")
 
@@ -220,6 +234,8 @@ def products():
 
     return render_template("individual_products.html.jinja", products=products)
 
+
+@limiter.limit("30 per minute")
 @app.route("/search", methods=["GET"])
 def search():
     query = request.args.get("q", "").strip()
@@ -596,6 +612,7 @@ def checkout():
 def thank_you():
     return render_template("thank_you.html.jinja")
 
+@limiter.limit("10 per hour")
 @app.route('/ai-help', methods=['POST'])
 def ai_help():
     try:
@@ -904,5 +921,15 @@ def map():
     return render_template("map.html.jinja", centers=result)
 
 
+@app.after_request
+def add_security_headers(response):
+    response.headers["X-Content-Type-Options"] = "nosniff"
+    response.headers["X-Frame-Options"] = "SAMEORIGIN"
+    response.headers["Referrer-Policy"] = "strict-origin-when-cross-origin"
+
+    return response
+
+
 if __name__ == '__main__':
-    app.run(debug=True)
+    app.run(debug=config.get("DEBUG", cast="@bool", default=False))
+    
