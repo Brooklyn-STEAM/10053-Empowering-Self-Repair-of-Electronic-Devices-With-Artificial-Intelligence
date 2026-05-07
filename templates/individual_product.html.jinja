@@ -115,6 +115,7 @@
         <h3 class="text-xl font-bold mb-4">Write a Review</h3>
 
         <form method="POST" action="/product/{{ product['ID'] }}/review">
+            <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
 
             <input type="number" name="rating" min="1" max="5" value="5"
                    class="w-full mb-4 p-2 rounded bg-[#0b2c4d] border border-[#6fb7ff]">
@@ -189,7 +190,7 @@
     </button>
 </div>
 
-<!-- JS 
+ JS 
 <script>
 document.addEventListener("scroll", function () {
     const sticky = document.getElementById("sticky-add-to-cart");
