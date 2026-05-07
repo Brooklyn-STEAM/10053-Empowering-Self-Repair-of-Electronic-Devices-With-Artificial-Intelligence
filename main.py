@@ -8,7 +8,6 @@ from anthropic import Anthropic
 import re
 from openai import OpenAI
 import sqlite3
-import pdfplumber
 from werkzeug.security import generate_password_hash, check_password_hash
 
 
