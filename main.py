@@ -1,19 +1,20 @@
 from flask import Flask, render_template, request, flash, redirect, abort, url_for, session, jsonify
 from flask_login import LoginManager, login_user, logout_user, login_required, current_user
-import pymysql, re, sqlite3, mysql.connector
+import pymysql, re, sqlite3, mysql.connector, base64, uuid, os, io
 from dynaconf import Dynaconf
 from ai_agent import run_agent
 from datetime import datetime
 from anthropic import Anthropic
-import re
 from openai import OpenAI
-import sqlite3
 import pdfplumber
 from werkzeug.security import generate_password_hash, check_password_hash
-
+from flask_sqlalchemy import SQLAlchemy
+from PIL import Image
 
 
 app = Flask(__name__)
+
+db = SQLAlchemy()
 
 if __name__ == "__main__":
     app.run(debug=True)
@@ -32,6 +33,7 @@ app.config.update(
     PERMANENT_SESSION_LIFETIME=3600  # 1 hour
 )
 
+
 login_manager = LoginManager(app)
 
 login_manager.login_view = "/login"
@@ -40,6 +42,7 @@ class User:
     is_authenticated = True
     is_active = True
     is_anonymous = False
+    
 
     def __init__(self, result):
         self.name = result["Name"]
@@ -716,6 +719,63 @@ def edit_profile():
     user = get_user(current_user.id)
     return render_template("edit_profile.html.jinja", user=user)
 
+@app.route("/upload_profile_pic", methods=["POST"])
+@login_required
+def upload_profile_pic():
+
+    data = request.get_json()
+    image_data = data.get("image")
+
+    if not image_data:
+        return jsonify({"success": False, "error": "No image"}), 400
+
+    try:
+   
+        if "," in image_data:
+            image_data = image_data.split(",")[1]
+
+        img_bytes = base64.b64decode(image_data)
+
+
+        img = Image.open(io.BytesIO(img_bytes))
+        img = img.convert("RGB")
+
+
+        folder = "static/profile_pics"
+        os.makedirs(folder, exist_ok=True)
+
+        width, height = img.size
+        size = min(width, height)
+
+        left = (width - size) // 2
+        top = (height - size) // 2
+
+        img = img.crop((left, top, left + size, top + size))
+
+        filename = f"user_{current_user.id}.png"
+        path = os.path.join(folder, filename)
+
+        img.save(path, format="PNG")
+
+        url = f"/static/profile_pics/{filename}"
+
+
+        current_user.profile_pic = url
+        db.session.commit()
+
+        return jsonify({
+            "success": True,
+            "url": url
+        })
+
+    except Exception as e:
+        print("UPLOAD ERROR:", repr(e))  # better debug output
+
+        return jsonify({
+            "success": False,
+            "error": "Image processing failed"
+        }), 500
+    
 def get_user(user_id):
     connection = connect_db()
     cursor = connection.cursor(pymysql.cursors.DictCursor)
@@ -961,3 +1021,4 @@ def delete_review(product_id, review_id):
     finally:
         cursor.close()
         connection.close()
+

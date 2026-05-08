@@ -4,27 +4,36 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
   <title>Profile</title>
+
   <script src="https://cdn.tailwindcss.com"></script>
   <link href="/static/style.css" rel="stylesheet" />
   <link rel="icon" href="/static/products/Blueprint Logo.png" />
+
+  <!-- Cropper FIXED CDN -->
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/cropperjs@1.6.2/dist/cropper.min.css">
+  <script src="https://cdn.jsdelivr.net/npm/cropperjs@1.6.2/dist/cropper.min.js"></script>
 
   <style>
     .glass {
       backdrop-filter: blur(10px);
       background: rgba(11, 44, 77, 0.6);
     }
+
     .soft-glow {
       box-shadow: 0 0 25px rgba(111, 183, 255, 0.12);
     }
+
     .hover-lift {
       transition: 0.25s ease;
     }
+
     .hover-lift:hover {
       transform: translateY(-4px);
     }
+
     .avatar {
-      width: 70px;
-      height: 70px;
+      width: 80px;
+      height: 80px;
       border-radius: 50%;
       background: #6fb7ff;
       color: #0b2c4d;
@@ -33,71 +42,59 @@
       justify-content: center;
       font-weight: bold;
       font-size: 22px;
-    }
-    .toast {
-      position: fixed;
-      bottom: 20px;
-      right: 20px;
-      background: #0e3a63;
-      border: 1px solid rgba(111,183,255,0.4);
-      padding: 12px 16px;
-      border-radius: 12px;
-      display: none;
+      overflow: hidden;
+      cursor: pointer;
     }
   </style>
 </head>
+
 <body class="min-h-screen flex flex-col bg-[#0b2c4d] text-[#d6ecff]">
 
 {% include "components/navbar.html.jinja" %}
 
 <main class="flex-grow px-6 lg:px-20 py-10">
 
-  <!-- FLASH MESSAGES -->
-  {% with messages = get_flashed_messages(with_categories=true) %}
-    {% if messages %}
-      <div class="mb-6 space-y-2">
-        {% for category, message in messages %}
-          <div class="p-3 rounded
-              {% if category == 'error' %}
-                  bg-red-500/20 text-red-300 border border-red-500/40
-              {% else %}
-                  bg-green-500/20 text-green-300 border border-green-500/40
-              {% endif %}">
-            {{ message }}
-          </div>
-        {% endfor %}
-      </div>
-    {% endif %}
-  {% endwith %}
-
   <!-- HEADER -->
   <div class="text-center mb-10">
+
+    <!-- AVATAR -->
     <div class="flex justify-center mb-4">
-      <div class="avatar">
-        {{ current_user.name[0]|upper }}
+      <div class="avatar" onclick="openUploadModal()">
+
+        {% if current_user.profile_pic %}
+          <img src="{{ current_user.profile_pic }}" class="w-full h-full object-cover" id="avatarImg">
+        {% else %}
+          <span id="avatarText">{{ current_user.name[0]|upper }}</span>
+          <img id="avatarImg" class="hidden w-full h-full object-cover">
+        {% endif %}
+
       </div>
     </div>
+
     <h1 class="text-4xl font-bold border-b border-dashed border-[#6fb7ff]/40 inline-block pb-2">
       Hey {{ current_user.name }}!
     </h1>
+
     <p class="text-gray-300 mt-3">Manage your account and activity</p>
   </div>
 
   <!-- GRID -->
   <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
 
-    <!-- LEFT -->
     <div class="glass p-6 rounded-xl border border-[#6fb7ff]/30 soft-glow">
       <h2 class="text-xl mb-4 border-b border-[#6fb7ff]/30 pb-2">Account Info</h2>
+
       <div class="space-y-4">
         <div class="bg-[#0b2c4d] p-3 rounded border border-white/10">
           <p class="text-xs text-gray-400">Name</p>
           <p class="font-semibold">{{ current_user.name }}</p>
         </div>
+
         <div class="bg-[#0b2c4d] p-3 rounded border border-white/10">
           <p class="text-xs text-gray-400">Email</p>
           <p class="font-semibold">{{ current_user.email }}</p>
         </div>
+
         <div class="bg-[#0b2c4d] p-3 rounded border border-white/10">
           <p class="text-xs text-gray-400">Status</p>
           <p class="font-semibold text-green-400">Active</p>
@@ -105,105 +102,180 @@
       </div>
     </div>
 
-    <!-- RIGHT -->
     <div class="lg:col-span-2 glass p-6 rounded-xl border border-[#6fb7ff]/30 soft-glow">
+
       <h2 class="text-xl mb-4 border-b border-[#6fb7ff]/30 pb-2">Actions</h2>
+
       <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
-        <a href="/edit_profile" class="bg-[#6fb7ff] text-[#0b2c4d] p-5 rounded-xl font-bold text-center hover-lift">
-          ⚙️ Edit Profile
+
+        <a href="/edit_profile"
+           class="bg-[#0b2c4d] border border-[#6fb7ff]/30 text-[#6fb7ff] p-5 rounded-xl font-bold text-center hover-lift hover:bg-[#6fb7ff] hover:text-[#0b2c4d] transition">
+          ✏️ Edit Profile
         </a>
-        <a href="/orders" class="bg-[#0b2c4d] border border-[#6fb7ff]/30 p-5 rounded-xl text-center hover-lift">
+
+        <a href="/orders"
+           class="bg-[#0b2c4d] border border-[#6fb7ff]/30 p-5 rounded-xl text-center hover-lift hover:bg-[#0e3a63] transition">
           📦 My Orders
         </a>
-        <button onclick="openDeleteModal()" class="bg-[#0b2c4d] border border-red-500/40 text-red-400 p-5 rounded-xl font-bold hover-lift hover:bg-red-500 hover:text-white">
+
+        <button onclick="openDeleteModal()"
+          class="bg-[#0b2c4d] border border-red-500/40 text-red-400 p-5 rounded-xl font-bold hover-lift hover:bg-red-500 hover:text-white transition">
           🗑 Delete Account
         </button>
-        <a href="/browse" class="bg-[#0b2c4d] border border-[#6fb7ff]/30 p-5 rounded-xl text-center hover-lift">
+
+        <a href="/browse"
+           class="bg-[#0b2c4d] border border-[#6fb7ff]/30 p-5 rounded-xl text-center hover-lift hover:bg-[#0e3a63] transition">
           🛒 Shop
         </a>
+
       </div>
     </div>
 
   </div>
-
 </main>
 
-<!-- DELETE MODAL -->
-<div id="deleteModal" class="hidden fixed inset-0 bg-black/70 flex items-center justify-center z-50">
-  <div class="bg-[#0e3a63] border border-red-500/40 rounded-xl p-6 w-full max-w-md text-center">
-    <h2 class="text-2xl font-bold text-red-400 mb-3">Delete Account?</h2>
-    <p class="text-gray-300 mb-4">Enter your password and type DELETE to confirm.</p>
-    <form method="POST" action="/delete_account" id="deleteForm" class="space-y-4">
-      <!-- Password Input -->
-      <input type="password" name="password" placeholder="Enter password" required class="w-full p-2 rounded bg-[#0b2c4d] border border-white/10 text-white" />
-      
-      <!-- Confirmation Input -->
-      <input type="text" name="confirmation" placeholder='Type "DELETE" to confirm' required class="w-full p-2 rounded bg-[#0b2c4d] border border-white/10 text-white" />
+<!-- MODAL -->
+<div id="uploadModal" class="hidden fixed inset-0 bg-black/70 flex items-center justify-center z-50">
 
-      <div class="flex gap-4 justify-center">
-        <button type="button" onclick="closeDeleteModal()" class="px-4 py-2 rounded bg-gray-700 hover:bg-gray-600">Cancel</button>
-        <button id="deleteBtn" type="submit" class="px-4 py-2 rounded bg-red-500 hover:bg-red-600 font-bold flex items-center gap-2">
-          <span id="btnText">Delete</span>
-          <svg id="spinner" class="hidden w-5 h-5 animate-spin" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
-            <circle class="opacity-25" cx="12" cy="12" r="10" stroke="white" stroke-width="4"></circle>
-            <path class="opacity-75" fill="white" d="M4 12a8 8 0 018-8v4a4 4 0 00-4 4H4z"></path>
-          </svg>
-        </button>
-      </div>
-    </form>
+  <div class="bg-[#0e3a63] p-5 rounded-xl w-full max-w-md">
+
+    <h2 class="text-xl font-bold mb-3">Upload & Crop Image</h2>
+
+    <input type="file" id="fileInput" accept="image/*" class="mb-3">
+
+    <div class="w-full h-64 bg-black flex items-center justify-center overflow-hidden">
+      <img id="cropImage" class="hidden w-full max-h-64">
+    </div>
+
+    <div class="flex justify-between mt-4">
+
+      <button onclick="closeUploadModal()" class="px-3 py-2 bg-gray-600 rounded">
+        Cancel
+      </button>
+
+      <button onclick="uploadCropped()" class="px-3 py-2 bg-[#6fb7ff] text-black font-bold rounded">
+        Save
+      </button>
+
+    </div>
+
   </div>
 </div>
 
-<!-- TOAST -->
-<div id="toast" class="toast">Loading...</div>
-
 <script>
-function openDeleteModal() {
-  document.getElementById("deleteModal").classList.remove("hidden");
-  // Optionally, focus on the first input
-  document.querySelector("#deleteForm input[name='password']").focus();
+
+let cropper = null;
+
+/* OPEN MODAL */
+function openUploadModal() {
+  document.getElementById("uploadModal").classList.remove("hidden");
+
+  // reset input so same file triggers change
+  document.getElementById("fileInput").value = "";
 }
 
-function closeDeleteModal() {
-  document.getElementById("deleteModal").classList.add("hidden");
-  document.getElementById("deleteBtn").disabled = false;
-  document.getElementById("btnText").textContent = "Delete";
-  document.getElementById("spinner").classList.add("hidden");
-  // Clear inputs
-  document.querySelector("#deleteForm input[name='password']").value = "";
-  document.querySelector("#deleteForm input[name='confirmation']").value = "";
+/* CLOSE MODAL */
+function closeUploadModal() {
+  document.getElementById("uploadModal").classList.add("hidden");
+
+  if (cropper) {
+    cropper.destroy();
+    cropper = null;
+  }
+
+  document.getElementById("cropImage").classList.add("hidden");
 }
 
-// Form validation before submission
-document.getElementById("deleteForm").addEventListener("submit", function (e) {
-  const confirmationInput = document.querySelector("input[name='confirmation']");
-  if (confirmationInput.value.trim().toUpperCase() !== "DELETE") {
-    e.preventDefault();
-    alert('Please type "DELETE" to confirm.');
+/* FILE CHANGE */
+document.getElementById("fileInput").addEventListener("change", function (e) {
+
+  const file = e.target.files[0];
+  if (!file) return;
+
+  const reader = new FileReader();
+
+  reader.onload = function (event) {
+
+    const img = document.getElementById("cropImage");
+    img.src = event.target.result;
+    img.classList.remove("hidden");
+
+    if (cropper) cropper.destroy();
+
+    cropper = new Cropper(img, {
+      aspectRatio: 1,
+      viewMode: 1,
+      autoCropArea: 1,
+      responsive: true
+    });
+  };
+
+  reader.readAsDataURL(file);
+});
+
+/* UPLOAD CROPPED */
+function uploadCropped() {
+
+  if (!cropper) {
+    alert("Please select an image first.");
     return;
   }
 
-  // Show loading state
-  const btn = document.getElementById("deleteBtn");
-  const text = document.getElementById("btnText");
-  const spinner = document.getElementById("spinner");
+  const canvas = cropper.getCroppedCanvas({
+    width: 300,
+    height: 300
+  });
 
-  btn.disabled = true;
-  text.textContent = "Deleting...";
-  spinner.classList.remove("hidden");
+  const croppedImage = canvas.toDataURL("image/png");
+
+  fetch("/upload_profile_pic", {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ image: croppedImage })
+  })
+  .then(res => res.json())
+  .then(data => {
+
+    console.log("UPLOAD RESPONSE:", data);
+
+    if (data.success) {
+
+      const avatar = document.getElementById("avatarImg");
+      const text = document.getElementById("avatarText");
+
+      if (avatar) {
+        avatar.src = data.url + "?t=" + new Date().getTime(); // FORCE REFRESH FIX
+        avatar.classList.remove("hidden");
+      }
+
+      if (text) text.style.display = "none";
+
+      closeUploadModal();
+
+    } else {
+      alert("Upload failed");
+    }
+
+  })
+  .catch(err => {
+    console.error(err);
+    alert("Server error");
+  });
+}
+
+/* ESC CLOSE */
+document.addEventListener("keydown", e => {
+  if (e.key === "Escape") closeUploadModal();
 });
 
-// Close modal on ESC key
-document.addEventListener("keydown", function(e) {
-  if (e.key === "Escape") closeDeleteModal();
+/* OUTSIDE CLICK CLOSE */
+document.getElementById("uploadModal").addEventListener("click", e => {
+  if (e.target === e.currentTarget) closeUploadModal();
 });
 
-// Close modal when clicking outside
-document.getElementById("deleteModal").addEventListener("click", function(e) {
-  if (e.target === this) closeDeleteModal();
-});
 </script>
 
 {% include "components/footer.html.jinja" %}
+
 </body>
 </html>
