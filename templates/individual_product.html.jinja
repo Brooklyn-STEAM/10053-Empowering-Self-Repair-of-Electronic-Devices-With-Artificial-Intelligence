@@ -1,21 +1,27 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>{{product['Name']}}</title>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>{{ product['Name'] }}</title>
 
-    <script src="https://cdn.tailwindcss.com"></script>
-    <link href="/static/style.css" rel="stylesheet">
-    <link rel="icon" href="/static/products/Blueprint Logo.png" type="image">
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link href="/static/style.css" rel="stylesheet" />
+  <link rel="icon" href="/static/products/Blueprint Logo.png" type="image" />
 
-    <style>
-        @keyframes fadeIn {
-            from { opacity: 0; transform: translateY(10px); }
-            to { opacity: 1; transform: translateY(0); }
-        }
-        .fade-in { animation: fadeIn 0.5s ease forwards; }
-    </style>
+  <style>
+    @keyframes fadeIn {
+      from { opacity: 0; transform: translateY(10px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+
+    .fade-in { animation: fadeIn 0.5s ease forwards; }
+
+    /* BLUEPRINT GREEN FLASH TOAST */
+    .toast {
+      animation: fadeIn 0.3s ease forwards;
+    }
+  </style>
 </head>
 
 <body class="bg-[#0b2c4d] text-[#d6ecff] font-mono min-h-screen flex flex-col text-sm lg:text-lg">
@@ -24,57 +30,60 @@
 {% include "components/ai_chat.html.jinja" %}
 {% include "components/navbar.html.jinja" %}
 
+<!-- FLASH CONTAINER -->
+<div id="flash-container" class="fixed top-5 right-5 z-[9999] space-y-3"></div>
+
 <main class="flex-grow px-4 py-8 lg:py-10">
 
 <div class="max-w-6xl mx-auto grid lg:grid-cols-2 gap-10 items-start">
 
-<!-- IMAGE -->
-<div class="bg-gradient-to-b from-[#0e3a63] to-[#0b2c4d]
-            border border-[#6fb7ff]/30 rounded-2xl p-5 sm:p-6
-            shadow-[0_10px_30px_rgba(0,0,0,0.35)] fade-in group">
-
-    <div class="relative overflow-hidden rounded-xl
-                bg-[#081f38] border border-[#6fb7ff]/20
-                flex items-center justify-center
-                h-[320px] sm:h-[380px] lg:h-[420px]">
-
-        <div class="absolute inset-0 bg-gradient-radial from-[#6fb7ff]/10 via-transparent to-transparent opacity-60"></div>
-
-        <img src="{{ product['Image'] }}"
-             alt="{{ product['Name'] }}"
-             class="relative z-10 max-h-full max-w-full object-contain
-                    transition duration-500 ease-out
-                    group-hover:scale-105
-                    drop-shadow-[0_10px_25px_rgba(0,0,0,0.6)]">
-
-        <div class="absolute inset-0 opacity-0 group-hover:opacity-100
-                    bg-gradient-to-tr from-transparent via-white/5 to-transparent
-                    transition duration-500"></div>
+  <!-- IMAGE -->
+  <div class="bg-gradient-to-b from-[#0e3a63] to-[#0b2c4d]
+              border border-[#6fb7ff]/30 rounded-2xl p-5 fade-in">
+    <div class="relative overflow-hidden rounded-xl bg-[#081f38] flex items-center justify-center h-[360px]">
+      <img src="{{ product['Image'] }}" class="max-h-full max-w-full object-contain" />
     </div>
+  </div>
+
+  <!-- INFO -->
+  <div class="space-y-6 fade-in">
+    <h1 class="text-3xl font-bold">{{ product['Name'] }}</h1>
+    <p class="text-3xl text-[#6fb7ff] font-bold">${{ product['Price'] }}</p>
+
+    <div class="bg-[#0e3a63] p-6 rounded-xl">
+      {{ product['Description'] }}
+    </div>
+
+    <!-- ADD TO CART -->
+    <form method="POST" action="/cart/{{ product['ID'] }}/add_to_cart"
+          class="bg-[#0e3a63] p-6 rounded-xl space-y-4">
+      <input type="number" name="quantity" value="1" min="1"
+             class="w-24 bg-[#0b2c4d] border border-[#6fb7ff] text-center rounded-md p-2" />
+      <button class="w-full bg-[#6fb7ff] text-[#0b2c4d] font-bold py-3 rounded-lg">
+        Add to Cart
+      </button>
+    </form>
+  </div>
+
 </div>
 
-<!-- INFO -->
-<div class="space-y-6 fade-in sticky top-6">
+<!-- REVIEWS -->
+<div class="max-w-4xl mx-auto mt-20">
 
-    <div>
-        <h1 class="text-2xl sm:text-3xl lg:text-4xl font-bold">
-            {{ product['Name'] }}
-        </h1>
+  <h2 class="text-3xl font-bold text-center mb-8 border-b border-[#6fb7ff] pb-4">
+    Customer Reviews
+  </h2>
 
-        <p class="text-xs text-gray-400 uppercase tracking-widest mt-2">
-            Price
-        </p>
+  <!-- REVIEW FORM -->
+  {% if current_user.is_authenticated %}
+  <div class="bg-[#0e3a63] p-6 rounded-xl mb-10">
+    <form method="POST" action="/product/{{ product['ID'] }}/review">
 
-        <p class="text-3xl text-[#6fb7ff] font-extrabold mt-1">
-            ${{ product['Price'] }}
-        </p>
-    </div>
+      <input type="number" name="rating" min="1" max="5" value="5"
+             class="w-full mb-4 p-2 rounded bg-[#0b2c4d] border border-[#6fb7ff]" />
 
-    <div class="bg-[#0e3a63] border border-[#6fb7ff]/40 p-6 rounded-xl">
-        <p class="text-[#cde7ff] leading-relaxed">
-            {{ product['Description'] }}
-        </p>
-    </div>
+      <textarea name="comment" rows="4"
+                class="w-full mb-4 p-2 rounded bg-[#0b2c4d] border border-[#6fb7ff]"></textarea>
 
     <!-- ADD TO CART -->
     <form method="POST"
@@ -99,116 +108,210 @@
             Add to Cart
         </button>
     </form>
+  </div>
+  {% endif %}
 
-</div>
-</div>
+  <!-- REVIEW LIST -->
+  <div class="space-y-6">
+    {% for x in reviews %}
+    <div id="review-{{ x['ID'] }}" class="bg-[#0e3a63] p-6 rounded-xl border border-[#6fb7ff]/40">
 
-<!-- REVIEWS -->
-<div class="max-w-4xl mx-auto mt-20">
+      <div class="flex justify-between">
+        <p class="font-bold">{{ x["Name"] }}</p>
+        <p class="text-xs text-gray-400">{{ x["Timestamp"].strftime('%m/%d/%Y') }}</p>
+      </div>
 
-    <h2 class="text-3xl font-bold text-center border-b border-[#6fb7ff] pb-4 mb-8">
-        Customer Reviews
-    </h2>
+      <div class="review-stars-{{ x['ID'] }} text-yellow-400 mb-2">
+        {% for i in range(1, 6) %}
+          {% if i <= x['Ratings'] %}★{% else %}☆{% endif %}
+        {% endfor %}
+      </div>
 
-    {% if current_user.is_authenticated %}
-    <div class="bg-[#0e3a63] border border-[#6fb7ff]/40 p-6 rounded-xl mb-10">
-        <h3 class="text-xl font-bold mb-4">Write a Review</h3>
+      <p class="review-text-{{ x['ID'] }} text-gray-200">{{ x["Comment"] }}</p>
 
         <form method="POST" action="/product/{{ product['ID'] }}/review">
             <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+      {% if current_user.is_authenticated and x["UserID"]|int == current_user.id|int %}
+      <div class="flex gap-2 mt-3">
 
-            <input type="number" name="rating" min="1" max="5" value="5"
-                   class="w-full mb-4 p-2 rounded bg-[#0b2c4d] border border-[#6fb7ff]">
+        <button onclick='openEditModal({{ x["ID"] }}, {{ x["Ratings"] }}, {{ x["Comment"]|tojson }})'
+                class="px-3 py-1 bg-[#6fb7ff] text-[#0b2c4d] rounded font-bold">
+          Edit
+        </button>
 
-            <textarea name="comment" rows="4"
-                      class="w-full mb-4 p-2 rounded bg-[#0b2c4d] border border-[#6fb7ff]"></textarea>
+        <button onclick='openDeleteModal({{ product["ID"] }}, {{ x["ID"] }})'
+                class="px-3 py-1 bg-red-500 text-white rounded font-bold">
+          Delete
+        </button>
 
-            <button class="bg-[#6fb7ff] text-[#0b2c4d] px-4 py-2 rounded font-bold">
-                Submit Review
-            </button>
-        </form>
+      </div>
+      {% endif %}
     </div>
-    {% else %}
-        <p class="text-center text-gray-400 mb-10">
-            <a href="/login" class="text-[#6fb7ff] font-bold hover:underline">
-                Log in
-            </a>
-            to write a review.
-        </p>
-    {% endif %}
-
-    <!-- REVIEW LIST -->
-    <div class="space-y-6">
-
-        {% if reviews %}
-            {% for x in reviews %}
-            <div class="bg-[#0e3a63] border border-[#6fb7ff]/40
-                        hover:border-[#6fb7ff] transition
-                        p-6 rounded-xl shadow-md hover:shadow-lg">
-
-                <div class="flex justify-between mb-2">
-                    <p class="font-bold">{{ x["Name"] }}</p>
-                    <p class="text-xs text-gray-400">
-                        {{ x["Timestamp"].strftime('%m/%d/%Y') }}
-                    </p>
-                </div>
-
-                <div class="mb-2">
-                    {% for i in range(1, 6) %}
-                        <span class="{% if i <= x['Ratings'] %}text-yellow-400{% else %}text-gray-500{% endif %}">
-                            ★
-                        </span>
-                    {% endfor %}
-                </div>
-
-                <p class="text-gray-200">
-                    {{ x["Comment"] }}
-                </p>
-
-            </div>
-            {% endfor %}
-        {% else %}
-            <p class="text-center text-gray-400">
-                No reviews yet. Be the first to review!
-            </p>
-        {% endif %}
-
-    </div>
+    {% endfor %}
+  </div>
 </div>
 
 </main>
 
-<!-- STICKY ADD TO CART 
-<div id="sticky-add-to-cart"
-     class="fixed bottom-0 left-0 right-0 bg-[#0e3a63]
-            border-t border-[#6fb7ff] p-4 z-50 shadow-lg hidden">
+<!-- EDIT MODAL -->
+<div id="editModal" class="hidden fixed inset-0 bg-black/60 flex items-center justify-center">
+  <div class="bg-[#0e3a63] p-6 rounded-xl w-[400px]">
+    <input type="hidden" id="modal-id" />
 
-    <button type="submit"
-            form="add-to-cart-form"
-            class="w-full bg-[#6fb7ff] text-[#0b2c4d] font-bold py-3 rounded-lg">
-        Add to Cart
+    <input id="modal-rating" type="number" min="1" max="5"
+           class="w-full mb-3 p-2 bg-[#0b2c4d] border border-[#6fb7ff]" />
+
+    <textarea id="modal-comment"
+              class="w-full p-2 bg-[#0b2c4d] border border-[#6fb7ff] mb-3"></textarea>
+
+    <button id="saveEditBtn"
+            class="bg-[#6fb7ff] text-[#0b2c4d] px-4 py-2 rounded font-bold w-full">
+      Save
     </button>
+
+    <button onclick="closeEdit()" class="text-gray-300 mt-2 w-full">
+      Cancel
+    </button>
+  </div>
+</div>
+
+<!-- DELETE MODAL -->
+<div id="deleteModal" class="hidden fixed inset-0 bg-black/60 flex items-center justify-center">
+  <div class="bg-[#0e3a63] p-6 rounded-xl">
+    <p class="mb-4">Delete this review?</p>
+
+    <button id="confirmDeleteBtn"
+            class="bg-red-500 text-white px-4 py-2 rounded w-full">
+      Delete
+    </button>
+
+    <button onclick="closeDeleteModal()" class="text-gray-300 mt-2 w-full">
+      Cancel
+    </button>
+  </div>
 </div>
 
  JS 
 <script>
-document.addEventListener("scroll", function () {
-    const sticky = document.getElementById("sticky-add-to-cart");
-    const form = document.getElementById("add-to-cart-form");
+document.addEventListener("DOMContentLoaded", () => {
 
-    if (!sticky || !form) return;
+  /* =========================
+     FLASH MESSAGES (GREEN BLUEPRINT STYLE)
+  ========================= */
+  const flashContainer = document.getElementById("flash-container");
 
-    const rect = form.getBoundingClientRect();
+  function showFlash(message, category = "success") {
 
-    if (rect.bottom < 0) {
-        sticky.classList.remove("hidden");
+    const div = document.createElement("div");
+
+    div.className = `
+      toast px-5 py-3 rounded-xl shadow-lg font-bold text-sm
+      border transition duration-300
+      ${category === "error"
+        ? "bg-red-600 text-white border-red-400"
+        : "bg-[#0f5e3a] text-[#b6ffd6] border-[#2aff9a]"}
+    `;
+
+    div.innerText = message;
+
+    flashContainer.appendChild(div);
+
+    setTimeout(() => {
+      div.style.opacity = "0";
+      div.style.transform = "translateY(-10px)";
+      setTimeout(() => div.remove(), 300);
+    }, 3000);
+  }
+
+  /* LOAD FLASK FLASHES */
+  {% with messages = get_flashed_messages(with_categories=true) %}
+    {% if messages %}
+      {% for category, message in messages %}
+        showFlash(`{{ message }}`, "{{ category }}");
+      {% endfor %}
+    {% endif %}
+  {% endwith %}
+
+
+  /* EDIT */
+  window.openEditModal = function(id, rating, comment) {
+    document.getElementById("editModal").classList.remove("hidden");
+    document.getElementById("modal-id").value = id;
+    document.getElementById("modal-rating").value = rating;
+    document.getElementById("modal-comment").value = comment;
+  };
+
+  window.closeEdit = function() {
+    document.getElementById("editModal").classList.add("hidden");
+  };
+
+  document.getElementById("saveEditBtn").addEventListener("click", async () => {
+
+    const id = document.getElementById("modal-id").value;
+    const rating = document.getElementById("modal-rating").value;
+    const comment = document.getElementById("modal-comment").value;
+
+    const res = await fetch(`/edit_review/${id}`, {
+      method: "POST",
+      headers: {"Content-Type": "application/x-www-form-urlencoded"},
+      body: `rating=${rating}&comment=${encodeURIComponent(comment)}`
+    });
+
+    const data = await res.json();
+
+    if (data.success) {
+      document.querySelector(`.review-text-${id}`).textContent = comment;
+
+      let stars = "";
+      for (let i = 1; i <= 5; i++) {
+        stars += i <= rating ? "★" : "☆";
+      }
+      document.querySelector(`.review-stars-${id}`).innerHTML = stars;
+
+      closeEdit();
+      showFlash("Review updated!");
     } else {
-        sticky.classList.add("hidden");
+      showFlash("Failed to update review", "error");
     }
+  });
+
+
+  /* DELETE */
+  let deleteTarget = null;
+
+  window.openDeleteModal = function(productId, reviewId) {
+    deleteTarget = { productId, reviewId };
+    document.getElementById("deleteModal").classList.remove("hidden");
+  };
+
+  window.closeDeleteModal = function() {
+    document.getElementById("deleteModal").classList.add("hidden");
+  };
+
+  document.getElementById("confirmDeleteBtn").addEventListener("click", async () => {
+
+    const { productId, reviewId } = deleteTarget;
+
+    const res = await fetch(`/delete_review/${productId}/${reviewId}`, {
+      method: "POST"
+    });
+
+    const data = await res.json();
+
+    if (data.success) {
+      document.getElementById(`review-${reviewId}`).remove();
+      closeDeleteModal();
+      showFlash("Review deleted!");
+    } else {
+      showFlash("Failed to delete review", "error");
+    }
+  });
+
 });
 </script>
 -->
 {% include "components/footer.html.jinja" %}
 </div>
+
 </body>
 </html>

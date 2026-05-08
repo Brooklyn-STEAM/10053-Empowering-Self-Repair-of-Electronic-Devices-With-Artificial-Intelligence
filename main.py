@@ -52,6 +52,7 @@ class User:
         self.email = result["Email"]
         self.address = result["Address"]
         self.id = result["ID"]
+        self.password = result["Password"] 
 
     def get_id(self):
         return str(self.id)
@@ -110,11 +111,10 @@ def login_page():
         connection = None
         cursor = None
         result = None
+        connection = connect_db()
+        cursor = connection.cursor()
 
         try:
-            connection = connect_db()
-            cursor = connection.cursor()
-
             cursor.execute(
                 "SELECT * FROM User WHERE Email = %s",
                 (email,)
@@ -123,10 +123,8 @@ def login_page():
             result = cursor.fetchone()
 
         finally:
-            if cursor:
-                cursor.close()
-            if connection:
-                connection.close()
+            cursor.close()
+            connection.close()
 
         if result is None:
             flash("Invalid email or password.", "error")
@@ -139,11 +137,9 @@ def login_page():
         # ✅ success
         session.pop("has_seen_greeting", None)
         login_user(User(result))
-
         session["has_seen_greeting"] = False
 
         flash("Welcome back!", "success")
-
         return redirect("/")
 
     return render_template("login.html.jinja")
@@ -158,7 +154,7 @@ def signup_page():
         password = request.form["password"]
         confirm_password = request.form["confirm_password"]
         address = request.form["address"]
-        
+
         if password != confirm_password:
             flash("Passwords do not match", "error")
         elif len(password) < 8:
@@ -326,31 +322,34 @@ def product_page(product_id):
     return render_template("individual_product.html.jinja", product=product, reviews=reviews)
 
 @app.route("/product/<int:product_id>/review", methods=["POST"])
+@login_required
 def submit_review(product_id):
-    rating = request.form.get("rating")
-    comment = request.form.get("comment")
 
+    rating = request.form.get("rating", 5)
+    comment = request.form.get("comment", "").strip()
 
-    connection = connect_db()
-    cursor = connection.cursor()
+    try:
+        rating = int(rating)
+        rating = max(1, min(rating, 5))
+    except:
+        rating = 5
 
-    if not current_user.is_authenticated:
-        return redirect(url_for("login"))
+    conn = connect_db()
+    cursor = conn.cursor()
 
-    
+    try:
+        cursor.execute("""
+            INSERT INTO Review (ProductID, UserID, Ratings, Comment)
+            VALUES (%s, %s, %s, %s)
+        """, (product_id, current_user.id, rating, comment))
 
-    # Save review to database
-    cursor.execute("""
-        INSERT INTO Review 
-                (ProductID, UserID, Ratings, Comment)
-        VALUES 
-        (%s, %s, %s, %s)
-    """, (product_id, current_user.id, rating, comment))
+        conn.commit()
 
+        return redirect(url_for("product_page", product_id=product_id))
 
-    connection.close()
-
-    return redirect(url_for("product_page", product_id=product_id))
+    finally:
+        cursor.close()
+        conn.close()
 
 @app.errorhandler(404)
 def page_not_found(e):
@@ -413,27 +412,31 @@ def repair_item_detail(id):
 @app.route("/cart/<int:product_id>/add_to_cart", methods=["POST"])
 @login_required
 def add_to_cart(product_id):
+
     try:
         quantity = int(request.form.get("quantity", 1))
         if quantity <= 0:
             raise ValueError
-    except (ValueError, TypeError):
+    except:
         flash("Invalid quantity", "error")
         return redirect(url_for("product_page", product_id=product_id))
 
-    connection = connect_db()
-    cursor = connection.cursor()
+    conn = connect_db()
+    cursor = conn.cursor()
 
-    cursor.execute("""
-        INSERT INTO Cart (Quantity, ProductID, UserID)
-        VALUES (%s, %s, %s)
-        ON DUPLICATE KEY UPDATE
-        Quantity = Quantity + VALUES(Quantity)
-    """, (quantity, product_id, current_user.id))
+    try:
+        cursor.execute("""
+            INSERT INTO Cart (Quantity, ProductID, UserID)
+            VALUES (%s, %s, %s)
+            ON DUPLICATE KEY UPDATE
+            Quantity = Quantity + VALUES(Quantity)
+        """, (quantity, product_id, current_user.id))
 
-    connection.commit()
-    cursor.close()
-    connection.close()
+        conn.commit()
+
+    finally:
+        cursor.close()
+        conn.close()
 
     flash("Product added to cart successfully!", "cart_success")
 
@@ -605,8 +608,6 @@ def checkout():
 
     return render_template("checkout.html.jinja", cart=cart_items)
 
-
-
 @app.route("/thank_you")
 @login_required
 def thank_you():
@@ -719,6 +720,7 @@ def update_profile():
         connection.close()
 
     return redirect("/profile")
+
 @app.route("/edit_profile")
 @login_required
 def edit_profile():
@@ -843,42 +845,30 @@ def orders():
 @app.route("/delete_account", methods=["POST"])
 @login_required
 def delete_account():
-
     connection = None
     cursor = None
 
     try:
+        password = request.form.get("password", "").strip()
+
+        if not password:
+            flash("Password required.", "error")
+            return redirect("/profile")
+
+        if not check_password_hash(current_user.password, password):
+            flash("Incorrect password.", "error")
+            return redirect("/profile")
+
         connection = connect_db()
         cursor = connection.cursor()
 
         user_id = current_user.id
+        print("🔍 Deleting user:", user_id)
 
-        # 1. Delete order tracking
-        cursor.execute("""
-            DELETE FROM order_tracking
-            WHERE order_id IN (
-                SELECT ID FROM orders WHERE user_id = %s
-            )
-        """, (user_id,))
+        # Begin transaction
+        connection.begin()
 
-        # 2. Delete sales cart items
-        cursor.execute("""
-            DELETE FROM SalesCart
-            WHERE order_id IN (
-                SELECT ID FROM orders WHERE user_id = %s
-            )
-        """, (user_id,))
-
-        # 3. Delete orders
-        cursor.execute("DELETE FROM orders WHERE user_id = %s", (user_id,))
-
-        # 4. Delete reviews
-        cursor.execute("DELETE FROM Review WHERE UserID = %s", (user_id,))
-
-        # 5. Delete cart items
-        cursor.execute("DELETE FROM Cart WHERE UserID = %s", (user_id,))
-
-        # 6. Delete user
+        # Delete user only; cascades will handle related records
         cursor.execute("DELETE FROM User WHERE ID = %s", (user_id,))
 
         connection.commit()
@@ -887,21 +877,17 @@ def delete_account():
         if connection:
             connection.rollback()
 
-        print(e)
-        flash("Error deleting account. Please try again.", "error")
+        print("❌ DELETE ERROR:", e)
+        flash("Error deleting account.", "error")
         return redirect("/profile")
-
     finally:
         if cursor:
             cursor.close()
         if connection:
             connection.close()
 
-    # logout AFTER deletion
     logout_user()
-
     flash("Account deleted successfully.", "success")
-
     return redirect("/")
 
 @app.route("/map", methods=["GET"])
@@ -920,6 +906,28 @@ def map():
 
     return render_template("map.html.jinja", centers=result)
 
+@app.route("/edit_review/<int:review_id>", methods=["POST"])
+@login_required
+def edit_review(review_id):
+
+    connection = connect_db()
+    cursor = connection.cursor()
+
+    try:
+        rating = request.form.get("rating")
+        comment = request.form.get("comment")
+
+        if not rating or not comment:
+            return jsonify({"success": False, "error": "Missing data"}), 400
+
+        cursor.execute("""
+            UPDATE Review
+            SET Ratings = %s, Comment = %s
+            WHERE ID = %s AND UserID = %s
+        """, (rating, comment, review_id, current_user.id))
+
+        if cursor.rowcount == 0:
+            return jsonify({"success": False, "error": "Not allowed or not found"}), 403
 
 @app.after_request
 def add_security_headers(response):
@@ -933,3 +941,46 @@ def add_security_headers(response):
 if __name__ == '__main__':
     app.run(debug=config.get("DEBUG", cast="@bool", default=False))
     
+        connection.commit()
+
+        return jsonify({
+            "success": True,
+            "rating": rating,
+            "comment": comment
+        })
+
+    except Exception as e:
+        connection.rollback()
+        return jsonify({"success": False, "error": str(e)}), 500
+
+    finally:
+        cursor.close()
+        connection.close()
+
+@app.route("/delete_review/<int:product_id>/<int:review_id>", methods=["POST"])
+@login_required
+def delete_review(product_id, review_id):
+
+    connection = connect_db()
+    cursor = connection.cursor()
+
+    try:
+        cursor.execute("""
+            DELETE FROM Review
+            WHERE ID = %s AND UserID = %s
+        """, (review_id, current_user.id))
+
+        if cursor.rowcount == 0:
+            return jsonify({"success": False, "error": "Not found or not allowed"}), 403
+
+        connection.commit()
+
+        return jsonify({"success": True})
+
+    except Exception as e:
+        connection.rollback()
+        return jsonify({"success": False, "error": str(e)}), 500
+
+    finally:
+        cursor.close()
+        connection.close()
