@@ -25,6 +25,7 @@
 </head>
 
 <body class="bg-[#0b2c4d] text-[#d6ecff] font-mono min-h-screen flex flex-col text-sm lg:text-lg">
+<div id="mainContent" class="transition-all duration-300" style="margin-right: 0; flex-grow flex flex-col">
 
 {% include "components/ai_chat.html.jinja" %}
 {% include "components/navbar.html.jinja" %}
@@ -84,9 +85,28 @@
       <textarea name="comment" rows="4"
                 class="w-full mb-4 p-2 rounded bg-[#0b2c4d] border border-[#6fb7ff]"></textarea>
 
-      <button class="bg-[#6fb7ff] text-[#0b2c4d] px-4 py-2 rounded font-bold">
-        Submit Review
-      </button>
+    <!-- ADD TO CART -->
+    <form method="POST"
+          id="add-to-cart-form"
+          action="/cart/{{ product['ID'] }}/add_to_cart"
+          class="bg-[#0e3a63] border border-[#6fb7ff]/40 p-6 rounded-xl space-y-4">
+
+          <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+
+        <div>
+            <label class="block text-sm mb-2 uppercase tracking-wide text-gray-300">
+                Quantity
+            </label>
+
+            <input type="number" name="quantity" value="1" min="1"
+                   class="w-24 bg-[#0b2c4d] border border-[#6fb7ff] text-center rounded-md p-2">
+        </div>
+
+        <button type="submit"
+                class="w-full bg-[#6fb7ff] hover:bg-[#5aa7f0] text-[#0b2c4d]
+                       font-bold py-3 rounded-lg transition">
+            Add to Cart
+        </button>
     </form>
   </div>
   {% endif %}
@@ -109,6 +129,8 @@
 
       <p class="review-text-{{ x['ID'] }} text-gray-200">{{ x["Comment"] }}</p>
 
+        <form method="POST" action="/product/{{ product['ID'] }}/review">
+            <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
       {% if current_user.is_authenticated and x["UserID"]|int == current_user.id|int %}
       <div class="flex gap-2 mt-3">
 
@@ -169,7 +191,7 @@
   </div>
 </div>
 
-<!-- FLASH + JS -->
+ JS 
 <script>
 document.addEventListener("DOMContentLoaded", () => {
 
@@ -287,6 +309,9 @@ document.addEventListener("DOMContentLoaded", () => {
 
 });
 </script>
+-->
+{% include "components/footer.html.jinja" %}
+</div>
 
 </body>
 </html>
