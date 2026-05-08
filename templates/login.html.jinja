@@ -28,6 +28,8 @@
 
         <form method="post" class="flex flex-col gap-4">
 
+            <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+
             <!-- EMAIL -->
             <div>
                 <label class="block text-sm mb-1 text-gray-300">Email</label>
