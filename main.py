@@ -928,18 +928,6 @@ def edit_review(review_id):
 
         if cursor.rowcount == 0:
             return jsonify({"success": False, "error": "Not allowed or not found"}), 403
-
-@app.after_request
-def add_security_headers(response):
-    response.headers["X-Content-Type-Options"] = "nosniff"
-    response.headers["X-Frame-Options"] = "SAMEORIGIN"
-    response.headers["Referrer-Policy"] = "strict-origin-when-cross-origin"
-
-    return response
-
-
-if __name__ == '__main__':
-    app.run(debug=config.get("DEBUG", cast="@bool", default=False))
     
         connection.commit()
 
@@ -956,6 +944,15 @@ if __name__ == '__main__':
     finally:
         cursor.close()
         connection.close()
+
+
+@app.after_request
+def add_security_headers(response):
+    response.headers["X-Content-Type-Options"] = "nosniff"
+    response.headers["X-Frame-Options"] = "SAMEORIGIN"
+    response.headers["Referrer-Policy"] = "strict-origin-when-cross-origin"
+
+    return response
 
 @app.route("/delete_review/<int:product_id>/<int:review_id>", methods=["POST"])
 @login_required
@@ -984,3 +981,6 @@ def delete_review(product_id, review_id):
     finally:
         cursor.close()
         connection.close()
+
+if __name__ == '__main__':
+    app.run(debug=config.get("DEBUG", cast="@bool", default=False))
