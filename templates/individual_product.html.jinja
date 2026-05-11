@@ -205,7 +205,7 @@ document.addEventListener("DOMContentLoaded", () => {
   {% with messages = get_flashed_messages(with_categories=true) %}
     {% if messages %}
       {% for category, message in messages %}
-        showFlash(`{{ message }}`, "{{ category }}");
+        showFlash({{ message }}, "{{ category }}");
       {% endfor %}
     {% endif %}
   {% endwith %}
@@ -229,22 +229,22 @@ document.addEventListener("DOMContentLoaded", () => {
     const rating = document.getElementById("modal-rating").value;
     const comment = document.getElementById("modal-comment").value;
 
-    const res = await fetch(`/edit_review/${id}`, {
+    const res = await fetch(/edit_review/${id}, {
       method: "POST",
       headers: {"Content-Type": "application/x-www-form-urlencoded"},
-      body: `rating=${rating}&comment=${encodeURIComponent(comment)}`
+      body: rating=${rating}&comment=${encodeURIComponent(comment)}
     });
 
     const data = await res.json();
 
     if (data.success) {
-      document.querySelector(`.review-text-${id}`).textContent = comment;
+      document.querySelector(.review-text-${id}).textContent = comment;
 
       let stars = "";
       for (let i = 1; i <= 5; i++) {
         stars += i <= rating ? "★" : "☆";
       }
-      document.querySelector(`.review-stars-${id}`).innerHTML = stars;
+      document.querySelector(.review-stars-${id}).innerHTML = stars;
 
       closeEdit();
       showFlash("Review updated!");
@@ -270,14 +270,14 @@ document.addEventListener("DOMContentLoaded", () => {
 
     const { productId, reviewId } = deleteTarget;
 
-    const res = await fetch(`/delete_review/${productId}/${reviewId}`, {
+    const res = await fetch(/delete_review/${productId}/${reviewId}, {
       method: "POST"
     });
 
     const data = await res.json();
 
     if (data.success) {
-      document.getElementById(`review-${reviewId}`).remove();
+      document.getElementById(review-${reviewId}).remove();
       closeDeleteModal();
       showFlash("Review deleted!");
     } else {
