@@ -1,19 +1,28 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
+
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+
   <title>Profile</title>
 
   <script src="https://cdn.tailwindcss.com"></script>
+
   <link href="/static/style.css" rel="stylesheet" />
+
   <link rel="icon" href="/static/products/Blueprint Logo.png" />
 
-  <!-- Cropper FIXED CDN -->
-  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/cropperjs@1.6.2/dist/cropper.min.css">
+  <!-- Cropper -->
+  <link
+    rel="stylesheet"
+    href="https://cdn.jsdelivr.net/npm/cropperjs@1.6.2/dist/cropper.min.css"
+  >
+
   <script src="https://cdn.jsdelivr.net/npm/cropperjs@1.6.2/dist/cropper.min.js"></script>
 
   <style>
+
     .glass {
       backdrop-filter: blur(10px);
       background: rgba(11, 44, 77, 0.6);
@@ -32,8 +41,8 @@
     }
 
     .avatar {
-      width: 80px;
-      height: 80px;
+      width: 90px;
+      height: 90px;
       border-radius: 50%;
       background: #6fb7ff;
       color: #0b2c4d;
@@ -41,11 +50,38 @@
       align-items: center;
       justify-content: center;
       font-weight: bold;
-      font-size: 22px;
+      font-size: 24px;
       overflow: hidden;
       cursor: pointer;
+      position: relative;
     }
+
+    .avatar img {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+    }
+
+    .avatar-overlay {
+      position: absolute;
+      inset: 0;
+      background: rgba(0,0,0,0.45);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      opacity: 0;
+      transition: 0.25s ease;
+      color: white;
+      font-size: 14px;
+      font-weight: bold;
+    }
+
+    .avatar:hover .avatar-overlay {
+      opacity: 1;
+    }
+
   </style>
+
 </head>
 
 <body class="min-h-screen flex flex-col bg-[#0b2c4d] text-[#d6ecff]">
@@ -59,32 +95,59 @@
 
     <!-- AVATAR -->
     <div class="flex justify-center mb-4">
+
       <div class="avatar" onclick="openUploadModal()">
 
         {% if current_user.profile_pic %}
-          <img src="{{ current_user.profile_pic }}" class="w-full h-full object-cover" id="avatarImg">
+
+          <img
+            src="{{ current_user.profile_pic }}"
+            id="avatarImg"
+          >
+
         {% else %}
-          <span id="avatarText">{{ current_user.name[0]|upper }}</span>
-          <img id="avatarImg" class="hidden w-full h-full object-cover">
+
+          <span id="avatarText">
+            {{ current_user.name[0]|upper }}
+          </span>
+
+          <img
+            id="avatarImg"
+            class="hidden"
+          >
+
         {% endif %}
 
+        <div class="avatar-overlay">
+          Change
+        </div>
+
       </div>
+
     </div>
 
     <h1 class="text-4xl font-bold border-b border-dashed border-[#6fb7ff]/40 inline-block pb-2">
       Hey {{ current_user.name }}!
     </h1>
 
-    <p class="text-gray-300 mt-3">Manage your account and activity</p>
+    <p class="text-gray-300 mt-3">
+      Manage your account and activity
+    </p>
+
   </div>
 
   <!-- GRID -->
   <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
 
+    <!-- ACCOUNT INFO -->
     <div class="glass p-6 rounded-xl border border-[#6fb7ff]/30 soft-glow">
-      <h2 class="text-xl mb-4 border-b border-[#6fb7ff]/30 pb-2">Account Info</h2>
+
+      <h2 class="text-xl mb-4 border-b border-[#6fb7ff]/30 pb-2">
+        Account Info
+      </h2>
 
       <div class="space-y-4">
+
         <div class="bg-[#0b2c4d] p-3 rounded border border-white/10">
           <p class="text-xs text-gray-400">Name</p>
           <p class="font-semibold">{{ current_user.name }}</p>
@@ -94,72 +157,110 @@
           <p class="text-xs text-gray-400">Email</p>
           <p class="font-semibold">{{ current_user.email }}</p>
         </div>
-
+ 
         <div class="bg-[#0b2c4d] p-3 rounded border border-white/10">
           <p class="text-xs text-gray-400">Status</p>
           <p class="font-semibold text-green-400">Active</p>
         </div>
+
       </div>
+
     </div>
 
+    <!-- ACTIONS -->
     <div class="lg:col-span-2 glass p-6 rounded-xl border border-[#6fb7ff]/30 soft-glow">
 
-      <h2 class="text-xl mb-4 border-b border-[#6fb7ff]/30 pb-2">Actions</h2>
+      <h2 class="text-xl mb-4 border-b border-[#6fb7ff]/30 pb-2">
+        Actions
+      </h2>
 
       <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
 
-        <a href="/edit_profile"
-           class="bg-[#0b2c4d] border border-[#6fb7ff]/30 text-[#6fb7ff] p-5 rounded-xl font-bold text-center hover-lift hover:bg-[#6fb7ff] hover:text-[#0b2c4d] transition">
+        <a
+          href="/edit_profile"
+          class="bg-[#0b2c4d] border border-[#6fb7ff]/30 text-[#6fb7ff] p-5 rounded-xl font-bold text-center hover-lift hover:bg-[#6fb7ff] hover:text-[#0b2c4d] transition"
+        >
           ✏️ Edit Profile
         </a>
 
-        <a href="/orders"
-           class="bg-[#0b2c4d] border border-[#6fb7ff]/30 p-5 rounded-xl text-center hover-lift hover:bg-[#0e3a63] transition">
+        <a
+          href="/orders"
+          class="bg-[#0b2c4d] border border-[#6fb7ff]/30 p-5 rounded-xl text-center hover-lift hover:bg-[#0e3a63] transition"
+        >
           📦 My Orders
         </a>
 
-        <button onclick="openDeleteModal()"
-          class="bg-[#0b2c4d] border border-red-500/40 text-red-400 p-5 rounded-xl font-bold hover-lift hover:bg-red-500 hover:text-white transition">
+        <button
+          onclick="openDeleteModal()"
+          class="bg-[#0b2c4d] border border-red-500/40 text-red-400 p-5 rounded-xl font-bold hover-lift hover:bg-red-500 hover:text-white transition"
+        >
           🗑 Delete Account
         </button>
 
-        <a href="/browse"
-           class="bg-[#0b2c4d] border border-[#6fb7ff]/30 p-5 rounded-xl text-center hover-lift hover:bg-[#0e3a63] transition">
+        <a
+          href="/browse"
+          class="bg-[#0b2c4d] border border-[#6fb7ff]/30 p-5 rounded-xl text-center hover-lift hover:bg-[#0e3a63] transition"
+        >
           🛒 Shop
         </a>
 
       </div>
+
     </div>
 
   </div>
+
 </main>
 
-<!-- MODAL -->
-<div id="uploadModal" class="hidden fixed inset-0 bg-black/70 flex items-center justify-center z-50">
+<!-- UPLOAD MODAL -->
+<div
+  id="uploadModal"
+  class="hidden fixed inset-0 bg-black/70 flex items-center justify-center z-50"
+>
 
   <div class="bg-[#0e3a63] p-5 rounded-xl w-full max-w-md">
 
-    <h2 class="text-xl font-bold mb-3">Upload & Crop Image</h2>
+    <h2 class="text-xl font-bold mb-3">
+      Upload & Crop Image
+    </h2>
 
-    <input type="file" id="fileInput" accept="image/*" class="mb-3">
+    <input
+      type="file"
+      id="fileInput"
+      accept="image/*"
+      class="mb-3"
+    >
 
-    <div class="w-full h-64 bg-black flex items-center justify-center overflow-hidden">
-      <img id="cropImage" class="hidden w-full max-h-64">
+    <div class="w-full h-64 bg-black flex items-center justify-center overflow-hidden rounded">
+
+      <img
+        id="cropImage"
+        class="hidden w-full max-h-64"
+      >
+
     </div>
 
     <div class="flex justify-between mt-4">
 
-      <button onclick="closeUploadModal()" class="px-3 py-2 bg-gray-600 rounded">
+      <button
+        onclick="closeUploadModal()"
+        class="px-3 py-2 bg-gray-600 rounded"
+      >
         Cancel
       </button>
 
-      <button onclick="uploadCropped()" class="px-3 py-2 bg-[#6fb7ff] text-black font-bold rounded">
+      <button
+        id="saveBtn"
+        onclick="uploadCropped(event)"
+        class="px-3 py-2 bg-[#6fb7ff] text-black font-bold rounded"
+      >
         Save
       </button>
 
     </div>
 
   </div>
+
 </div>
 
 <script>
@@ -168,109 +269,192 @@ let cropper = null;
 
 /* OPEN MODAL */
 function openUploadModal() {
-  document.getElementById("uploadModal").classList.remove("hidden");
 
-  // reset input so same file triggers change
+  document
+    .getElementById("uploadModal")
+    .classList
+    .remove("hidden");
+
   document.getElementById("fileInput").value = "";
+
 }
 
 /* CLOSE MODAL */
 function closeUploadModal() {
-  document.getElementById("uploadModal").classList.add("hidden");
+
+  document
+    .getElementById("uploadModal")
+    .classList
+    .add("hidden");
 
   if (cropper) {
     cropper.destroy();
     cropper = null;
   }
 
-  document.getElementById("cropImage").classList.add("hidden");
+  document
+    .getElementById("cropImage")
+    .classList
+    .add("hidden");
+
 }
 
-/* FILE CHANGE */
-document.getElementById("fileInput").addEventListener("change", function (e) {
+/* FILE SELECT */
+document
+.getElementById("fileInput")
+.addEventListener("change", function (e) {
 
   const file = e.target.files[0];
+
   if (!file) return;
+
+  /* validate image */
+  if (!file.type.startsWith("image/")) {
+    alert("Please upload an image.");
+    return;
+  }
+
+  /* validate size */
+  if (file.size > 5 * 1024 * 1024) {
+    alert("Image too large (max 5MB)");
+    return;
+  }
 
   const reader = new FileReader();
 
   reader.onload = function (event) {
 
     const img = document.getElementById("cropImage");
+
     img.src = event.target.result;
+
     img.classList.remove("hidden");
 
-    if (cropper) cropper.destroy();
+    if (cropper) {
+      cropper.destroy();
+    }
 
     cropper = new Cropper(img, {
       aspectRatio: 1,
       viewMode: 1,
       autoCropArea: 1,
-      responsive: true
+      responsive: true,
+      dragMode: "move",
+      background: false,
+      guides: false,
+      center: false,
+      highlight: false
     });
+
   };
 
   reader.readAsDataURL(file);
+
 });
 
-/* UPLOAD CROPPED */
-function uploadCropped() {
+/* UPLOAD */
+function uploadCropped(event) {
 
   if (!cropper) {
     alert("Please select an image first.");
     return;
   }
 
+  const saveBtn = document.getElementById("saveBtn");
+
+  saveBtn.disabled = true;
+  saveBtn.innerText = "Uploading...";
+
   const canvas = cropper.getCroppedCanvas({
     width: 300,
     height: 300
   });
 
-  const croppedImage = canvas.toDataURL("image/png");
+  /* COMPRESSED JPEG */
+  const croppedImage =
+    canvas.toDataURL("image/jpeg", 0.9);
 
   fetch("/upload_profile_pic", {
+
     method: "POST",
-    headers: { "Content-Type": "application/json" },
-    body: JSON.stringify({ image: croppedImage })
+
+    headers: {
+      "Content-Type": "application/json"
+    },
+
+    body: JSON.stringify({
+      image: croppedImage
+    })
+
   })
+
   .then(res => res.json())
+
   .then(data => {
+
+    saveBtn.disabled = false;
+    saveBtn.innerText = "Save";
 
     console.log("UPLOAD RESPONSE:", data);
 
     if (data.success) {
 
-      const avatar = document.getElementById("avatarImg");
-      const text = document.getElementById("avatarText");
+      const avatar =
+        document.getElementById("avatarImg");
 
-      if (avatar) {
-        avatar.src = data.url + "?t=" + new Date().getTime(); // FORCE REFRESH FIX
-        avatar.classList.remove("hidden");
+      const text =
+        document.getElementById("avatarText");
+
+      avatar.src =
+        data.url + "?t=" + new Date().getTime();
+
+      avatar.classList.remove("hidden");
+
+      if (text) {
+        text.style.display = "none";
       }
-
-      if (text) text.style.display = "none";
 
       closeUploadModal();
 
     } else {
-      alert("Upload failed");
+
+      alert(data.error || "Upload failed");
+
     }
 
   })
+
   .catch(err => {
+
     console.error(err);
+
+    saveBtn.disabled = false;
+    saveBtn.innerText = "Save";
+
     alert("Server error");
+
   });
+
 }
 
 /* ESC CLOSE */
 document.addEventListener("keydown", e => {
-  if (e.key === "Escape") closeUploadModal();
+
+  if (e.key === "Escape") {
+    closeUploadModal();
+  }
+
 });
 
 /* OUTSIDE CLICK CLOSE */
-document.getElementById("uploadModal").addEventListener("click", e => {
-  if (e.target === e.currentTarget) closeUploadModal();
+document
+.getElementById("uploadModal")
+.addEventListener("click", e => {
+
+  if (e.target === e.currentTarget) {
+    closeUploadModal();
+  }
+
 });
 
 </script>

@@ -1,18 +1,16 @@
 from flask import Flask, render_template, request, flash, redirect, abort, url_for, session, jsonify
 from flask_login import LoginManager, login_user, logout_user, login_required, current_user
-import pymysql, re, sqlite3, mysql.connector, base64, uuid, os, io
-from flask_limiter import Limiter
-from flask_limiter.util import get_remote_address
+import pymysql, re, sqlite3, mysql.connector, base64, time , os, io, logging, uuid, pdfplumber
 from dynaconf import Dynaconf
 from ai_agent import run_agent
 from datetime import datetime
 from anthropic import Anthropic
 from openai import OpenAI
-import pdfplumber
 from werkzeug.security import generate_password_hash, check_password_hash
 from flask_sqlalchemy import SQLAlchemy
 from PIL import Image
 from flask_wtf import CSRFProtect
+
 
 
 app = Flask(__name__)
@@ -672,8 +670,8 @@ def clear_chat():
 @app.route("/profile")
 @login_required
 def profile():
-    user = get_user(current_user.id)
-    return render_template("profile.html.jinja", user=user)
+
+    return render_template("profile.html.jinja")
 
 @app.route("/profile/update", methods=["POST"])
 @login_required
@@ -725,81 +723,100 @@ def update_profile():
 @app.route("/edit_profile")
 @login_required
 def edit_profile():
-    user = get_user(current_user.id)
+    connection = connect_db()
+    cursor = connection.cursor(pymysql.cursors.DictCursor)
+
+    try:
+        cursor.execute("SELECT * FROM User WHERE ID = %s", (current_user.id,))
+        user = cursor.fetchone()
+    finally:
+        cursor.close()
+        connection.close()
     return render_template("edit_profile.html.jinja", user=user)
+
+Image.MAX_IMAGE_PIXELS = 20_000_000
+
+app.config["MAX_CONTENT_LENGTH"] = 5 * 1024 * 1024  # 5MB
 
 @app.route("/upload_profile_pic", methods=["POST"])
 @login_required
 def upload_profile_pic():
-
     data = request.get_json()
+
+    if not data:
+        return jsonify({"success": False, "error": "Invalid request"}), 400
+
     image_data = data.get("image")
 
     if not image_data:
-        return jsonify({"success": False, "error": "No image"}), 400
+        return jsonify({"success": False, "error": "No image provided"}), 400
 
     try:
-   
+        # Remove base64 prefix if present
         if "," in image_data:
             image_data = image_data.split(",")[1]
 
+        # Decode base64
         img_bytes = base64.b64decode(image_data)
 
+        # Check size of image bytes
+        if len(img_bytes) > app.config["MAX_CONTENT_LENGTH"]:
+            return jsonify({"success": False, "error": "Image size exceeds limit."}), 400
 
-        img = Image.open(io.BytesIO(img_bytes))
-        img = img.convert("RGB")
+        # Load image
+        img_file = io.BytesIO(img_bytes)
+        img = Image.open(img_file)
 
+        # Verify image
+        img.verify()
+        img_file.seek(0)  # Reset file pointer
 
+        # Reopen image after verify
+        img = Image.open(img_file).convert("RGB")
+
+        # Crop to square
+        width, height = img.size
+        size = min(width, height)
+        left = (width - size) // 2
+        top = (height - size) // 2
+        img = img.crop((left, top, left + size, top + size))
+
+        # Resize
+        img = img.resize((300, 300))
+
+        # Prepare folder
         folder = "static/profile_pics"
         os.makedirs(folder, exist_ok=True)
 
-        width, height = img.size
-        size = min(width, height)
+        # Delete old profile picture if exists
+        if current_user.profile_pic:
+            old_path = current_user.profile_pic.lstrip("/")
+            if os.path.exists(old_path):
+                try:
+                    os.remove(old_path)
+                except Exception as e:
+                    logging.warning(f"Failed to delete old profile pic: {e}")
 
-        left = (width - size) // 2
-        top = (height - size) // 2
-
-        img = img.crop((left, top, left + size, top + size))
-
-        filename = f"user_{current_user.id}.png"
+        # Generate unique filename
+        filename = f"user_{current_user.id}_{uuid.uuid4().hex}.jpg"
         path = os.path.join(folder, filename)
 
-        img.save(path, format="PNG")
+        # Save image with optimization
+        img.save(path, format="JPEG", quality=90, optimize=True)
 
+        # URL for the image
         url = f"/static/profile_pics/{filename}"
 
-
+        # Save to database
         current_user.profile_pic = url
         db.session.commit()
 
-        return jsonify({
-            "success": True,
-            "url": url
-        })
+        return jsonify({"success": True, "url": url})
 
     except Exception as e:
-        print("UPLOAD ERROR:", repr(e))  # better debug output
-
-        return jsonify({
-            "success": False,
-            "error": "Image processing failed"
-        }), 500
-    
-def get_user(user_id):
-    connection = connect_db()
-    cursor = connection.cursor(pymysql.cursors.DictCursor)
-
-    cursor.execute(
-        "SELECT * FROM User WHERE ID = %s",
-        (user_id,)
-    )
-
-    user = cursor.fetchone()
-
-    cursor.close()
-    connection.close()
-
-    return user
+        logging.exception("Error uploading profile picture")
+        return jsonify({"success": False, "error": "Image upload failed"}), 500
+      
 
 @app.route("/orders")
 @login_required
