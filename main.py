@@ -346,6 +346,114 @@ def logout():
 
     return redirect("/")
 
+# ============================================
+# GAMIFICATION SYSTEM
+# ============================================
+
+BADGES = [
+    {"name": "First Steps", "icon": "🌱", "description": "Complete your first repair", "requirement": 1},
+    {"name": "Handy Helper", "icon": "🔧", "description": "Complete 5 repairs", "requirement": 5},
+    {"name": "Repair Pro", "icon": "⚡", "description": "Complete 10 repairs", "requirement": 10},
+    {"name": "Master Fixer", "icon": "🏆", "description": "Complete 25 repairs", "requirement": 25},
+    {"name": "Eco Warrior", "icon": "🌍", "description": "Save the planet - 50 repairs", "requirement": 50},
+    {"name": "Legend", "icon": "👑", "description": "100 repairs completed", "requirement": 100},
+]
+
+POINTS_PER_REPAIR = 100
+
+def check_and_award_badges(user_id, repairs_completed):
+    """Award any new badges the user qualifies for"""
+    connection = connect_db()
+    cursor = connection.cursor(pymysql.cursors.DictCursor)
+    new_badges = []
+    try:
+        with connection.cursor() as cursor:
+            # Get already earned badges
+            cursor.execute("SELECT badge_name FROM user_badges WHERE user_id = %s", (user_id,))
+            earned = {row['badge_name'] for row in cursor.fetchall()}
+            
+            # Check each badge
+            for badge in BADGES:
+                if badge['name'] not in earned and repairs_completed >= badge['requirement']:
+                    cursor.execute(
+                        "INSERT INTO user_badges (user_id, badge_name, badge_icon, badge_description) VALUES (%s, %s, %s, %s)",
+                        (user_id, badge['name'], badge['icon'], badge['description'])
+                    )
+                    new_badges.append(badge)
+            connection.commit()
+    finally:
+        connection.close()
+    return new_badges
+
+
+@app.route('/complete_repair', methods=['POST'])
+def complete_repair():
+    """Mark a repair as completed and award points/badges"""
+    if 'user_id' not in session:  # ⚠️ UPDATE if your session key is different
+        return jsonify({"error": "Please log in"}), 401
+    
+    user_id = session['user_id']
+    guide_id = request.json.get('guide_id')
+    
+    if not guide_id:
+        return jsonify({"error": "Guide ID required"}), 400
+    
+    connection = connect_db()
+    try:
+        with connection.cursor() as cursor:
+            # Check if already completed (prevent farming points)
+            cursor.execute(
+                "SELECT id FROM completed_repairs WHERE user_id = %s AND guide_id = %s",
+                (user_id, guide_id)
+            )
+            if cursor.fetchone():
+                return jsonify({"message": "Already completed!", "already_done": True})
+            
+            # Log completion
+            cursor.execute(
+                "INSERT INTO completed_repairs (user_id, guide_id) VALUES (%s, %s)",
+                (user_id, guide_id)
+            )
+            
+            # Update user stats
+            cursor.execute(
+                "UPDATE users SET points = points + %s, repairs_completed = repairs_completed + 1, level = FLOOR((repairs_completed + 1) / 5) + 1 WHERE id = %s",
+                (POINTS_PER_REPAIR, user_id)
+            )
+            
+            # Get updated stats
+            cursor.execute("SELECT points, repairs_completed, level FROM users WHERE id = %s", (user_id,))
+            stats = cursor.fetchone()
+            connection.commit()
+            
+            # Check for new badges
+            new_badges = check_and_award_badges(user_id, stats['repairs_completed'])
+            
+            return jsonify({
+                "success": True,
+                "points_earned": POINTS_PER_REPAIR,
+                "total_points": stats['points'],
+                "repairs_completed": stats['repairs_completed'],
+                "level": stats['level'],
+                "new_badges": new_badges
+            })
+    finally:
+        connection.close()
+
+
+@app.route('/leaderboard')
+def leaderboard():
+    """Top 10 users by points"""
+    connection = connect_db()
+    try:
+        with connection.cursor() as cursor:
+            cursor.execute("SELECT username, points, repairs_completed, level FROM users ORDER BY points DESC LIMIT 10")
+            top_users = cursor.fetchall()
+        return render_template('leaderboard.html', users=top_users)
+    finally:
+        connection.close()
+
+
 @app.route("/repairs")
 def repair_page():
 
@@ -842,8 +950,31 @@ def clear_chat():
 @app.route("/profile")
 @login_required
 def profile():
+    """User profile page with Stats and Badges"""
+    
     user = get_user(current_user.id)
-    return render_template("profile.html.jinja", user=user)
+    connection = connect_db()
+    cursor = connection.cursor(pymysql.cursors.DictCursor)
+    
+    try:
+        with connection.cursor() as cursor:
+            cursor.execute("SELECT username, points, repairs_completed, level FROM users WHERE id = %s", (current_user.id,))
+            user = cursor.fetchone()
+            
+            cursor.execute("SELECT badge_name, badge_icon, badge_description, earned_at FROM user_badges WHERE user_id = %s ORDER BY earned_at DESC", (current_user.id,))
+            badges = cursor.fetchall()
+        
+        # Calculate progress to next badge
+        next_badge = next((b for b in BADGES if b['requirement'] > user['repairs_completed']), None)
+        progress_percent = (user['repairs_completed'] / next_badge['requirement'] * 100) if next_badge else 100
+        
+        return render_template("profile.html.jinja", user=user, 
+                               badges=badges,
+                               all_badges=BADGES,
+                               next_badge=next_badge, 
+                               progress_percent=progress_percent)
+    finally:
+        connection.close()
 
 @app.route("/profile/update", methods=["POST"])
 @login_required
