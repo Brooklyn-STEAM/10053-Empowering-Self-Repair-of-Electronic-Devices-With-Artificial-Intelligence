@@ -884,43 +884,36 @@ def profile():
 @app.route("/profile/update", methods=["POST"])
 @login_required
 def update_profile():
-    name = re.sub(r'\s+', ' ', request.form.get("full_name", "").strip()).title()
+
+    print("PROFILE UPDATE HIT")
+
+    name = request.form.get("name", "").strip()
     email = request.form.get("email", "").strip()
     address = request.form.get("address", "").strip()
+
+    print(name, email, address)
 
     connection = connect_db()
     cursor = connection.cursor(pymysql.cursors.DictCursor)
 
     try:
-        cursor.execute(
-            "SELECT Name, Email, Address FROM User WHERE ID=%s",
-            (current_user.id,)
-        )
-
-        old_user = cursor.fetchone()
-
-        if old_user:
-            if (
-                old_user["Name"] == name and
-                old_user["Email"] == email and
-                old_user["Address"] == address
-            ):
-                flash("No changes detected", "error")
-                return redirect("/edit_profile")
-
         cursor.execute("""
-            UPDATE User
+            UPDATE `User`
             SET Name=%s, Email=%s, Address=%s
             WHERE ID=%s
         """, (name, email, address, current_user.id))
 
         connection.commit()
 
-        flash("Profile updated successfully!", "profile_success")
+        print("UPDATED SUCCESSFULLY")
 
-    except pymysql.err.IntegrityError:
+        flash("Profile updated successfully!", "success")
+
+    except Exception as e:
+        print("ERROR:", e)
         connection.rollback()
-        flash("Email already exists", "error")
+
+        flash("Failed to update profile. Email may already exist.", "error")
 
     finally:
         cursor.close()
