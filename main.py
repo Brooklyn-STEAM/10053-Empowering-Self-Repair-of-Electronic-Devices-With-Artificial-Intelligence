@@ -1,3 +1,4 @@
+import os
 from flask import Flask, render_template, request, flash, redirect, abort, url_for, session, jsonify
 from flask_login import LoginManager, login_user, logout_user, login_required, current_user
 from flask_limiter import Limiter
@@ -187,7 +188,7 @@ def signup_page():
     return render_template("signup.html.jinja")
 
 @app.route("/forgot_password", methods=["GET", "POST"])
-@limiter.limit("3 per minute")
+@limiter.limit("4 per minute")
 def forgot_password():
 
     if request.method == "POST":
@@ -267,7 +268,7 @@ def reset_password(token):
             SELECT *
             FROM User
             WHERE ResetToken = %s
-        """, (hash_token,))
+        """, (hash_token(token),))
 
         user = cursor.fetchone()
 
@@ -764,37 +765,56 @@ def checkout():
 def thank_you():
     return render_template("thank_you.html.jinja")
 
-@limiter.limit("10 per hour")
+#@limiter.limit("10 per hour")
+@csrf.exempt
 @app.route('/ai-help', methods=['POST'])
 def ai_help():
+   
     try:
         # Make session permanent
+
         session.permanent = True
         
         user_input = request.form.get("message", "")
         image = request.files.get("image")
-        guide_id = request.form.get("guide_id")
 
         if image:
+            # Limit to 5MB
+            image.seek(0, 2)  # Seek to end
+            size = image.tell()
+            image.seek(0)  # Reset
+            if size > 5 * 1024 * 1024:
+                return jsonify({"reply": "⚠️ Image too large. Please upload under 5MB."}), 400
+            
+        guide_id = request.form.get("guide_id")
+        
+        image_path = None  # ✅ Track image path
+        
+        if image:
+            os.makedirs("static/uploads", exist_ok=True)
             image_path = f"static/uploads/{image.filename}"
             image.save(image_path)
-            user_input += "\nUser uploaded an image."
+            if not user_input:
+                user_input = "Please analyze this image and tell me what's wrong with the device."
 
         if "chat_history" not in session:
             session["chat_history"] = []
 
-        session["chat_history"].append({"role": "user", "content": user_input})
+        # Save user message (note if image was uploaded)
+        display_message = user_input
+        if image_path:
+            display_message = f"📷 [Image uploaded] {user_input}"
+        session["chat_history"].append({"role": "user", "content": display_message})
 
-        # Pass guide_id to run_agent
+        # ✅ Pass image_path to run_agent
         result = run_agent(
             user_input,
             session["chat_history"],
-            guide_id=guide_id
+            guide_id=guide_id,
+            image_path=image_path
         )
 
         session["chat_history"].append({"role": "ai", "content": result["summary"]})
-        
-        # Explicitly save session
         session.modified = True
 
         return jsonify({
