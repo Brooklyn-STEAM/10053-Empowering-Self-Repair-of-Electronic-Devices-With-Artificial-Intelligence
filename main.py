@@ -1269,23 +1269,6 @@ def add_security_headers(response):
 
 
 if __name__ == '__main__':
-    app.run(debug=config.get("DEBUG", cast="@bool", default=False))
-    
-        connection.commit()
+   app.run(debug=config.get("DEBUG", cast="@bool", default=False))
 
-        return jsonify({
-            "success": True,
-            "rating": rating,
-            "comment": comment
-        })
 
-    except Exception as e:
-        connection.rollback()
-        return jsonify({"success": False, "error": str(e)}), 500
-
-    finally:
-        cursor.close()
-        connection.close()
-
-if __name__ == '__main__':
-    app.run(debug=config.get("DEBUG", cast="@bool", default=False))
