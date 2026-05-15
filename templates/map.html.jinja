@@ -5,6 +5,8 @@
     <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js" integrity="sha256-20nQCchB9co0qIjJZRGuk2/Z9VM+kNiyxNV1lvTlZBo=" crossorigin=""></script>
     <link rel="stylesheet" href="https://unpkg.com/leaflet-routing-machine@latest/dist/leaflet-routing-machine.css" />
     <script src="https://unpkg.com/leaflet-routing-machine@latest/dist/leaflet-routing-machine.js"></script>
+    <link rel="stylesheet" href="https://unpkg.com/leaflet-sidebar-v2/css/leaflet-sidebar.min.css" />
+    <script src="https://unpkg.com/leaflet-sidebar-v2/js/leaflet-sidebar.min.js"></script>
     <style>
 
 body {
@@ -52,7 +54,7 @@ body {
     background-color: #5aa3e0;
 }
 
-/* Responsive typography */
+
 h1 {
     font-size: 1.5rem; /* Default font size */
     text-align: center;
@@ -101,7 +103,32 @@ h1 {
         <input id="search-input" type="text" placeholder="Enter an address" />
         <button id="search-button">Search</button>
     </div>
-    <div id="map"></div>
+
+    <div id="map" style="width: 100%; height: 100vh;"></div>
+
+    <div id="sidebar" class="leaflet-sidebar collapsed">
+        <!-- Tabs -->
+        <div class="leaflet-sidebar-tabs">
+            <ul role="tablist">
+                <li><a href="#home" role="tab"><i class="fa fa-home"></i></a></li>
+            </ul>
+        </div>
+
+        <!-- Content -->
+        <div class="leaflet-sidebar-content">
+            <div id="home" class="leaflet-sidebar-pane">
+                <h1 class="leaflet-sidebar-header">Repair Shop Location <span class="leaflet-sidebar-close"><i class="fa fa-times"></i></span></h1>
+                {%for x in centers%}
+                <br>
+                <div class="mb-4">
+                    <h2 class="text-xl font-bold">{{ x.name }}</h2>
+                    <p>{{ x.address }}</p>
+                    <img src="{{ x.image }}" alt="{{ x.name }}" class="w-full h-48 object-cover mt-2 rounded">
+                </div>
+                {%endfor%}
+            </div>
+        </div>
+    </div>
 
     <script>
         var map = L.map('map').setView([40.6987909591662, -73.97121363208167], 13);
@@ -111,12 +138,21 @@ h1 {
             attribution: '<a href="https://www.maptiler.com/copyright/" target="_blank">&copy; MapTiler </a> <a href="https://www.openstreetmap.org/copyright/" target="_blank">&copy; OpenStreetMap contributors</a>'
         }).addTo(map);
 
+         // Initialize the sidebar
+        var sidebar = L.control.sidebar({
+            container: 'sidebar',
+            position: 'left'
+        }).addTo(map);
+
+        // Example: Open the sidebar on map load
+        sidebar.open('home');
+
         var centers = {{ centers | tojson }};
         centers.forEach(function(center) {
-            var imageUrl = center.image ? "/static/" + center.image : "/static/products/Blueprint Logo.png";
             L.marker([center.lat, center.lng])
                 .addTo(map)
-                .bindPopup(center.name + "<br>" + center.address + "<br><br>" + "<img src='" + imageUrl + "' style='width: 200px; height: 200px; object-fit: cover; display: block; margin: 0 auto;'>");
+                .bindPopup( center.name + "<br><br>" + center.address + "<br><br>" + "<img src='" + center.image + "' alt='" + center.name + "' class='w-full h-48 object-cover mt-2 rounded'>");
+
         });
 
         document.getElementById('search-button').addEventListener('click', function() {
@@ -125,67 +161,79 @@ h1 {
                 fetch(`https://nominatim.openstreetmap.org/search?format=json&q=${encodeURIComponent(address)}`)
                     .then(response => response.json())
                     .then(data => {
-                        if (data.length > 0) {
+                       if (data.length > 0) {
                             var lat = data[0].lat;
                             var lon = data[0].lon;
                             map.setView([lat, lon], 13);
-                                 L.Routing.control({
+                            
+                            // Find closest center to user's location
+                            var closestCenter = centers[0];
+                            var minDistance = Infinity;
+                            centers.forEach(function(center) {
+                                var distance = Math.sqrt(Math.pow(center.lat - lat, 2) + Math.pow(center.lng - lon, 2));
+                                if (distance < minDistance) {
+                                    minDistance = distance;
+                                    closestCenter = center;
+                                }
+                            });
+                            
+                            L.Routing.control({
                                 waypoints: [
-                                    L.latLng(lat, lon), // User's searched location
-                                    L.latLng(40.68738, -73.96323)
-                                            ]
+                                    L.latLng(lat, lon),
+                                    L.latLng(closestCenter.lat, closestCenter.lng)
+                                ]
                             }).addTo(map);
                             
                         } else {
-                            alert("Address not found. Please try again.");
+                            flash("Address not found. Please try again.");
                         }
                     })
                     .catch(error => console.error('Error:', error));
             } else {
-                alert("Please enter an address.");
+                flash("Please enter an address.");
             }
         });
         
+
+         
     function createButton(label, container) {
         var btn = L.DomUtil.create('button', '', container);
         btn.setAttribute('type', 'button');
         btn.innerHTML = label;
         return btn;
-            }
-
-map.on('click', function(e) {
-    var container = L.DomUtil.create('div'),
-        startBtn = createButton('Start from this location', container),
-        destBtn = createButton('Go to this location', container);
-
-    console.log("Popup buttons created:", startBtn, destBtn); // Debugging
-
-    L.popup()
-        .setContent(container)
-        .setLatLng(e.latlng)
-        .openOn(map);
-
-    // Check if control is defined
-    if (typeof control === 'undefined') {
-        console.error("Error: 'control' is not defined. Ensure it is initialized.");
-        return;
     }
 
-    // Add event listeners for the buttons
-    L.DomEvent.on(startBtn, 'click', function() {
-        console.log("Start button clicked, setting waypoint:", e.latlng); // Debugging
-        control.spliceWaypoints(0, 1, e.latlng);
-        map.closePopup();
+    map.on('click', function(e) {
+        var container = L.DomUtil.create('div'),
+            startBtn = createButton('Start from this location', container);
+
+        // Display a popup with the button at the clicked location
+        L.popup()
+            .setContent(container)
+            .setLatLng(e.latlng)
+            .openOn(map);
+
+        // Find closest center to user's location
+        var closestCenter = centers[0];
+        var minDistance = Infinity;
+        
+        centers.forEach(function(center) {
+            var distance = Math.sqrt(Math.pow(center.lat - e.latlng.lat, 2) + Math.pow(center.lng - e.latlng.lng, 2));
+            if (distance < minDistance) {
+                minDistance = distance;
+                closestCenter = center;
+            }
+        });
+
+        L.Routing.control({
+            waypoints: [
+                L.latLng(e.latlng.lat, e.latlng.lng),
+                L.latLng(closestCenter.lat, closestCenter.lng)
+            ]
+        }).addTo(map);
+
     });
-
-    L.DomEvent.on(destBtn, 'click', function() {
-        console.log("Destination button clicked, setting waypoint:", e.latlng); // Debugging
-        control.spliceWaypoints(control.getWaypoints().length - 1, 1, e.latlng);
-        map.closePopup();
-    });
-});
-
-
     </script>
+
 </body>
 </html>
