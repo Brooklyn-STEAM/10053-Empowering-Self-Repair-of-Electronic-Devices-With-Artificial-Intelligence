@@ -10,6 +10,7 @@ import base64
 import time
 import io
 import logging
+import hashlib
 
 from flask_limiter import Limiter
 from flask_limiter.util import get_remote_address
@@ -34,6 +35,7 @@ UPLOAD_FOLDER = os.path.join("static", "uploads")
 
 
 app = Flask(__name__)
+csrf = CSRFProtect(app)
 
 config = Dynaconf(settings_file =["settings.toml", ".env"])
 
@@ -53,6 +55,13 @@ app.config.update(
     SESSION_COOKIE_SAMESITE='Lax',
     PERMANENT_SESSION_LIFETIME=3600  # 1 hour
 )
+
+limiter = Limiter(
+    app=app,
+    key_func=get_remote_address,
+    default_limits=["200 per day", "50 per hour"]
+)
+
 
 
 login_manager = LoginManager(app)
