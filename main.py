@@ -1,5 +1,5 @@
 from flask import Flask, render_template, request, flash, redirect, abort, url_for, session, jsonify
-from flask_login import LoginManager, login_user, logout_user, login_required, current_user
+from flask_login import LoginManager, login_user, logout_user, login_required, current_user, UserMixin
 import pymysql, re, sqlite3, mysql.connector, base64, time , os, io, logging, uuid, pdfplumber
 from dynaconf import Dynaconf
 from ai_agent import run_agent
@@ -7,27 +7,26 @@ from datetime import datetime
 from anthropic import Anthropic
 from openai import OpenAI
 from werkzeug.security import generate_password_hash, check_password_hash
-from flask_sqlalchemy import SQLAlchemy
 from PIL import Image
 from flask_wtf import CSRFProtect
+from werkzeug.utils import secure_filename
 
 
 
-app = Flask(__name__)
-
-db = SQLAlchemy()
-
-if __name__ == "__main__":
-    app.run(debug=True)
+UPLOAD_FOLDER = os.path.join("static", "uploads")
 
 
 app = Flask(__name__)
-csrf = CSRFProtect(app)
 
 config = Dynaconf(settings_file =["settings.toml", ".env"])
 
-client = OpenAI(api_key=config.get("OPENAI_API_KEY"))
-client = Anthropic(api_key=config.get("ANTHROPIC_API_KEY"))
+openai_client = OpenAI(
+    api_key=config.get("OPENAI_API_KEY")
+)
+
+anthropic_client = Anthropic(
+    api_key=config.get("ANTHROPIC_API_KEY")
+)
 
 app.secret_key = config.secret_key
 
@@ -44,35 +43,48 @@ login_manager = LoginManager(app)
 login_manager.login_view = "/login"
 
 class User:
+
+    def __init__(self, user_data):
+
+        self.id = user_data["ID"]
+        self.name = user_data["Name"]
+        self.email = user_data["Email"]
+        self.password = user_data["Password"]
+
+        # FIXED: must match your MySQL column name exactly
+        self.profile_pic = user_data.get("Profile_pic")
+
     is_authenticated = True
     is_active = True
     is_anonymous = False
-    
-
-    def __init__(self, result):
-        self.name = result["Name"]
-        self.email = result["Email"]
-        self.address = result["Address"]
-        self.id = result["ID"]
-        self.password = result["Password"] 
 
     def get_id(self):
         return str(self.id)
-
-@login_manager.user_loader  
-def load_user(user_id):
-    connection  = connect_db()
-    cursor = connection.cursor()
-
-    cursor.execute("SELECT * FROM `User` WHERE `ID` = %s ", (user_id,))
-
-    result = cursor.fetchone()
-    connection.close()
-    if result is None:
-        return None
-
     
-    return User(result)
+@login_manager.user_loader
+def load_user(user_id):
+
+    connection = connect_db()
+    cursor = connection.cursor(pymysql.cursors.DictCursor)
+
+    try:
+
+        cursor.execute("""
+            SELECT *
+            FROM `User`
+            WHERE `ID` = %s
+        """, (user_id,))
+
+        result = cursor.fetchone()
+
+        if result is None:
+            return None
+
+        return User(result)
+
+    finally:
+        cursor.close()
+        connection.close()
 
 
 def connect_db():
@@ -720,103 +732,105 @@ def update_profile():
 
     return redirect("/profile")
 
-@app.route("/edit_profile")
-@login_required
-def edit_profile():
-    connection = connect_db()
-    cursor = connection.cursor(pymysql.cursors.DictCursor)
-
-    try:
-        cursor.execute("SELECT * FROM User WHERE ID = %s", (current_user.id,))
-        user = cursor.fetchone()
-    finally:
-        cursor.close()
-        connection.close()
-    return render_template("edit_profile.html.jinja", user=user)
-
-Image.MAX_IMAGE_PIXELS = 20_000_000
-
-app.config["MAX_CONTENT_LENGTH"] = 5 * 1024 * 1024  # 5MB
-
 @app.route("/upload_profile_pic", methods=["POST"])
 @login_required
 def upload_profile_pic():
-    data = request.get_json()
 
-    if not data:
-        return jsonify({"success": False, "error": "Invalid request"}), 400
-
-    image_data = data.get("image")
-
-    if not image_data:
-        return jsonify({"success": False, "error": "No image provided"}), 400
+    connection = None
+    cursor = None
 
     try:
-        # Remove base64 prefix if present
-        if "," in image_data:
-            image_data = image_data.split(",")[1]
 
-        # Decode base64
-        img_bytes = base64.b64decode(image_data)
+        data = request.get_json()
 
-        # Check size of image bytes
-        if len(img_bytes) > app.config["MAX_CONTENT_LENGTH"]:
-            return jsonify({"success": False, "error": "Image size exceeds limit."}), 400
+        if not data:
+            return jsonify({
+                "success": False,
+                "error": "No JSON data received"
+            }), 400
 
-        # Load image
-        img_file = io.BytesIO(img_bytes)
-        img = Image.open(img_file)
+        image_data = data.get("image")
 
-        # Verify image
-        img.verify()
-        img_file.seek(0)  # Reset file pointer
+        if not image_data:
+            return jsonify({
+                "success": False,
+                "error": "No image provided"
+            }), 400
 
-        # Reopen image after verify
-        img = Image.open(img_file).convert("RGB")
+        # VALIDATE BASE64 FORMAT
+        if "," not in image_data:
+            return jsonify({
+                "success": False,
+                "error": "Invalid image format"
+            }), 400
 
-        # Crop to square
-        width, height = img.size
-        size = min(width, height)
-        left = (width - size) // 2
-        top = (height - size) // 2
-        img = img.crop((left, top, left + size, top + size))
+        # SPLIT HEADER + IMAGE
+        header, encoded = image_data.split(",", 1)
 
-        # Resize
-        img = img.resize((300, 300))
+        # DECODE IMAGE
+        binary_data = base64.b64decode(encoded)
 
-        # Prepare folder
-        folder = "static/profile_pics"
-        os.makedirs(folder, exist_ok=True)
+        # CREATE FOLDER IF NEEDED
+        os.makedirs(UPLOAD_FOLDER, exist_ok=True)
 
-        # Delete old profile picture if exists
-        if current_user.profile_pic:
-            old_path = current_user.profile_pic.lstrip("/")
-            if os.path.exists(old_path):
-                try:
-                    os.remove(old_path)
-                except Exception as e:
-                    logging.warning(f"Failed to delete old profile pic: {e}")
+        # GENERATE FILE NAME
+        filename = f"{uuid.uuid4().hex}.jpg"
 
-        # Generate unique filename
-        filename = f"user_{current_user.id}_{uuid.uuid4().hex}.jpg"
-        path = os.path.join(folder, filename)
+        filepath = os.path.join(UPLOAD_FOLDER, filename)
 
-        # Save image with optimization
-        img.save(path, format="JPEG", quality=90, optimize=True)
+        # SAVE FILE
+        with open(filepath, "wb") as f:
+            f.write(binary_data)
 
-        # URL for the image
-        url = f"/static/profile_pics/{filename}"
+        # URL FOR DATABASE
+        image_url = f"/static/uploads/{filename}"
 
-        # Save to database
-        current_user.profile_pic = url
-        db.session.commit()
+        # DATABASE UPDATE
+        connection = connect_db()
 
-        return jsonify({"success": True, "url": url})
+        cursor = connection.cursor()
+
+        cursor.execute("""
+            UPDATE User
+            SET Profile_pic = %s
+            WHERE ID = %s
+        """, (image_url, current_user.id))
+
+        connection.commit()
+
+        # VERIFY UPDATE
+        if cursor.rowcount == 0:
+
+            return jsonify({
+                "success": False,
+                "error": "User not found"
+            }), 400
+
+        # UPDATE FLASK-LOGIN OBJECT
+        current_user.profile_pic = image_url
+
+        return jsonify({
+            "success": True,
+            "url": image_url
+        })
 
     except Exception as e:
-        logging.exception("Error uploading profile picture")
-        return jsonify({"success": False, "error": "Image upload failed"}), 500
-      
+
+        print("UPLOAD ERROR:", e)
+
+        return jsonify({
+            "success": False,
+            "error": str(e)
+        }), 500
+
+    finally:
+
+        # ALWAYS CLOSE DB
+        if cursor:
+            cursor.close()
+
+        if connection:
+            connection.close()
 
 @app.route("/orders")
 @login_required
