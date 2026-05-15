@@ -3,8 +3,12 @@
 <head>
     <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" integrity="sha256-p4NxAoJBhIIN+hmNHrzRCf9tD/miZyoHS5obTRR9BMY=" crossorigin="" />
     <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js" integrity="sha256-20nQCchB9co0qIjJZRGuk2/Z9VM+kNiyxNV1lvTlZBo=" crossorigin=""></script>
+    <link rel="stylesheet" href="https://unpkg.com/leaflet-routing-machine@latest/dist/leaflet-routing-machine.css" />
+    <script src="https://unpkg.com/leaflet-routing-machine@latest/dist/leaflet-routing-machine.js"></script>
+    <link rel="stylesheet" href="https://unpkg.com/leaflet-sidebar-v2/css/leaflet-sidebar.min.css" />
+    <script src="https://unpkg.com/leaflet-sidebar-v2/js/leaflet-sidebar.min.js"></script>
     <style>
-/* General body styling */
+
 body {
     display: flex;
     flex-direction: column;
@@ -13,24 +17,44 @@ body {
     height: 100vh;
 }
 
-/* Navbar styling */
-.navbar {
-    position: relative;
-    z-index: 10;
-    padding: 10px;
-    background-color: #0b2c4d; /* Match the body background */
-    color: #d6ecff;
-    text-align: center;
-}
-
 /* Map styling */
 #map {
-    margin-top: 40px; /* Adjust this value based on the navbar height */
-    height: calc(100vh - 100px); /* Full height minus the navbar and header */
+    margin-top: 40px; 
+    height: calc(100vh - 150px); 
     width: 100%;
 }
 
-/* Responsive typography */
+/* Search bar styling */
+#search-container {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    margin: 10px 0;
+}
+
+#search-input {
+    width: 70%;
+    padding: 10px;
+    border: 1px solid #6fb7ff;
+    border-radius: 5px;
+    font-size: 1rem;
+}
+
+#search-button {
+    padding: 10px 20px;
+    margin-left: 10px;
+    background-color: #6fb7ff;
+    color: #0b2c4d;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+}
+
+#search-button:hover {
+    background-color: #5aa3e0;
+}
+
+
 h1 {
     font-size: 1.5rem; /* Default font size */
     text-align: center;
@@ -43,14 +67,9 @@ h1 {
         padding: 10px;
     }
 
-    .navbar {
-        padding: 5px;
-        font-size: 0.9rem; /* Adjust navbar font size */
-    }
-
     #map {
         margin-top: 50px; /* Adjust spacing for smaller screens */
-        height: calc(100vh - 90px); /* Adjust height for smaller screens */
+        height: calc(100vh - 190px); /* Adjust height for smaller screens */
     }
 }
 
@@ -72,30 +91,172 @@ h1 {
     <link rel="icon" href="/static/products/Blueprint Logo.png" type="image">
 </head>
 
-<body class="bg-[#0b2c4d] text-[#d6ecff] font-mono min-h-screen flex flex-col text-sm lg:text-lg">
+<body class="bg-[#0b2c4d] font-mono min-h-screen flex flex-col text-sm lg:text-lg text-[#d6ecff]">
     <div class="navbar">
         {% include "components/navbar.html.jinja" %}
     </div>
-    <h1 class="text-3xl md:text-4xl mb-4 border-b-2 border-dashed border-[#6fb7ff] inline-block pb-2 text-center">
+   
+    <h1 class="text-3xl md:text-4xl mt-8 mb-8 border-b-2 border-dashed border-[#6fb7ff] inline-block pb-2 text-center text-[#d6ecff]">
         Find Repair Centers Near You
     </h1>
-    <div id="map"></div>
+    <div id="search-container" class="mb-4 text-[#d6ecff]">
+        <input id="search-input" type="text" placeholder="Enter an address" />
+        <button id="search-button">Search</button>
+    </div>
+
+    <div id="map" style="width: 100%; height: 100vh;"></div>
+
+    <div id="sidebar" class="leaflet-sidebar collapsed">
+        <div class="leaflet-sidebar-tabs">
+            <ul role="tablist">
+                <li><a href="#home" role="tab"><i class="fa fa-home"></i></a></li>
+            </ul>
+        </div>
+
+        <!-- Content -->
+        <div class="leaflet-sidebar-content">
+            <div id="home" class="leaflet-sidebar-pane">
+                <h1 class="leaflet-sidebar-header">Repair Shop Location <span class="leaflet-sidebar-close"><i class="fa fa-times"></i></span></h1>
+                {%for x in centers%}
+                <br>
+                <div class="mb-4">
+                    <h2 class="text-xl font-bold">{{ x.name }}</h2>
+                    <p>{{ x.address }}</p>
+                    <button class="shop-link text-blue-500 underline" data-lat="{{ x.lat }}" data-lng="{{ x.lng }}" data-name="{{ x.name }}">View on Map</button>
+                    <img src="{{ x.image }}" alt="{{ x.name }}" class="w-full h-48 object-cover mt-2 rounded">
+                </div>
+                {%endfor%}
+            </div>
+        </div>
+    </div>
 
     <script>
         var map = L.map('map').setView([40.6987909591662, -73.97121363208167], 13);
+        var markers = []; // Store all markers
 
         var osm = L.tileLayer('https://api.maptiler.com/maps/dataviz-v4/{z}/{x}/{y}.png?key=HWne2349v5WDLtpgx5BN', {
             maxZoom: 19,
-            attribution: '<a href="https://www.maptiler.com/copyright/" target="_blank">&copy; MapTiler</a> <a href="https://www.openstreetmap.org/copyright/" target="_blank">&copy; OpenStreetMap contributors</a>'
+            attribution: '<a href="https://www.maptiler.com/copyright/" target="_blank">&copy; MapTiler </a> <a href="https://www.openstreetmap.org/copyright/" target="_blank">&copy; OpenStreetMap contributors</a>'
         }).addTo(map);
+
+        function clearMarkers() {
+            markers.forEach(marker => map.removeLayer(marker));
+            markers = [];
+        }
+
+        function addMarker(lat, lng, name) {
+            var marker = L.marker([lat, lng]).addTo(map).bindPopup(name);
+            markers.push(marker);
+        }
+
+        var sidebar = L.control.sidebar({
+            container: 'sidebar',
+            position: 'left'
+        }).addTo(map);
+
+        sidebar.open('home');
+
+    document.querySelectorAll('.shop-link').forEach(button => {
+        button.addEventListener('click', function() {
+            const lat = parseFloat(this.dataset.lat);
+            const lng = parseFloat(this.dataset.lng);
+            const name = this.dataset.name;
+        
+            map.setView([lat, lng], 15);
+            sidebar.close();
+        });
+    });
 
         var centers = {{ centers | tojson }};
         centers.forEach(function(center) {
-            var imageUrl = center.image ? "/static/" + center.image : "/static/products/Blueprint Logo.png";
             L.marker([center.lat, center.lng])
                 .addTo(map)
-                .bindPopup(center.name + "<br>" + center.address + "<br><br>" + "<img src='" + imageUrl + "' style='width: 200px; height: 200px; object-fit: cover; display: block; margin: 0 auto;'>");
+                .bindPopup( center.name + "<br><br>" + center.address + "<br><br>" + "<img src='" + center.image + "' alt='" + center.name + "' class='w-full h-48 object-cover mt-2 rounded'>");
+
         });
+
+        document.getElementById('search-button').addEventListener('click', function() {
+            var address = document.getElementById('search-input').value;
+            if (address) {
+                fetch(`https://nominatim.openstreetmap.org/search?format=json&q=${encodeURIComponent(address)}`)
+                    .then(response => response.json())
+                    .then(data => {
+                       if (data.length > 0) {
+                            var lat = data[0].lat;
+                            var lon = data[0].lon;
+                            map.setView([lat, lon], 13);
+                            
+                            clearMarkers(); // Clear previous markers BEFORE adding new ones
+                            addMarker(lat, lon, "Search Location");
+                            
+                            // Find closest center to user's location
+                            var closestCenter = centers[0];
+                            var minDistance = Infinity;
+                            centers.forEach(function(center) {
+                                var distance = Math.sqrt(Math.pow(center.lat - lat, 2) + Math.pow(center.lng - lon, 2));
+                                if (distance < minDistance) {
+                                    minDistance = distance;
+                                    closestCenter = center;
+                                }
+                            });
+                            
+                            L.Routing.control({
+                                waypoints: [
+                                    L.latLng(lat, lon),
+                                    L.latLng(closestCenter.lat, closestCenter.lng)
+                                ]
+                            }).addTo(map);
+                            
+                        } else {
+                            flash("Address not found. Please try again.");
+                        }
+                    })
+                    .catch(error => console.error('Error:', error));
+            } else {
+                flash("Please enter an address.");
+            }
+        });
+        
+
+         
+    function createButton(label, container) {
+        var btn = L.DomUtil.create('button', '', container);
+        btn.setAttribute('type', 'button');
+        btn.innerHTML = label;
+        return btn;
+    }
+
+    map.on('click', function(e) {
+        var container = L.DomUtil.create('div'),
+            startBtn = createButton('Starting from this location', container);
+
+        // Display a popup with the button at the clicked location
+        L.popup()
+            .setContent(container)
+            .setLatLng(e.latlng)
+            .openOn(map);
+
+        // Find closest center to user's location
+        var closestCenter = centers[0];
+        var minDistance = Infinity;
+        
+        centers.forEach(function(center) {
+            var distance = Math.sqrt(Math.pow(center.lat - e.latlng.lat, 2) + Math.pow(center.lng - e.latlng.lng, 2));
+            if (distance < minDistance) {
+                minDistance = distance;
+                closestCenter = center;
+            }
+        });
+
+        L.Routing.control({
+            waypoints: [
+                L.latLng(e.latlng.lat, e.latlng.lng),
+                L.latLng(closestCenter.lat, closestCenter.lng)
+            ]
+        }).addTo(map);
+
+    });
     </script>
+
 </body>
 </html>
