@@ -42,6 +42,12 @@
     <div id="chatBox" class="flex-1 overflow-y-auto p-3 space-y-2 flex flex-col">
     </div>
 
+    <label class="block mb-2">
+    <span class="text-white text-xs">📎 Attach image:</span>
+    <input type="file" id="imageUpload" accept="image/*"
+        class="text-white text-xs file:mr-2 file:py-1 file:px-2 file:rounded file:border-0 file:bg-blue-600 file:text-white file:cursor-pointer">
+    </label>
+
     <!-- Input Area -->
     <div class="p-3 border-t border-[#2a4a6a]">
         <input id="msg"
@@ -254,7 +260,18 @@ document.addEventListener("DOMContentLoaded", () => {
             if (metaGuide) guideId = metaGuide.getAttribute('content');
 
             if (msg) addMessage(msg, "user");
-            if (file) addMessage("📷 Image uploaded", "user");
+            if (file) {
+                const reader = new FileReader();
+                reader.onload = function(e) {
+                    const chatBox = document.getElementById("chatBox");
+                    const imgDiv = document.createElement("div");
+                    imgDiv.className = "bg-blue-500 p-2 rounded-lg self-end ml-auto max-w-[75%]";
+                    imgDiv.innerHTML = `<img src="${e.target.result}" class="rounded max-w-full" style="max-height: 200px;">`;
+                    chatBox.appendChild(imgDiv);
+                    chatBox.scrollTop = chatBox.scrollHeight;
+                };
+                reader.readAsDataURL(file);
+            }
 
             const thinkingDiv = addMessage("_Thinking..._", "ai");
 

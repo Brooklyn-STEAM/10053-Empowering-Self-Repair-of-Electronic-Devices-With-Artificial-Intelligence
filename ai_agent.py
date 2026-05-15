@@ -1,12 +1,13 @@
 from ast import If
 import os
 import pdfplumber
+import ollama
 from dotenv import load_dotenv
 from langchain_community.chat_models import ChatOllama
 from langchain_core.messages import AIMessage, HumanMessage, SystemMessage
 import pymysql
 from dynaconf import Dynaconf
-
+import base64
 
 load_dotenv()
 
@@ -17,6 +18,9 @@ llm = ChatOllama(
     model="llama3",
     base_url="http://localhost:11434"
 )
+
+# ✅ NEW - Vision model name
+VISION_MODEL = "llava:7b"
 
 # -----------------------
 # SYSTEM PROMPT
@@ -193,7 +197,7 @@ You are teaching — not dumping information.
 # -----------------------
 # MAIN FUNCTION
 # -----------------------
-def run_agent(query: str, history: list, guide_id: str = None):
+def run_agent(query: str, history: list, guide_id: str = None, image_path: str = None):
     try:
         context = ""
 
@@ -223,7 +227,7 @@ Step-by-Step Instructions (from database):
             else:
                 context = "The user is on a guide page but details could not be loaded.\n"
 
-        # --- 2. Fallback: keyword search (only if no guide_id or if you want both) ---
+        # --- 2. Fallback: keyword search ---
         db_results = search_repair_guides(query)
 
         if db_results:
@@ -241,7 +245,44 @@ Steps: {r['Steps']}
         elif not context:
             context = "No matching repair guides found."
 
-        # --- 3. Build message history (unchanged) ---
+        # --- 3. ✅ NEW: If image provided, use LLaVA vision model ---
+        if image_path and os.path.exists(image_path):
+            vision_prompt = f"""You are an expert phone/device repair technician analyzing a damaged device.
+
+User's question: {query if query else "What's wrong with this device?"}
+
+Relevant repair context:
+{context}
+
+Analyze the image and respond in this format:
+
+🔍 DEVICE: [identify the device]
+💥 VISIBLE DAMAGE: [describe damage in 1-2 sentences]
+⚠️ SEVERITY: [Minor / Moderate / Severe]
+🔧 RECOMMENDED REPAIR: [what needs to be fixed]
+⭐ DIFFICULTY: [Rate 1-5 stars where 1=Very Easy DIY, 5=Professional Required]
+💡 NEXT STEPS: [practical advice, reference the guide above if relevant]
+
+Be concise and helpful."""
+
+            try:
+                response = ollama.chat(
+                    model=VISION_MODEL,
+                    messages=[{
+                        'role': 'user',
+                        'content': vision_prompt,
+                        'images': [image_path]
+                    }]
+                )
+                return {
+                    "summary": response['message']['content']
+                }
+            except Exception as ve:
+                return {
+                    "summary": f"Vision model error: {str(ve)}. Make sure 'llava:7b' is installed via: ollama pull llava:7b"
+                }
+
+        # --- 4. Normal text flow (your original logic) ---
         messages = [SystemMessage(content=SYSTEM_PROMPT)]
 
         for msg in history[-6:]:

@@ -1,15 +1,32 @@
 from flask import Flask, render_template, request, flash, redirect, abort, url_for, session, jsonify
-from flask_login import LoginManager, login_user, logout_user, login_required, current_user, UserMixin
-import pymysql, re, sqlite3, mysql.connector, base64, time , os, io, logging, uuid, pdfplumber
+
+from flask_login import LoginManager, login_user, logout_user, login_required, current_user
+
+import pymysql
+import re
+import os
+import uuid
+import base64
+import time
+import io
+import logging
+
+from flask_limiter import Limiter
+from flask_limiter.util import get_remote_address
+
 from dynaconf import Dynaconf
 from ai_agent import run_agent
+
 from datetime import datetime
+
 from anthropic import Anthropic
 from openai import OpenAI
+
 from werkzeug.security import generate_password_hash, check_password_hash
+
 from PIL import Image
+
 from flask_wtf import CSRFProtect
-from werkzeug.utils import secure_filename
 
 
 
@@ -97,6 +114,9 @@ def connect_db():
         cursorclass= pymysql.cursors.DictCursor
     )
     return conn
+
+def hash_token(token: str) -> str:
+    return hashlib.sha256(token.encode()).hexdigest()
 
 @app.route("/")
 def index():
@@ -193,6 +213,154 @@ def signup_page():
                 connection.close()
 
     return render_template("signup.html.jinja")
+
+@app.route("/forgot_password", methods=["GET", "POST"])
+@limiter.limit("4 per minute")
+def forgot_password():
+
+    if request.method == "POST":
+
+        email = request.form["email"].strip().lower()
+
+        connection = None
+        cursor = None
+
+        try:
+            connection = connect_db()
+            cursor = connection.cursor()
+
+            cursor.execute(
+                "SELECT * FROM User WHERE Email = %s",
+                (email,)
+            )
+
+            user = cursor.fetchone()
+
+            # ONLY if account exists
+            if user:
+
+                # Generate secure token
+                token = secrets.token_urlsafe(32)
+                token_hash = hash_token(token)
+
+                # Expiration = 1 hour from now
+                expiry = datetime.now() + timedelta(hours=1)
+
+                # Save token to DB
+                cursor.execute("""
+                    UPDATE User
+                    SET ResetToken = %s,
+                        ResetTokenExpiry = %s
+                    WHERE Email = %s
+                """, (token_hash, expiry, email))
+
+                connection.commit()
+
+                # TEMPORARY: print link in terminal
+                print(f"""
+                    RESET LINK:
+                    http://127.0.0.1:5000/reset_password/{token}
+                                    """)
+
+        finally:
+            if cursor:
+                cursor.close()
+
+            if connection:
+                connection.close()
+
+        flash(
+            "If an account exists, a reset link has been sent.",
+            "success"
+        )
+
+        return redirect("/login")
+
+    return render_template("forgot_password.html.jinja")
+
+
+@app.route("/reset_password/<token>", methods=["GET", "POST"])
+@limiter.limit("5 per minute")
+def reset_password(token):
+
+    connection = None
+    cursor = None
+
+    try:
+        connection = connect_db()
+        cursor = connection.cursor()
+
+        # Find matching token
+        cursor.execute("""
+            SELECT *
+            FROM User
+            WHERE ResetToken = %s
+        """, (hash_token(token),))
+
+        user = cursor.fetchone()
+
+        # Invalid token
+        if not user:
+            flash("Invalid or expired reset link.", "error")
+            return redirect("/forgot_password")
+
+        # Expired token
+        if datetime.now() > user["ResetTokenExpiry"]:
+            flash("Reset link has expired.", "error")
+            return redirect("/forgot_password")
+
+        # FORM SUBMIT
+        if request.method == "POST":
+
+            password = request.form["password"]
+            confirm_password = request.form["confirm_password"]
+
+            # Password mismatch
+            if password != confirm_password:
+                flash("Passwords do not match.", "error")
+                return render_template(
+                    "reset_password.html.jinja"
+                )
+
+            # Password too short
+            if len(password) < 8:
+                flash(
+                    "Password must be at least 8 characters.",
+                    "error"
+                )
+                return render_template(
+                    "reset_password.html.jinja"
+                )
+
+            # Hash new password
+            hashed_password = generate_password_hash(password)
+
+            # Update password + clear token
+            cursor.execute("""
+                UPDATE User
+                SET Password = %s,
+                    ResetToken = NULL,
+                    ResetTokenExpiry = NULL
+                WHERE ID = %s
+            """, (hashed_password, user["ID"]))
+
+            connection.commit()
+
+            flash(
+                "Password reset successfully. Please log in.",
+                "success"
+            )
+
+            return redirect("/login")
+
+    finally:
+        if cursor:
+            cursor.close()
+
+        if connection:
+            connection.close()
+
+    return render_template("reset_password.html.jinja")
 
 @app.route("/logout")
 @login_required
@@ -624,37 +792,56 @@ def checkout():
 def thank_you():
     return render_template("thank_you.html.jinja")
 
-@limiter.limit("10 per hour")
+#@limiter.limit("10 per hour")
+@csrf.exempt
 @app.route('/ai-help', methods=['POST'])
 def ai_help():
+   
     try:
         # Make session permanent
+
         session.permanent = True
         
         user_input = request.form.get("message", "")
         image = request.files.get("image")
-        guide_id = request.form.get("guide_id")
 
         if image:
+            # Limit to 5MB
+            image.seek(0, 2)  # Seek to end
+            size = image.tell()
+            image.seek(0)  # Reset
+            if size > 5 * 1024 * 1024:
+                return jsonify({"reply": "⚠️ Image too large. Please upload under 5MB."}), 400
+            
+        guide_id = request.form.get("guide_id")
+        
+        image_path = None  # ✅ Track image path
+        
+        if image:
+            os.makedirs("static/uploads", exist_ok=True)
             image_path = f"static/uploads/{image.filename}"
             image.save(image_path)
-            user_input += "\nUser uploaded an image."
+            if not user_input:
+                user_input = "Please analyze this image and tell me what's wrong with the device."
 
         if "chat_history" not in session:
             session["chat_history"] = []
 
-        session["chat_history"].append({"role": "user", "content": user_input})
+        # Save user message (note if image was uploaded)
+        display_message = user_input
+        if image_path:
+            display_message = f"📷 [Image uploaded] {user_input}"
+        session["chat_history"].append({"role": "user", "content": display_message})
 
-        # Pass guide_id to run_agent
+        # ✅ Pass image_path to run_agent
         result = run_agent(
             user_input,
             session["chat_history"],
-            guide_id=guide_id
+            guide_id=guide_id,
+            image_path=image_path
         )
 
         session["chat_history"].append({"role": "ai", "content": result["summary"]})
-        
-        # Explicitly save session
         session.modified = True
 
         return jsonify({
