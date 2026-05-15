@@ -1,23 +1,23 @@
+import os
 from flask import Flask, render_template, request, flash, redirect, abort, url_for, session, jsonify
 from flask_login import LoginManager, login_user, logout_user, login_required, current_user
-import pymysql, re, sqlite3, mysql.connector
+from flask_limiter import Limiter
+from flask_limiter.util import get_remote_address
+import pymysql, re, sqlite3, mysql.connector, secrets, hashlib
 from dynaconf import Dynaconf
 from ai_agent import run_agent
-from datetime import datetime
+from datetime import datetime, timedelta
 from anthropic import Anthropic
 import re
 from openai import OpenAI
 import sqlite3
 import pdfplumber
-
-
-
+from werkzeug.security import generate_password_hash, check_password_hash
+from flask_wtf import CSRFProtect
 
 
 app = Flask(__name__)
-
-if __name__ == "__main__":
-    app.run(debug=True)
+csrf = CSRFProtect(app)
 
 config = Dynaconf(settings_file =["settings.toml", ".env"])
 
@@ -31,6 +31,12 @@ app.config.update(
     SESSION_COOKIE_HTTPONLY=True,
     SESSION_COOKIE_SAMESITE='Lax',
     PERMANENT_SESSION_LIFETIME=3600  # 1 hour
+)
+
+limiter = Limiter(
+    app=app,
+    key_func=get_remote_address,
+    default_limits=["200 per day", "50 per hour"]
 )
 
 login_manager = LoginManager(app)
@@ -47,6 +53,7 @@ class User:
         self.email = result["Email"]
         self.address = result["Address"]
         self.id = result["ID"]
+        self.password = result["Password"] 
 
     def get_id(self):
         return str(self.id)
@@ -78,6 +85,9 @@ def connect_db():
     )
     return conn
 
+def hash_token(token: str) -> str:
+    return hashlib.sha256(token.encode()).hexdigest()
+
 @app.route("/")
 def index():
     
@@ -93,13 +103,97 @@ def index():
 
     return render_template("homepage.html.jinja", guides=result)
 
+@limiter.limit("5 per minute; 20 per hour")
 @app.route("/login", methods=["POST", "GET"])
 def login_page():
 
     if request.method == "POST":
 
+        email = request.form["email"].strip().lower()
+        password = request.form["password"]
+
+        connection = None
+        cursor = None
+        result = None
+        connection = connect_db()
+        cursor = connection.cursor()
+
+        try:
+            cursor.execute(
+                "SELECT * FROM User WHERE Email = %s",
+                (email,)
+            )
+
+            result = cursor.fetchone()
+
+        finally:
+            cursor.close()
+            connection.close()
+
+        if result is None:
+            flash("Invalid email or password.", "error")
+            return render_template("login.html.jinja")
+
+        if not check_password_hash(result["Password"], password):
+            flash("Invalid email or password.", "error")
+            return render_template("login.html.jinja")
+
+        # ✅ success
+        session.pop("has_seen_greeting", None)
+        login_user(User(result))
+        session["has_seen_greeting"] = False
+
+        flash("Welcome back!", "success")
+        return redirect("/")
+
+    return render_template("login.html.jinja")
+
+@limiter.limit("3 per minute; 10 per hour")
+@app.route("/signup", methods=["POST", "GET"])
+def signup_page():
+
+    if request.method == "POST":
+        name = request.form["full_name"]
         email = request.form["email"]
         password = request.form["password"]
+        confirm_password = request.form["confirm_password"]
+        address = request.form["address"]
+
+        if password != confirm_password:
+            flash("Passwords do not match", "error")
+        elif len(password) < 8:
+            flash("Password must be at least 8 characters long", "error")
+        else:
+            connection = connect_db()
+
+            cursor = connection.cursor()
+            try:
+                hashed_password = generate_password_hash(password)
+                
+                cursor.execute("""
+                    INSERT INTO `User` (`Name`, `Email`, `Password`,  `Address`)
+                    VALUES (%s, %s, %s, %s)
+                """, (name, email, hashed_password, address))
+                
+            except pymysql.err.IntegrityError:
+                flash("Email is already in use", "error")
+                
+            else:
+                flash("Account created successfully!", "success")
+                return redirect("/login")
+            finally:
+                cursor.close()
+                connection.close()
+
+    return render_template("signup.html.jinja")
+
+@app.route("/forgot_password", methods=["GET", "POST"])
+@limiter.limit("4 per minute")
+def forgot_password():
+
+    if request.method == "POST":
+
+        email = request.form["email"].strip().lower()
 
         connection = None
         cursor = None
@@ -113,65 +207,133 @@ def login_page():
                 (email,)
             )
 
-            result = cursor.fetchone()
+            user = cursor.fetchone()
+
+            # ONLY if account exists
+            if user:
+
+                # Generate secure token
+                token = secrets.token_urlsafe(32)
+                token_hash = hash_token(token)
+
+                # Expiration = 1 hour from now
+                expiry = datetime.now() + timedelta(hours=1)
+
+                # Save token to DB
+                cursor.execute("""
+                    UPDATE User
+                    SET ResetToken = %s,
+                        ResetTokenExpiry = %s
+                    WHERE Email = %s
+                """, (token_hash, expiry, email))
+
+                connection.commit()
+
+                # TEMPORARY: print link in terminal
+                print(f"""
+                    RESET LINK:
+                    http://127.0.0.1:5000/reset_password/{token}
+                                    """)
 
         finally:
             if cursor:
                 cursor.close()
+
             if connection:
                 connection.close()
 
-        if result is None:
-            flash("No user found. Please check your email or password.", "error")
-            return render_template("login.html.jinja")
+        flash(
+            "If an account exists, a reset link has been sent.",
+            "success"
+        )
 
-        if password != result["Password"]:
-            flash("Incorrect password.", "error")
-            return render_template("login.html.jinja")
+        return redirect("/login")
 
-        # ✅ success
-        login_user(User(result))
-
-        session["has_seen_greeting"] = False
-
-        flash("Welcome back!", "success")
-
-        return redirect("/")
-
-    return render_template("login.html.jinja")
-
-@app.route("/signup", methods=["POST", "GET"])
-def signup_page():
-
-    if request.method == "POST":
-        name = request.form["full_name"]
-        email = request.form["email"]
-        password = request.form["password"]
-        confirm_password = request.form["confirm_password"]
-        address = request.form["address"]
-        
-        if password != confirm_password:
-            flash("Passwords do not match")
-        elif len(password) < 8:
-            flash("Password is too short")
-        else:
-            connection = connect_db()
-
-            cursor = connection.cursor()
-            try:
-                cursor.execute("""
-                    INSERT INTO `User` (`Name`, `Email`, `Password`,  `Address`)
-                    VALUES (%s, %s, %s, %s)
-                """, (name, email, password, address))
-                connection.close()
-            except pymysql.err.IntegrityError:
-                flash("Email is already in use")
-                connection.close()
-            else:
-                return redirect("/login")
+    return render_template("forgot_password.html.jinja")
 
 
-    return render_template("signup.html.jinja")
+@app.route("/reset_password/<token>", methods=["GET", "POST"])
+@limiter.limit("5 per minute")
+def reset_password(token):
+
+    connection = None
+    cursor = None
+
+    try:
+        connection = connect_db()
+        cursor = connection.cursor()
+
+        # Find matching token
+        cursor.execute("""
+            SELECT *
+            FROM User
+            WHERE ResetToken = %s
+        """, (hash_token(token),))
+
+        user = cursor.fetchone()
+
+        # Invalid token
+        if not user:
+            flash("Invalid or expired reset link.", "error")
+            return redirect("/forgot_password")
+
+        # Expired token
+        if datetime.now() > user["ResetTokenExpiry"]:
+            flash("Reset link has expired.", "error")
+            return redirect("/forgot_password")
+
+        # FORM SUBMIT
+        if request.method == "POST":
+
+            password = request.form["password"]
+            confirm_password = request.form["confirm_password"]
+
+            # Password mismatch
+            if password != confirm_password:
+                flash("Passwords do not match.", "error")
+                return render_template(
+                    "reset_password.html.jinja"
+                )
+
+            # Password too short
+            if len(password) < 8:
+                flash(
+                    "Password must be at least 8 characters.",
+                    "error"
+                )
+                return render_template(
+                    "reset_password.html.jinja"
+                )
+
+            # Hash new password
+            hashed_password = generate_password_hash(password)
+
+            # Update password + clear token
+            cursor.execute("""
+                UPDATE User
+                SET Password = %s,
+                    ResetToken = NULL,
+                    ResetTokenExpiry = NULL
+                WHERE ID = %s
+            """, (hashed_password, user["ID"]))
+
+            connection.commit()
+
+            flash(
+                "Password reset successfully. Please log in.",
+                "success"
+            )
+
+            return redirect("/login")
+
+    finally:
+        if cursor:
+            cursor.close()
+
+        if connection:
+            connection.close()
+
+    return render_template("reset_password.html.jinja")
 
 @app.route("/logout")
 @login_required
@@ -220,6 +382,8 @@ def products():
 
     return render_template("individual_products.html.jinja", products=products)
 
+
+@limiter.limit("30 per minute")
 @app.route("/search", methods=["GET"])
 def search():
     query = request.args.get("q", "").strip()
@@ -310,31 +474,34 @@ def product_page(product_id):
     return render_template("individual_product.html.jinja", product=product, reviews=reviews)
 
 @app.route("/product/<int:product_id>/review", methods=["POST"])
+@login_required
 def submit_review(product_id):
-    rating = request.form.get("rating")
-    comment = request.form.get("comment")
 
+    rating = request.form.get("rating", 5)
+    comment = request.form.get("comment", "").strip()
 
-    connection = connect_db()
-    cursor = connection.cursor()
+    try:
+        rating = int(rating)
+        rating = max(1, min(rating, 5))
+    except:
+        rating = 5
 
-    if not current_user.is_authenticated:
-        return redirect(url_for("login"))
+    conn = connect_db()
+    cursor = conn.cursor()
 
-    
+    try:
+        cursor.execute("""
+            INSERT INTO Review (ProductID, UserID, Ratings, Comment)
+            VALUES (%s, %s, %s, %s)
+        """, (product_id, current_user.id, rating, comment))
 
-    # Save review to database
-    cursor.execute("""
-        INSERT INTO Review 
-                (ProductID, UserID, Ratings, Comment)
-        VALUES 
-        (%s, %s, %s, %s)
-    """, (product_id, current_user.id, rating, comment))
+        conn.commit()
 
+        return redirect(url_for("product_page", product_id=product_id))
 
-    connection.close()
-
-    return redirect(url_for("product_page", product_id=product_id))
+    finally:
+        cursor.close()
+        conn.close()
 
 @app.errorhandler(404)
 def page_not_found(e):
@@ -397,27 +564,31 @@ def repair_item_detail(id):
 @app.route("/cart/<int:product_id>/add_to_cart", methods=["POST"])
 @login_required
 def add_to_cart(product_id):
+
     try:
         quantity = int(request.form.get("quantity", 1))
         if quantity <= 0:
             raise ValueError
-    except (ValueError, TypeError):
+    except:
         flash("Invalid quantity", "error")
         return redirect(url_for("product_page", product_id=product_id))
 
-    connection = connect_db()
-    cursor = connection.cursor()
+    conn = connect_db()
+    cursor = conn.cursor()
 
-    cursor.execute("""
-        INSERT INTO Cart (Quantity, ProductID, UserID)
-        VALUES (%s, %s, %s)
-        ON DUPLICATE KEY UPDATE
-        Quantity = Quantity + VALUES(Quantity)
-    """, (quantity, product_id, current_user.id))
+    try:
+        cursor.execute("""
+            INSERT INTO Cart (Quantity, ProductID, UserID)
+            VALUES (%s, %s, %s)
+            ON DUPLICATE KEY UPDATE
+            Quantity = Quantity + VALUES(Quantity)
+        """, (quantity, product_id, current_user.id))
 
-    connection.commit()
-    cursor.close()
-    connection.close()
+        conn.commit()
+
+    finally:
+        cursor.close()
+        conn.close()
 
     flash("Product added to cart successfully!", "cart_success")
 
@@ -589,43 +760,61 @@ def checkout():
 
     return render_template("checkout.html.jinja", cart=cart_items)
 
-
-
 @app.route("/thank_you")
 @login_required
 def thank_you():
     return render_template("thank_you.html.jinja")
 
+#@limiter.limit("10 per hour")
+@csrf.exempt
 @app.route('/ai-help', methods=['POST'])
 def ai_help():
+   
     try:
         # Make session permanent
+
         session.permanent = True
         
         user_input = request.form.get("message", "")
         image = request.files.get("image")
-        guide_id = request.form.get("guide_id")
 
         if image:
+            # Limit to 5MB
+            image.seek(0, 2)  # Seek to end
+            size = image.tell()
+            image.seek(0)  # Reset
+            if size > 5 * 1024 * 1024:
+                return jsonify({"reply": "⚠️ Image too large. Please upload under 5MB."}), 400
+            
+        guide_id = request.form.get("guide_id")
+        
+        image_path = None  # ✅ Track image path
+        
+        if image:
+            os.makedirs("static/uploads", exist_ok=True)
             image_path = f"static/uploads/{image.filename}"
             image.save(image_path)
-            user_input += "\nUser uploaded an image."
+            if not user_input:
+                user_input = "Please analyze this image and tell me what's wrong with the device."
 
         if "chat_history" not in session:
             session["chat_history"] = []
 
-        session["chat_history"].append({"role": "user", "content": user_input})
+        # Save user message (note if image was uploaded)
+        display_message = user_input
+        if image_path:
+            display_message = f"📷 [Image uploaded] {user_input}"
+        session["chat_history"].append({"role": "user", "content": display_message})
 
-        # Pass guide_id to run_agent
+        # ✅ Pass image_path to run_agent
         result = run_agent(
             user_input,
             session["chat_history"],
-            guide_id=guide_id
+            guide_id=guide_id,
+            image_path=image_path
         )
 
         session["chat_history"].append({"role": "ai", "content": result["summary"]})
-        
-        # Explicitly save session
         session.modified = True
 
         return jsonify({
@@ -702,6 +891,7 @@ def update_profile():
         connection.close()
 
     return redirect("/profile")
+
 @app.route("/edit_profile")
 @login_required
 def edit_profile():
@@ -826,42 +1016,30 @@ def orders():
 @app.route("/delete_account", methods=["POST"])
 @login_required
 def delete_account():
-
     connection = None
     cursor = None
 
     try:
+        password = request.form.get("password", "").strip()
+
+        if not password:
+            flash("Password required.", "error")
+            return redirect("/profile")
+
+        if not check_password_hash(current_user.password, password):
+            flash("Incorrect password.", "error")
+            return redirect("/profile")
+
         connection = connect_db()
         cursor = connection.cursor()
 
         user_id = current_user.id
+        print("🔍 Deleting user:", user_id)
 
-        # 1. Delete order tracking
-        cursor.execute("""
-            DELETE FROM order_tracking
-            WHERE order_id IN (
-                SELECT ID FROM orders WHERE user_id = %s
-            )
-        """, (user_id,))
+        # Begin transaction
+        connection.begin()
 
-        # 2. Delete sales cart items
-        cursor.execute("""
-            DELETE FROM SalesCart
-            WHERE order_id IN (
-                SELECT ID FROM orders WHERE user_id = %s
-            )
-        """, (user_id,))
-
-        # 3. Delete orders
-        cursor.execute("DELETE FROM orders WHERE user_id = %s", (user_id,))
-
-        # 4. Delete reviews
-        cursor.execute("DELETE FROM Review WHERE UserID = %s", (user_id,))
-
-        # 5. Delete cart items
-        cursor.execute("DELETE FROM Cart WHERE UserID = %s", (user_id,))
-
-        # 6. Delete user
+        # Delete user only; cascades will handle related records
         cursor.execute("DELETE FROM User WHERE ID = %s", (user_id,))
 
         connection.commit()
@@ -870,21 +1048,17 @@ def delete_account():
         if connection:
             connection.rollback()
 
-        print(e)
-        flash("Error deleting account. Please try again.", "error")
+        print("❌ DELETE ERROR:", e)
+        flash("Error deleting account.", "error")
         return redirect("/profile")
-
     finally:
         if cursor:
             cursor.close()
         if connection:
             connection.close()
 
-    # logout AFTER deletion
     logout_user()
-
     flash("Account deleted successfully.", "success")
-
     return redirect("/")
 
 @app.route("/map", methods=["GET"])
@@ -903,6 +1077,81 @@ def map():
 
     return render_template("map.html.jinja", centers=result)
 
+@app.route("/edit_review/<int:review_id>", methods=["POST"])
+@login_required
+def edit_review(review_id):
+
+    connection = connect_db()
+    cursor = connection.cursor()
+
+    try:
+        rating = request.form.get("rating")
+        comment = request.form.get("comment")
+
+        if not rating or not comment:
+            return jsonify({"success": False, "error": "Missing data"}), 400
+
+        cursor.execute("""
+            UPDATE Review
+            SET Ratings = %s, Comment = %s
+            WHERE ID = %s AND UserID = %s
+        """, (rating, comment, review_id, current_user.id))
+
+        if cursor.rowcount == 0:
+            return jsonify({"success": False, "error": "Not allowed or not found"}), 403
+    
+        connection.commit()
+
+        return jsonify({
+            "success": True,
+            "rating": rating,
+            "comment": comment
+        })
+
+    except Exception as e:
+        connection.rollback()
+        return jsonify({"success": False, "error": str(e)}), 500
+
+    finally:
+        cursor.close()
+        connection.close()
+
+
+@app.after_request
+def add_security_headers(response):
+    response.headers["X-Content-Type-Options"] = "nosniff"
+    response.headers["X-Frame-Options"] = "SAMEORIGIN"
+    response.headers["Referrer-Policy"] = "strict-origin-when-cross-origin"
+
+    return response
+
+@app.route("/delete_review/<int:product_id>/<int:review_id>", methods=["POST"])
+@login_required
+def delete_review(product_id, review_id):
+
+    connection = connect_db()
+    cursor = connection.cursor()
+
+    try:
+        cursor.execute("""
+            DELETE FROM Review
+            WHERE ID = %s AND UserID = %s
+        """, (review_id, current_user.id))
+
+        if cursor.rowcount == 0:
+            return jsonify({"success": False, "error": "Not found or not allowed"}), 403
+
+        connection.commit()
+
+        return jsonify({"success": True})
+
+    except Exception as e:
+        connection.rollback()
+        return jsonify({"success": False, "error": str(e)}), 500
+
+    finally:
+        cursor.close()
+        connection.close()
 
 if __name__ == '__main__':
-    app.run(debug=True)
+    app.run(debug=config.get("DEBUG", cast="@bool", default=False))

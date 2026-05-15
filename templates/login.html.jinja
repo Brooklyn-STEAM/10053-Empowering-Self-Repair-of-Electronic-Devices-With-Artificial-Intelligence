@@ -28,6 +28,8 @@
 
         <form method="post" class="flex flex-col gap-4">
 
+            <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+
             <!-- EMAIL -->
             <div>
                 <label class="block text-sm mb-1 text-gray-300">Email</label>
@@ -65,6 +67,12 @@
             Don’t have an account?
             <a href="/signup" class="text-[#6fb7ff] underline hover:text-[#5aa7f0]">
                 Create one
+            </a>
+
+            <br> 
+
+            <a href="/forgot_password" class="text-[#6fb7ff] underline hover:text-[#5aa7f0]">
+                Forgot Password?
             </a>
         </p>
 
