@@ -82,6 +82,8 @@
 
             <form action="/profile/update" method="POST" class="space-y-5">
 
+                <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+
                 <!-- NAME -->
                 <div>
                     <label class="text-sm text-gray-300">Name</label>

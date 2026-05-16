@@ -21,8 +21,8 @@ csrf = CSRFProtect(app)
 
 config = Dynaconf(settings_file =["settings.toml", ".env"])
 
-client = OpenAI(api_key=config.get("OPENAI_API_KEY"))
-client = Anthropic(api_key=config.get("ANTHROPIC_API_KEY"))
+#client = OpenAI(api_key=config.get("OPENAI_API_KEY"))
+#client = Anthropic(api_key=config.get("ANTHROPIC_API_KEY"))
 
 app.secret_key = config.secret_key
 
@@ -77,7 +77,7 @@ def load_user(user_id):
 def connect_db():
     conn = pymysql.connect(
         host="db.steamcenter.tech",
-        user = config.USER,
+        user = config.user,
         password = config.password,
         database="blueprint",
         autocommit= True,
@@ -364,19 +364,19 @@ POINTS_PER_REPAIR = 100
 def check_and_award_badges(user_id, repairs_completed):
     """Award any new badges the user qualifies for"""
     connection = connect_db()
-    cursor = connection.cursor(pymysql.cursors.DictCursor)
+    cursor = connection.cursor()
     new_badges = []
     try:
         with connection.cursor() as cursor:
             # Get already earned badges
-            cursor.execute("SELECT badge_name FROM user_badges WHERE user_id = %s", (user_id,))
+            cursor.execute("SELECT badge_name FROM User_badges WHERE user_id = %s", (user_id,))
             earned = {row['badge_name'] for row in cursor.fetchall()}
             
             # Check each badge
             for badge in BADGES:
                 if badge['name'] not in earned and repairs_completed >= badge['requirement']:
                     cursor.execute(
-                        "INSERT INTO user_badges (user_id, badge_name, badge_icon, badge_description) VALUES (%s, %s, %s, %s)",
+                        "INSERT INTO User_badges (user_id, badge_name, badge_icon, badge_description) VALUES (%s, %s, %s, %s)",
                         (user_id, badge['name'], badge['icon'], badge['description'])
                     )
                     new_badges.append(badge)
@@ -417,12 +417,12 @@ def complete_repair():
             
             # Update user stats
             cursor.execute(
-                "UPDATE users SET points = points + %s, repairs_completed = repairs_completed + 1, level = FLOOR((repairs_completed + 1) / 5) + 1 WHERE id = %s",
+                "UPDATE User SET points = points + %s, repairs_completed = repairs_completed + 1, level = FLOOR((repairs_completed + 1) / 5) + 1 WHERE id = %s",
                 (POINTS_PER_REPAIR, user_id)
             )
             
             # Get updated stats
-            cursor.execute("SELECT points, repairs_completed, level FROM users WHERE id = %s", (user_id,))
+            cursor.execute("SELECT points, repairs_completed, level FROM User WHERE id = %s", (user_id,))
             stats = cursor.fetchone()
             connection.commit()
             
@@ -446,10 +446,10 @@ def leaderboard():
     """Top 10 users by points"""
     connection = connect_db()
     try:
-        with connection.cursor() as cursor:
-            cursor.execute("SELECT username, points, repairs_completed, level FROM users ORDER BY points DESC LIMIT 10")
-            top_users = cursor.fetchall()
-        return render_template('leaderboard.html', users=top_users)
+        with connection.cursor(pymysql.cursors.DictCursor) as cursor:
+            cursor.execute("SELECT Name AS username, points, repairs_completed, level FROM `User` ORDER BY points DESC LIMIT 10")
+            top_user = cursor.fetchall()
+        return render_template('leaderboard.html.jinja', user=top_user)
     finally:
         connection.close()
 
@@ -954,14 +954,14 @@ def profile():
     
     user = get_user(current_user.id)
     connection = connect_db()
-    cursor = connection.cursor(pymysql.cursors.DictCursor)
+    cursor = connection.cursor()
     
     try:
         with connection.cursor() as cursor:
-            cursor.execute("SELECT username, points, repairs_completed, level FROM users WHERE id = %s", (current_user.id,))
+            cursor.execute("SELECT name, points, repairs_completed, level FROM User WHERE ID = %s", (current_user.id,))
             user = cursor.fetchone()
             
-            cursor.execute("SELECT badge_name, badge_icon, badge_description, earned_at FROM user_badges WHERE user_id = %s ORDER BY earned_at DESC", (current_user.id,))
+            cursor.execute("SELECT badge_name, badge_icon, badge_description, earned_at FROM User_badges WHERE user_id = %s ORDER BY earned_at DESC", (current_user.id,))
             badges = cursor.fetchall()
         
         # Calculate progress to next badge
@@ -978,6 +978,7 @@ def profile():
 
 @app.route("/profile/update", methods=["POST"])
 @login_required
+@limiter.limit("3 per minute")
 def update_profile():
     name = re.sub(r'\s+', ' ', request.form.get("full_name", "").strip()).title()
     email = request.form.get("email", "").strip()
