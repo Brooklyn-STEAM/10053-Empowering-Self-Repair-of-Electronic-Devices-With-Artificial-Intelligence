@@ -1,20 +1,18 @@
+from email.mime import image
 import os
 from flask import Flask, render_template, request, flash, redirect, abort, url_for, session, jsonify
 from flask_login import LoginManager, login_user, logout_user, login_required, current_user
 from flask_limiter import Limiter
 from flask_limiter.util import get_remote_address
-import pymysql, re, sqlite3, mysql.connector, secrets, hashlib
+import pymysql, re, sqlite3, mysql.connector, secrets, hashlib, pdfplumber, uuid
 from dynaconf import Dynaconf
 from ai_agent import run_agent
 from datetime import datetime, timedelta
 from anthropic import Anthropic
-import re
 from openai import OpenAI
-import sqlite3
-import pdfplumber
 from werkzeug.security import generate_password_hash, check_password_hash
 from flask_wtf import CSRFProtect
-
+from werkzeug.utils import secure_filename
 
 app = Flask(__name__)
 csrf = CSRFProtect(app)
@@ -873,7 +871,7 @@ def checkout():
 def thank_you():
     return render_template("thank_you.html.jinja")
 
-#@limiter.limit("10 per hour")
+@limiter.limit("10 per hour")
 @csrf.exempt
 @app.route('/ai-help', methods=['POST'])
 def ai_help():
@@ -899,14 +897,16 @@ def ai_help():
         image_path = None  # ✅ Track image path
         
         if image:
-            os.makedirs("static/uploads", exist_ok=True)
-            image_path = f"static/uploads/{image.filename}"
+            os.makedirs("temp_uploads", exist_ok=True)
+            filename = secure_filename(image.filename)
+            unique_filename = f"{uuid.uuid4()}_{filename}"
+            image_path = os.path.join("temp_uploads", unique_filename)
             image.save(image_path)
             if not user_input:
                 user_input = "Please analyze this image and tell me what's wrong with the device."
 
         if "chat_history" not in session:
-            session["chat_history"] = []
+            session["chat_history"] = session["chat_history"] [-20:]  # Keep last 20 messages max
 
         # Save user message (note if image was uploaded)
         display_message = user_input
