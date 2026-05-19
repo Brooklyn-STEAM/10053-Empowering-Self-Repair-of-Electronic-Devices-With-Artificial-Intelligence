@@ -6,204 +6,399 @@
     <title>Cart</title>
 
     <script src="https://cdn.tailwindcss.com"></script>
+
     <link href="/static/style.css" rel="stylesheet">
     <link rel="icon" href="/static/products/Blueprint Logo.png" type="image">
+
+    <!-- CSRF -->
+    <meta name="csrf-token" content="{{ csrf_token() }}">
+
+    <style>
+
+        @keyframes fadeIn {
+
+            from {
+                opacity: 0;
+                transform: translateY(10px);
+            }
+
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .toast {
+            animation: fadeIn 0.3s ease forwards;
+        }
+
+    </style>
+
 </head>
 
-
 <body class="min-h-screen flex flex-col bg-[#0b2c4d] text-[#d6ecff] font-[Inter]">
-<div id="mainContent" class="transition-all duration-300 flex-grow flex flex-col" 
-style="margin-right: 0; ">
+
+<div id="mainContent"
+     class="transition-all duration-300 flex-grow flex flex-col"
+     style="margin-right: 0;">
 
 {% include "components/ai_chat.html.jinja" %}
 {% include "components/navbar.html.jinja" %}
 
-<main class="flex-grow px-4 lg:px-8 py-6 max-w-5xl mx-auto w-full">
+<!-- FLASH CONTAINER -->
+<div id="flash-container"
+     class="fixed top-5 right-5 z-[9999] space-y-3">
+</div>
 
-    <h1 class="text-3xl font-bold mb-6">Your Shopping Cart</h1>
+<main class="flex-1 max-w-6xl mx-auto p-6 space-y-8 w-full">
 
-    <!-- FLASH MESSAGES (FIXED + AUTO DISAPPEAR READY) -->
-    {% with messages = get_flashed_messages(with_categories=true) %}
-      {% if messages %}
-        <div class="space-y-3 mb-6">
-          {% for category, message in messages %}
-            <div class="flash-msg px-4 py-3 rounded-lg font-semibold shadow-md bg-green-500 text-white">
-              {{ message }}
-            </div>
-          {% endfor %}
-        </div>
-      {% endif %}
-    {% endwith %}
+    <!-- HEADER -->
+    <div class="text-center">
+
+        <h1 class="text-4xl font-bold">
+            Your Shopping Cart
+        </h1>
+
+        <p class="text-gray-300 mt-2">
+            Review and manage your cart items
+        </p>
+
+    </div>
 
     {% if cart|length == 0 %}
-        <p class="text-lg text-gray-400">Your cart is empty.</p>
+
+        <!-- EMPTY CART -->
+        <div class="bg-[#0e3a63]
+                    border border-[#6fb7ff]
+                    rounded-xl
+                    p-10
+                    text-center
+                    shadow-lg">
+
+            <p class="text-xl text-gray-300">
+                Your cart is empty.
+            </p>
+
+            <a href="{{ url_for('browse') }}"
+               class="inline-block mt-6
+                      bg-[#6fb7ff]
+                      hover:bg-blue-400
+                      text-[#0b2c4d]
+                      font-bold
+                      px-6 py-3
+                      rounded-lg
+                      transition">
+
+                Browse Products
+
+            </a>
+
+        </div>
+
     {% else %}
 
     {% set ns = namespace(total=0) %}
 
-    {% for x in cart %}
-    {% set ns.total = ns.total + (x['Price'] * x['Quantity']) %}
+    <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
 
-    <div class="bg-[#0e3a63] border border-[#6fb7ff] rounded-xl p-4 mb-4 shadow-lg">
+        <!-- CART ITEMS -->
+        <div class="lg:col-span-2 space-y-4">
 
-        <!-- MOBILE -->
-        <div class="flex flex-col gap-4 lg:hidden">
+            {% for x in cart %}
 
-            <div class="flex gap-4 items-center">
-                <img src="{{ x['Image'] }}"
-                     class="h-20 w-20 object-contain rounded border border-[#6fb7ff]">
+            {% set ns.total = ns.total + (x['Price'] * x['Quantity']) %}
 
-                <div class="font-semibold text-sm">
-                    {{ x['Name'] }}
+            <div class="bg-[#0e3a63]
+                        border border-[#6fb7ff]
+                        rounded-xl
+                        shadow-lg
+                        p-4
+                        flex flex-col sm:flex-row
+                        items-center
+                        gap-4">
+
+                <!-- IMAGE -->
+                <div class="w-24 h-24
+                            bg-[#0b2c4d]
+                            rounded-lg
+                            overflow-hidden
+                            border border-[#1f4f7a]">
+
+                    <img src="{{ x['Image'] }}"
+                         class="w-full h-full object-contain">
+
                 </div>
+
+                <!-- INFO -->
+                <div class="flex-1 text-center sm:text-left">
+
+                    <h2 class="font-bold text-lg">
+                        {{ x['Name'] }}
+                    </h2>
+
+                    <p class="text-sm text-gray-300 mt-1">
+                        Unit Price:
+                        ${{ "%.2f"|format(x['Price']) }}
+                    </p>
+
+                    <p class="text-sm text-gray-400">
+                        Quantity:
+                        {{ x['Quantity'] }}
+                    </p>
+
+                </div>
+
+                <!-- ACTIONS -->
+                <div class="flex flex-wrap items-center justify-center gap-2">
+
+                    <!-- UPDATE -->
+                    <form method="POST"
+                          action="/cart/{{ x['ProductID'] }}/update_qty"
+                          class="flex items-center gap-2">
+
+                        <input type="hidden"
+                               name="csrf_token"
+                               value="{{ csrf_token() }}">
+
+                        <input name="quantity"
+                               type="number"
+                               value="{{ x['Quantity'] }}"
+                               min="1"
+                               max="20"
+
+                               class="w-16 bg-[#0b2c4d]
+                                      border border-[#6fb7ff]
+                                      rounded-lg
+                                      px-2 py-2
+                                      text-center
+                                      text-white
+                                      focus:outline-none
+                                      focus:ring-2
+                                      focus:ring-[#6fb7ff]">
+
+                        <button type="submit"
+                                class="bg-[#6fb7ff]
+                                       hover:bg-blue-400
+                                       text-[#0b2c4d]
+                                       font-bold
+                                       px-4 py-2
+                                       rounded-lg
+                                       transition duration-200
+                                       shadow-md hover:shadow-lg
+                                       active:scale-95">
+
+                            Update
+
+                        </button>
+
+                    </form>
+
+                    <!-- REMOVE -->
+                    <form method="POST"
+                          action="/cart/{{ x['ProductID'] }}/remove">
+
+                        <input type="hidden"
+                               name="csrf_token"
+                               value="{{ csrf_token() }}">
+
+                        <button
+                            class="bg-red-500
+                                   hover:bg-red-600
+                                   text-white
+                                   text-sm
+                                   font-semibold
+                                   px-4 py-2
+                                   rounded-lg
+                                   transition duration-200
+                                   shadow-md hover:shadow-lg
+                                   active:scale-95">
+
+                            Remove
+
+                        </button>
+
+                    </form>
+
+                </div>
+
+                <!-- SUBTOTAL -->
+                <div class="text-right min-w-[120px]">
+
+                    <p class="text-xs text-gray-300">
+                        Subtotal
+                    </p>
+
+                    <p class="text-xl font-bold text-green-400">
+
+                        ${{ "%.2f"|format(x['Price'] * x['Quantity']) }}
+
+                    </p>
+
+                </div>
+
             </div>
 
-            <form method="post"
-                  action="/cart/{{ x['ProductID'] }}/update_qty"
-                  class="flex gap-2">
-
-                <input name="quantity"
-                       type="number"
-                       value="{{ x['Quantity'] }}"
-                       min="1"
-                       max="20"
-                       class="flex-1 rounded px-3 py-2 text-center bg-[#0b2c4d] border border-[#6fb7ff]">
-
-                <button type="submit"
-                        class="bg-[#6fb7ff] hover:bg-[#5aa7f0] text-[#0b2c4d] px-4 py-2 rounded font-bold">
-                    Update
-                </button>
-            </form>
-
-            <div class="flex justify-between text-sm text-gray-300">
-                <span>Price:</span>
-                <span>${{ "%.2f"|format(x['Price']) }}</span>
-            </div>
-
-            <div class="flex justify-between font-semibold">
-                <span>Subtotal:</span>
-                <span>${{ "%.2f"|format(x['Price'] * x['Quantity']) }}</span>
-            </div>
-
-            <form method="post" action="/cart/{{ x['ProductID'] }}/remove">
-                <button class="w-full bg-red-500 hover:bg-red-600 text-white py-2 rounded">
-                    Remove
-                </button>
-            </form>
+            {% endfor %}
 
         </div>
 
-        <!-- DESKTOP -->
-        <div class="hidden lg:grid grid-cols-6 items-center gap-4">
+        <!-- SUMMARY -->
+        <div class="bg-[#0e3a63]
+                    border border-[#6fb7ff]
+                    rounded-xl
+                    shadow-lg
+                    p-6
+                    h-fit
+                    sticky top-6">
 
-            <img src="{{ x['Image'] }}"
-                 class="h-24 w-24 object-contain rounded border border-[#6fb7ff]">
+            <h2 class="text-2xl font-bold
+                       border-b border-[#6fb7ff]
+                       pb-3 mb-4">
 
-            <div class="col-span-2 font-semibold">
-                {{ x['Name'] }}
-            </div>
+                Cart Summary
 
-            <div class="text-center">
-                <form method="post"
-                      action="/cart/{{ x['ProductID'] }}/update_qty"
-                      class="flex items-center gap-2 justify-center">
-
-                    <input name="quantity"
-                           type="number"
-                           value="{{ x['Quantity'] }}"
-                           min="1"
-                           max="20"
-                           class="w-16 rounded px-2 py-1 text-center bg-[#0b2c4d] border border-[#6fb7ff]">
-
-                    <button type="submit"
-                            class="bg-[#6fb7ff] hover:bg-[#5aa7f0] text-[#0b2c4d] px-3 py-1 rounded text-sm font-bold">
-                        Update
-                    </button>
-                </form>
-            </div>
-
-            <div class="text-center">
-                <form method="post"
-                      action="/cart/{{ x['ProductID'] }}/remove">
-
-                    <button class="bg-red-500 hover:bg-red-600 text-white px-4 py-2 rounded text-sm">
-                        Remove
-                    </button>
-                </form>
-            </div>
-
-            <div class="text-right">
-                <div class="font-semibold">
-                    ${{ "%.2f"|format(x['Price']) }}
-                </div>
-
-                <div class="text-sm text-gray-300">
-                    Subtotal: ${{ "%.2f"|format(x['Price'] * x['Quantity']) }}
-                </div>
-            </div>
-
-        </div>
-
-    </div>
-
-    {% endfor %}
-
-    <!-- TOTAL -->
-    <div class="mt-6 flex justify-end">
-
-        <div class="bg-[#0e3a63] border border-[#6fb7ff] rounded-xl p-4 w-full max-w-xs shadow-lg text-left">
-            <div class="text-gray-400 text-sm">
-                {{ cart|length }} items
-            </div>
-
-            <h2 class="text-2xl font-bold mt-2">
-                Total: ${{ "%.2f"|format(ns.total) }}
             </h2>
 
+            <div class="space-y-2">
+
+                <div class="flex justify-between text-gray-300">
+
+                    <span>Items</span>
+                    <span>{{ cart|length }}</span>
+
+                </div>
+
+                <div class="flex justify-between text-gray-300">
+
+                    <span>Shipping</span>
+                    <span>Free</span>
+
+                </div>
+
+            </div>
+
+            <div class="border-t border-[#6fb7ff] mt-4 pt-4">
+
+                <p class="text-gray-300 text-sm">
+                    Total
+                </p>
+
+                <div class="text-4xl font-bold text-green-400">
+
+                    ${{ "%.2f"|format(ns.total) }}
+
+                </div>
+
+            </div>
+
+            <!-- CHECKOUT -->
             <a href="{{ url_for('checkout') }}"
-               class="block mt-4 w-full text-center font-semibold px-4 py-2 rounded-lg
-                      bg-[#6fb7ff] hover:bg-[#5aa7f0]
+               class="block mt-6 w-full text-center
+                      bg-[#6fb7ff]
+                      hover:bg-blue-400
                       text-[#0b2c4d]
-                      transition-all duration-200
-                      hover:shadow-md active:scale-95">
-                Checkout
+                      font-bold
+                      py-3
+                      rounded-lg
+                      transition">
+
+                Proceed to Checkout
+
             </a>
+
+            <!-- CONTINUE SHOPPING -->
+            <a href="{{ url_for('browse') }}"
+               class="block mt-3 w-full text-center
+                      bg-[#0b2c4d]
+                      hover:bg-[#081f36]
+                      border border-[#6fb7ff]
+                      text-white
+                      font-bold
+                      py-3
+                      rounded-lg
+                      transition">
+
+                Continue Shopping
+
+            </a>
+
         </div>
 
     </div>
 
     {% endif %}
 
-    <!-- BACK -->
-    <a href="{{ url_for('browse') }}">
-        <button class="w-full lg:w-auto bg-[#111] hover:bg-black font-bold text-white mt-4 rounded-lg px-4 py-3">
-            ⬅ Go Back
-        </button>
-    </a>
-
 </main>
 
 {% include "components/footer.html.jinja" %}
 
-<!-- AUTO DISAPPEAR SCRIPT (FIXED) -->
+<!-- FLASH SCRIPT -->
 <script>
+
 document.addEventListener("DOMContentLoaded", () => {
-  setTimeout(() => {
-    const messages = document.querySelectorAll('.flash-msg');
 
-    messages.forEach(msg => {
-      msg.style.transition = "all 0.5s ease";
-      msg.style.opacity = "0";
-      msg.style.transform = "translateY(-10px)";
+    const flashContainer =
+        document.getElementById("flash-container");
 
-      setTimeout(() => {
-        msg.remove();
-      }, 500);
-    });
+    /* =========================
+       SHOW FLASH
+    ========================= */
 
-  }, 3000);
+    function showFlash(message, category = "success") {
+
+        const div = document.createElement("div");
+
+        div.className = `
+            toast px-5 py-3 rounded-xl shadow-lg
+            font-bold text-sm border transition duration-300
+
+            ${category === "error"
+                ? "bg-red-600 text-white border-red-400"
+                : "bg-[#0f5e3a] text-[#b6ffd6] border-[#2aff9a]"
+            }
+        `;
+
+        div.innerText = message;
+
+        flashContainer.appendChild(div);
+
+        setTimeout(() => {
+
+            div.style.opacity = "0";
+            div.style.transform = "translateY(-10px)";
+
+            setTimeout(() => {
+
+                div.remove();
+
+            }, 300);
+
+        }, 3000);
+    }
+
+    /* =========================
+       LOAD FLASK FLASHES
+    ========================= */
+
+    {% with messages = get_flashed_messages(with_categories=true) %}
+      {% if messages %}
+
+        {% for category, message in messages %}
+
+          showFlash(
+            {{ message|tojson }},
+            "{{ category }}"
+          );
+
+        {% endfor %}
+
+      {% endif %}
+    {% endwith %}
+
 });
+
 </script>
 
+</div>
 </body>
 </html>
