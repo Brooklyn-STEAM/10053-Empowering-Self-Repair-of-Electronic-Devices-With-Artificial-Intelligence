@@ -198,6 +198,7 @@ You are teaching — not dumping information.
 # MAIN FUNCTION
 # -----------------------
 def run_agent(query: str, history: list, guide_id: str = None, image_path: str = None):
+    
     try:
         context = ""
 
@@ -312,7 +313,10 @@ Give troubleshooting advice in the context of that guide.
         return {
             "summary": f"Error: {str(e)}"
         }
-    
+    finally:
+        if image_path and os.path.exists(image_path):
+            os.remove(image_path)
+
 def get_guide_by_id(guide_id: str):
 
     config = Dynaconf(settings_file=["settings.toml", ".env"])

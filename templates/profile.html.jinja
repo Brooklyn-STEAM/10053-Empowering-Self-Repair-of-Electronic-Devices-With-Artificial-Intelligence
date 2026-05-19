@@ -168,10 +168,63 @@
            class="p-5 bg-[#0b2c4d] border border-[#6fb7ff]/30 rounded text-center">
           Shop
         </a>
+         <a href="/leaderboard" class="bg-[#0b2c4d] border border-[#6fb7ff]/30 p-5 rounded-xl text-center hover-lift">
+            🏆 View Leaderboard
+        </a>
 
       </div>
 
     </div>
+
+    <div class="bg-gradient-to-r from-blue-600 to-blue-800 text-white rounded-xl p-6 mb-6 shadow-lg">
+            <h1 class="text-3xl font-bold mb-2">👋 {{ user.username }}</h1>
+            <div class="flex gap-6 mt-4">
+                <div class="bg-white/20 rounded-lg p-4 flex-1">
+                    <div class="text-sm opacity-80">Level</div>
+                    <div class="text-3xl font-bold">⭐ {{ user.level }}</div>
+                </div>
+                <div class="bg-white/20 rounded-lg p-4 flex-1">
+                    <div class="text-sm opacity-80">Points</div>
+                    <div class="text-3xl font-bold">💎 {{ user.points }}</div>
+                </div>
+                <div class="bg-white/20 rounded-lg p-4 flex-1">
+                    <div class="text-sm opacity-80">Repairs Done</div>
+                    <div class="text-3xl font-bold">🔧 {{ user.repairs_completed }}</div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Progress to next badge -->
+        {% if next_badge %}
+        <div class="bg-white rounded-xl p-6 mb-6 shadow">
+            <h2 class="text-xl font-bold mb-3">🎯 Next Badge: {{ next_badge.icon }} {{ next_badge.name }}</h2>
+            <p class="text-gray-600 mb-3">{{ next_badge.description }}</p>
+            <div class="w-full bg-gray-200 rounded-full h-4">
+                <div class="bg-blue-600 h-4 rounded-full transition-all" style="width: {{ progress_percent }}%"></div>
+            </div>
+            <p class="text-sm text-gray-500 mt-2">{{ user.repairs_completed }} / {{ next_badge.requirement }} repairs</p>
+        </div>
+        {% endif %}
+
+        <!-- All Badges -->
+        <div class="bg-white rounded-xl p-6 shadow">
+            <h2 class="text-2xl font-bold mb-4">🏅 Badges</h2>
+            <div class="grid grid-cols-2 md:grid-cols-3 gap-4">
+                {% for badge in all_badges %}
+                    {% set earned = badges | selectattr('badge_name', 'equalto', badge.name) | list %}
+                    <div class="border-2 rounded-lg p-4 text-center {% if earned %}bg-yellow-50 border-yellow-400{% else %}bg-gray-50 border-gray-300 opacity-50{% endif %}">
+                        <div class="text-5xl mb-2">{{ badge.icon }}</div>
+                        <div class="font-bold">{{ badge.name }}</div>
+                        <div class="text-xs text-gray-600 mt-1">{{ badge.description }}</div>
+                        {% if earned %}
+                            <div class="text-xs text-green-600 mt-2 font-bold">✅ EARNED</div>
+                        {% else %}
+                            <div class="text-xs text-gray-400 mt-2">🔒 Locked</div>
+                        {% endif %}
+                    </div>
+                {% endfor %}
+            </div>
+        </div>
 
   </div>
 
