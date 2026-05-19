@@ -1,51 +1,31 @@
 from flask import Flask, render_template, request, flash, redirect, abort, url_for, session, jsonify
-
 from flask_login import LoginManager, login_user, logout_user, login_required, current_user
-
-import pymysql
-import re
-import os
-import uuid
-import base64
-import time
-import io
-import logging
-import hashlib
-
 from flask_limiter import Limiter
 from flask_limiter.util import get_remote_address
-
+import pymysql, re, sqlite3, mysql.connector, secrets, hashlib
 from dynaconf import Dynaconf
 from ai_agent import run_agent
-
-from datetime import datetime
-
+from datetime import datetime, timedelta
 from anthropic import Anthropic
+import re
 from openai import OpenAI
-
+import sqlite3
+import pdfplumber
 from werkzeug.security import generate_password_hash, check_password_hash
-
-from PIL import Image
-
 from flask_wtf import CSRFProtect
-
-
+import base64
+import uuid
+import os
 
 UPLOAD_FOLDER = os.path.join("static", "uploads")
-
 
 app = Flask(__name__)
 csrf = CSRFProtect(app)
 
 config = Dynaconf(settings_file =["settings.toml", ".env"])
 
-openai_client = OpenAI(
-    api_key=config.get("OPENAI_API_KEY")
-)
-
-anthropic_client = Anthropic(
-    api_key=config.get("ANTHROPIC_API_KEY")
-)
+#client = OpenAI(api_key=config.get("OPENAI_API_KEY"))
+#client = Anthropic(api_key=config.get("ANTHROPIC_API_KEY"))
 
 app.secret_key = config.secret_key
 
@@ -62,61 +42,45 @@ limiter = Limiter(
     default_limits=["200 per day", "50 per hour"]
 )
 
-
-
 login_manager = LoginManager(app)
 
 login_manager.login_view = "/login"
 
 class User:
-
-    def __init__(self, user_data):
-
-        self.id = user_data["ID"]
-        self.name = user_data["Name"]
-        self.email = user_data["Email"]
-        self.password = user_data["Password"]
-
-        # FIXED: must match your MySQL column name exactly
-        self.profile_pic = user_data.get("Profile_pic")
-
     is_authenticated = True
     is_active = True
     is_anonymous = False
 
+    def __init__(self, result):
+        self.name = result["Name"]
+        self.email = result["Email"]
+        self.address = result["Address"]
+        self.id = result["ID"]
+        self.password = result["Password"] 
+
     def get_id(self):
         return str(self.id)
-    
-@login_manager.user_loader
+
+@login_manager.user_loader  
 def load_user(user_id):
+    connection  = connect_db()
+    cursor = connection.cursor()
 
-    connection = connect_db()
-    cursor = connection.cursor(pymysql.cursors.DictCursor)
+    cursor.execute("SELECT * FROM `User` WHERE `ID` = %s ", (user_id,))
 
-    try:
+    result = cursor.fetchone()
+    connection.close()
+    if result is None:
+        return None
 
-        cursor.execute("""
-            SELECT *
-            FROM `User`
-            WHERE `ID` = %s
-        """, (user_id,))
-
-        result = cursor.fetchone()
-
-        if result is None:
-            return None
-
-        return User(result)
-
-    finally:
-        cursor.close()
-        connection.close()
+    
+    return User(result)
 
 
 def connect_db():
     conn = pymysql.connect(
         host="db.steamcenter.tech",
-        user = config.USER,
+        user = config.user,
         password = config.password,
         database="blueprint",
         autocommit= True,
@@ -151,6 +115,9 @@ def login_page():
         email = request.form["email"].strip().lower()
         password = request.form["password"]
 
+        connection = None
+        cursor = None
+        result = None
         connection = connect_db()
         cursor = connection.cursor()
 
@@ -381,6 +348,114 @@ def logout():
     flash("You have been logged out successfully.", "success")
 
     return redirect("/")
+
+# ============================================
+# GAMIFICATION SYSTEM
+# ============================================
+
+BADGES = [
+    {"name": "First Steps", "icon": "🌱", "description": "Complete your first repair", "requirement": 1},
+    {"name": "Handy Helper", "icon": "🔧", "description": "Complete 5 repairs", "requirement": 5},
+    {"name": "Repair Pro", "icon": "⚡", "description": "Complete 10 repairs", "requirement": 10},
+    {"name": "Master Fixer", "icon": "🏆", "description": "Complete 25 repairs", "requirement": 25},
+    {"name": "Eco Warrior", "icon": "🌍", "description": "Save the planet - 50 repairs", "requirement": 50},
+    {"name": "Legend", "icon": "👑", "description": "100 repairs completed", "requirement": 100},
+]
+
+POINTS_PER_REPAIR = 100
+
+def check_and_award_badges(user_id, repairs_completed):
+    """Award any new badges the user qualifies for"""
+    connection = connect_db()
+    cursor = connection.cursor()
+    new_badges = []
+    try:
+        with connection.cursor() as cursor:
+            # Get already earned badges
+            cursor.execute("SELECT badge_name FROM User_badges WHERE user_id = %s", (user_id,))
+            earned = {row['badge_name'] for row in cursor.fetchall()}
+            
+            # Check each badge
+            for badge in BADGES:
+                if badge['name'] not in earned and repairs_completed >= badge['requirement']:
+                    cursor.execute(
+                        "INSERT INTO User_badges (user_id, badge_name, badge_icon, badge_description) VALUES (%s, %s, %s, %s)",
+                        (user_id, badge['name'], badge['icon'], badge['description'])
+                    )
+                    new_badges.append(badge)
+            connection.commit()
+    finally:
+        connection.close()
+    return new_badges
+
+
+@app.route('/complete_repair', methods=['POST'])
+def complete_repair():
+    """Mark a repair as completed and award points/badges"""
+    if 'user_id' not in session:  # ⚠️ UPDATE if your session key is different
+        return jsonify({"error": "Please log in"}), 401
+    
+    user_id = session['user_id']
+    guide_id = request.json.get('guide_id')
+    
+    if not guide_id:
+        return jsonify({"error": "Guide ID required"}), 400
+    
+    connection = connect_db()
+    try:
+        with connection.cursor() as cursor:
+            # Check if already completed (prevent farming points)
+            cursor.execute(
+                "SELECT id FROM completed_repairs WHERE user_id = %s AND guide_id = %s",
+                (user_id, guide_id)
+            )
+            if cursor.fetchone():
+                return jsonify({"message": "Already completed!", "already_done": True})
+            
+            # Log completion
+            cursor.execute(
+                "INSERT INTO completed_repairs (user_id, guide_id) VALUES (%s, %s)",
+                (user_id, guide_id)
+            )
+            
+            # Update user stats
+            cursor.execute(
+                "UPDATE User SET points = points + %s, repairs_completed = repairs_completed + 1, level = FLOOR((repairs_completed + 1) / 5) + 1 WHERE id = %s",
+                (POINTS_PER_REPAIR, user_id)
+            )
+            
+            # Get updated stats
+            cursor.execute("SELECT points, repairs_completed, level FROM User WHERE id = %s", (user_id,))
+            stats = cursor.fetchone()
+            connection.commit()
+            
+            # Check for new badges
+            new_badges = check_and_award_badges(user_id, stats['repairs_completed'])
+            
+            return jsonify({
+                "success": True,
+                "points_earned": POINTS_PER_REPAIR,
+                "total_points": stats['points'],
+                "repairs_completed": stats['repairs_completed'],
+                "level": stats['level'],
+                "new_badges": new_badges
+            })
+    finally:
+        connection.close()
+
+
+@app.route('/leaderboard')
+def leaderboard():
+    """Top 10 users by points"""
+    connection = connect_db()
+    try:
+        with connection.cursor(pymysql.cursors.DictCursor) as cursor:
+            cursor.execute("SELECT Name AS username, points, repairs_completed, level FROM `User` ORDER BY points DESC LIMIT 10")
+            top_user = cursor.fetchall()
+        return render_template('leaderboard.html.jinja', user=top_user)
+    finally:
+        connection.close()
+
 
 @app.route("/repairs")
 def repair_page():
@@ -878,48 +953,131 @@ def clear_chat():
 @app.route("/profile")
 @login_required
 def profile():
+    """User profile page with stats + badges"""
 
-    return render_template("profile.html.jinja")
+    connection = None
+    cursor = None
+
+    try:
+        connection = connect_db()
+        cursor = connection.cursor()
+
+        # Get user info + stats
+        cursor.execute("""
+            SELECT name, email, address, points, repairs_completed, level, profile_pic
+            FROM User
+            WHERE ID = %s
+        """, (current_user.id,))
+
+        user = cursor.fetchone()
+
+        if not user:
+            flash("User not found.", "error")
+            return redirect("/")
+
+        # Get badges
+        cursor.execute("""
+            SELECT badge_name, badge_icon, badge_description, earned_at
+            FROM User_badges
+            WHERE user_id = %s
+            ORDER BY earned_at DESC
+        """, (current_user.id,))
+
+        badges = cursor.fetchall()
+
+        # Progress calculation (safe)
+        repairs = user.get("repairs_completed", 0)
+
+        next_badge = next(
+            (b for b in BADGES if b["requirement"] > repairs),
+            None
+        )
+
+        if next_badge:
+            progress_percent = (repairs / next_badge["requirement"]) * 100
+        else:
+            progress_percent = 100
+
+        return render_template(
+            "profile.html.jinja",
+            user=user,
+            badges=badges,
+            all_badges=BADGES,
+            next_badge=next_badge,
+            progress_percent=progress_percent
+        )
+
+    except Exception as e:
+        print("PROFILE ERROR:", repr(e))
+        flash("Error loading profile.", "error")
+        return redirect("/")
+
+    finally:
+        if cursor:
+            cursor.close()
+        if connection:
+            connection.close()
+
+
+# --------------------------------------------------
+
+@app.route("/edit_profile")
+@login_required
+def edit_profile():
+    return render_template("edit_profile.html.jinja")
+
+
+# --------------------------------------------------
 
 @app.route("/profile/update", methods=["POST"])
 @login_required
 def update_profile():
 
-    print("PROFILE UPDATE HIT")
+    print("ROUTE HIT")
+    print("FORM DATA:", request.form)
 
     name = request.form.get("name", "").strip()
-    email = request.form.get("email", "").strip()
+    email = request.form.get("email", "").strip().lower()
     address = request.form.get("address", "").strip()
 
-    print(name, email, address)
+    if not name or not email:
+        flash("Name and email are required.", "error")
+        return redirect("/edit_profile")
 
-    connection = connect_db()
-    cursor = connection.cursor(pymysql.cursors.DictCursor)
+    connection = None
+    cursor = None
 
     try:
+        connection = connect_db()
+        cursor = connection.cursor()
+
         cursor.execute("""
-            UPDATE `User`
+            UPDATE User
             SET Name=%s, Email=%s, Address=%s
             WHERE ID=%s
         """, (name, email, address, current_user.id))
 
         connection.commit()
 
-        print("UPDATED SUCCESSFULLY")
-
         flash("Profile updated successfully!", "success")
+        return redirect("/profile")
 
     except Exception as e:
-        print("ERROR:", e)
-        connection.rollback()
+        print("UPDATE ERROR:", repr(e))
+        if connection:
+            connection.rollback()
 
-        flash("Failed to update profile. Email may already exist.", "error")
+        flash("An error occurred while updating your profile.", "error")
+        return redirect("/edit_profile")
 
     finally:
-        cursor.close()
-        connection.close()
+        if cursor:
+            cursor.close()
+        if connection:
+            connection.close()
 
-    return redirect("/profile")
+
+# --------------------------------------------------
 
 @app.route("/upload_profile_pic", methods=["POST"])
 @login_required
@@ -929,54 +1087,31 @@ def upload_profile_pic():
     cursor = None
 
     try:
-
         data = request.get_json()
 
-        if not data:
-            return jsonify({
-                "success": False,
-                "error": "No JSON data received"
-            }), 400
+        if not data or "image" not in data:
+            return jsonify({"success": False, "error": "No image provided"}), 400
 
-        image_data = data.get("image")
+        image_data = data["image"]
 
-        if not image_data:
-            return jsonify({
-                "success": False,
-                "error": "No image provided"
-            }), 400
-
-        # VALIDATE BASE64 FORMAT
         if "," not in image_data:
-            return jsonify({
-                "success": False,
-                "error": "Invalid image format"
-            }), 400
+            return jsonify({"success": False, "error": "Invalid image format"}), 400
 
-        # SPLIT HEADER + IMAGE
         header, encoded = image_data.split(",", 1)
 
-        # DECODE IMAGE
         binary_data = base64.b64decode(encoded)
 
-        # CREATE FOLDER IF NEEDED
         os.makedirs(UPLOAD_FOLDER, exist_ok=True)
 
-        # GENERATE FILE NAME
         filename = f"{uuid.uuid4().hex}.jpg"
-
         filepath = os.path.join(UPLOAD_FOLDER, filename)
 
-        # SAVE FILE
         with open(filepath, "wb") as f:
             f.write(binary_data)
 
-        # URL FOR DATABASE
         image_url = f"/static/uploads/{filename}"
 
-        # DATABASE UPDATE
         connection = connect_db()
-
         cursor = connection.cursor()
 
         cursor.execute("""
@@ -987,16 +1122,8 @@ def upload_profile_pic():
 
         connection.commit()
 
-        # VERIFY UPDATE
         if cursor.rowcount == 0:
-
-            return jsonify({
-                "success": False,
-                "error": "User not found"
-            }), 400
-
-        # UPDATE FLASK-LOGIN OBJECT
-        current_user.profile_pic = image_url
+            return jsonify({"success": False, "error": "User not found"}), 400
 
         return jsonify({
             "success": True,
@@ -1004,8 +1131,7 @@ def upload_profile_pic():
         })
 
     except Exception as e:
-
-        print("UPLOAD ERROR:", e)
+        print("UPLOAD ERROR:", repr(e))
 
         return jsonify({
             "success": False,
@@ -1013,11 +1139,8 @@ def upload_profile_pic():
         }), 500
 
     finally:
-
-        # ALWAYS CLOSE DB
         if cursor:
             cursor.close()
-
         if connection:
             connection.close()
 
@@ -1129,6 +1252,8 @@ def delete_account():
     try:
         password = request.form.get("password", "").strip()
 
+        print("FORM DATA:", request.form)
+
         if not password:
             flash("Password required.", "error")
             return redirect("/profile")
@@ -1141,32 +1266,29 @@ def delete_account():
         cursor = connection.cursor()
 
         user_id = current_user.id
-        print("🔍 Deleting user:", user_id)
+        print("Deleting user:", user_id)
 
-        # Begin transaction
-        connection.begin()
-
-        # Delete user only; cascades will handle related records
         cursor.execute("DELETE FROM User WHERE ID = %s", (user_id,))
-
         connection.commit()
+
+        logout_user()
+
+        flash("Account deleted successfully.", "success")
+        return redirect("/")
 
     except Exception as e:
         if connection:
             connection.rollback()
 
-        print("❌ DELETE ERROR:", e)
+        print("DELETE ERROR:", e)
         flash("Error deleting account.", "error")
         return redirect("/profile")
+
     finally:
         if cursor:
             cursor.close()
         if connection:
             connection.close()
-
-    logout_user()
-    flash("Account deleted successfully.", "success")
-    return redirect("/")
 
 @app.route("/map", methods=["GET"])
 def map():
@@ -1206,7 +1328,6 @@ def edit_review(review_id):
 
         if cursor.rowcount == 0:
             return jsonify({"success": False, "error": "Not allowed or not found"}), 403
-
     
         connection.commit()
 
@@ -1261,16 +1382,5 @@ def delete_review(product_id, review_id):
         cursor.close()
         connection.close()
 
-@app.after_request
-def add_security_headers(response):
-    response.headers["X-Content-Type-Options"] = "nosniff"
-    response.headers["X-Frame-Options"] = "SAMEORIGIN"
-    response.headers["Referrer-Policy"] = "strict-origin-when-cross-origin"
-
-    return response
-
-
 if __name__ == '__main__':
-   app.run(debug=config.get("DEBUG", cast="@bool", default=False))
-
-
+    app.run(debug=config.get("DEBUG", cast="@bool", default=False))
