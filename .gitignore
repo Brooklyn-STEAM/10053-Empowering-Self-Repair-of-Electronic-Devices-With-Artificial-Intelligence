@@ -5,9 +5,6 @@ __pycache__/
 
 venv/
 
-node_modules/
+uploads
 
-package-lock.json
-
-package.json
-temp_uploads/
+profile_pics
