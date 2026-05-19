@@ -136,9 +136,10 @@ h1 {
         var userMarkers = []; // Store only user search markers
         var routingControl = null; // Store routing control
 
-        var osm = L.tileLayer('https://api.maptiler.com/maps/dataviz-v4/{z}/{x}/{y}.png?key=HWne2349v5WDLtpgx5BN', {
+        L.tileLayer('https://{s}.basemaps.cartocdn.com/rastertiles/voyager/{z}/{x}/{y}{r}.png',
+        {
             maxZoom: 19,
-            attribution: '<a href="https://www.maptiler.com/copyright/" target="_blank">&copy; MapTiler </a> <a href="https://www.openstreetmap.org/copyright/" target="_blank">&copy; OpenStreetMap contributors</a>'
+        attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
         }).addTo(map);
 
         function clearUserMarkers() {
