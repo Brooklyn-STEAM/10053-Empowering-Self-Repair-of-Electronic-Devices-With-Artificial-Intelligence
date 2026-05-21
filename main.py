@@ -6,6 +6,7 @@ from flask_limiter import Limiter
 from flask_limiter.util import get_remote_address
 import pymysql, re, sqlite3, mysql.connector, secrets, hashlib, pdfplumber, uuid
 from dynaconf import Dynaconf
+from scipy import stats
 from ai_agent import run_agent
 from datetime import datetime, timedelta
 from anthropic import Anthropic
@@ -390,12 +391,10 @@ def check_and_award_badges(user_id, repairs_completed):
 
 
 @app.route('/complete_repair', methods=['POST'])
+@login_required
 def complete_repair():
     """Mark a repair as completed and award points/badges"""
-    if 'user_id' not in session:  # ⚠️ UPDATE if your session key is different
-        return jsonify({"error": "Please log in"}), 401
-    
-    user_id = session['user_id']
+    user_id = current_user.id
     guide_id = request.json.get('guide_id')
     
     if not guide_id:
@@ -406,12 +405,12 @@ def complete_repair():
         with connection.cursor() as cursor:
             # Check if already completed (prevent farming points)
             cursor.execute(
-                "SELECT id FROM completed_repairs WHERE user_id = %s AND guide_id = %s",
+                "SELECT 1 FROM completed_repairs WHERE user_id = %s AND guide_id = %s",
                 (user_id, guide_id)
             )
             if cursor.fetchone():
-                return jsonify({"message": "Already completed!", "already_done": True})
-            
+                return jsonify({"already_done": True, "success": False, "message": "Repair already completed."})
+
             # Log completion
             cursor.execute(
                 "INSERT INTO completed_repairs (user_id, guide_id) VALUES (%s, %s)",
@@ -420,13 +419,15 @@ def complete_repair():
             
             # Update user stats
             cursor.execute(
-                "UPDATE User SET points = points + %s, repairs_completed = repairs_completed + 1, level = FLOOR((repairs_completed + 1) / 5) + 1 WHERE id = %s",
+                "UPDATE User SET points = points + %s, repairs_completed = repairs_completed + 1, level = FLOOR((repairs_completed + 1) / 5) + 1 WHERE ID = %s",
                 (POINTS_PER_REPAIR, user_id)
             )
             
             # Get updated stats
-            cursor.execute("SELECT points, repairs_completed, level FROM User WHERE id = %s", (user_id,))
+            cursor.execute("SELECT points, repairs_completed, level FROM User WHERE ID = %s", (user_id,))
             stats = cursor.fetchone()
+            print(stats)
+            print(type(stats))
             connection.commit()
             
             # Check for new badges
@@ -452,7 +453,7 @@ def leaderboard():
         with connection.cursor(pymysql.cursors.DictCursor) as cursor:
             cursor.execute("SELECT Name AS username, points, repairs_completed, level FROM `User` ORDER BY points DESC LIMIT 10")
             top_user = cursor.fetchall()
-        return render_template('leaderboard.html.jinja', user=top_user)
+        return render_template('leaderboard.html.jinja', users=top_user)
     finally:
         connection.close()
 
@@ -646,12 +647,20 @@ def guide_detail(id):
     cursor.execute("SELECT * FROM `RepairGuides` WHERE ID = %s", (id,))
     guide = cursor.fetchone()
 
+    guide_completed = False
+    if current_user.is_authenticated:
+        cursor.execute(
+            "SELECT 1 FROM completed_repairs WHERE user_id = %s AND guide_id = %s",
+            (current_user.id, id)
+        )
+        guide_completed = cursor.fetchone() is not None
+
     connection.close()
 
     if guide is None:
         return "Guide not found", 404
 
-    return render_template('guides_detail.html.jinja', guide=guide)
+    return render_template('guides_detail.html.jinja', guide=guide, guide_completed=guide_completed)
 
 @app.route('/repair-item/<int:id>')
 def repair_item_detail(id):
@@ -876,7 +885,7 @@ def checkout():
 def thank_you():
     return render_template("thank_you.html.jinja")
 
-@limiter.limit("10 per hour")
+@limiter.limit("100 per hour")
 @csrf.exempt
 @app.route('/ai-help', methods=['POST'])
 def ai_help():
@@ -911,7 +920,10 @@ def ai_help():
                 user_input = "Please analyze this image and tell me what's wrong with the device."
 
         if "chat_history" not in session:
-            session["chat_history"] = session["chat_history"] [-20:]  # Keep last 20 messages max
+            session["chat_history"] = []
+
+            # Keep only last 20 messages
+            session["chat_history"] = session["chat_history"][-20:]
 
         # Save user message (note if image was uploaded)
         display_message = user_input
@@ -961,59 +973,22 @@ def profile():
     cursor = None
 
     try:
-        connection = connect_db()
-        cursor = connection.cursor()
-
-        # Get user info + stats
-        cursor.execute("""
-            SELECT name, email, address, points, repairs_completed, level, profile_pic
-            FROM User
-            WHERE ID = %s
-        """, (current_user.id,))
-
-        user = cursor.fetchone()
-
-        if not user:
-            flash("User not found.", "error")
-            return redirect("/")
-
-        # Get badges
-        cursor.execute("""
-            SELECT badge_name, badge_icon, badge_description, earned_at
-            FROM User_badges
-            WHERE user_id = %s
-            ORDER BY earned_at DESC
-        """, (current_user.id,))
-
-        badges = cursor.fetchall()
-
-        # Progress calculation (safe)
-        repairs = user.get("repairs_completed", 0)
-
-        next_badge = next(
-            (b for b in BADGES if b["requirement"] > repairs),
-            None
-        )
-
-        if next_badge:
-            progress_percent = (repairs / next_badge["requirement"]) * 100
-        else:
-            progress_percent = 100
-
-        return render_template(
-            "profile.html.jinja",
-            user=user,
-            badges=badges,
-            all_badges=BADGES,
-            next_badge=next_badge,
-            progress_percent=progress_percent
-        )
-
-    except Exception as e:
-        print("PROFILE ERROR:", repr(e))
-        flash("Error loading profile.", "error")
-        return redirect("/")
-
+        with connection.cursor() as cursor:
+            cursor.execute("SELECT Name, points, repairs_completed, level FROM User WHERE ID = %s", (current_user.id,))
+            user = cursor.fetchone()
+            
+            cursor.execute("SELECT badge_name, badge_icon, badge_description, earned_at FROM User_badges WHERE user_id = %s ORDER BY earned_at DESC", (current_user.id,))
+            badges = cursor.fetchall()
+        
+        # Calculate progress to next badge
+        next_badge = next((b for b in BADGES if b['requirement'] > user['repairs_completed']), None)
+        progress_percent = (user['repairs_completed'] / next_badge['requirement'] * 100) if next_badge else 100
+        
+        return render_template("profile.html.jinja", user=user, 
+                               badges=badges,
+                               all_badges=BADGES,
+                               next_badge=next_badge, 
+                               progress_percent=progress_percent)
     finally:
         if cursor:
             cursor.close()

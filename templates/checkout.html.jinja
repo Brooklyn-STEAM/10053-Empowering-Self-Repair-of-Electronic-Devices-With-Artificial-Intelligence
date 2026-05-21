@@ -172,6 +172,10 @@
                         <button
                             class="text-red-400 text-xs mt-2 hover:text-red-300">
 
+                    <form method="post" action="/cart/{{ x['product_id'] }}/remove">
+                        <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+
+                        <button class="text-red-400 text-xs mt-2 hover:text-red-300">
                             Remove
 
                         </button>
@@ -275,9 +279,9 @@
                        name="city"
                        placeholder="City"
 
-                       class="w-full bg-[#0b2c4d]
-                              border border-[#6fb7ff]
-                              rounded px-3 py-2"
+                <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+                <input type="text" name="street" placeholder="Street"
+                       class="w-full bg-[#0b2c4d] border border-[#6fb7ff] rounded px-3 py-2" required>
 
                        required>
 

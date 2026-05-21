@@ -138,6 +138,24 @@
           Email: {{ user['email'] }}
         </div>
 
+        <div class="bg-[#0b2c4d] p-3 rounded border-2 border-white/30">
+                    <h1 class="text-3xl font-bold mb-2">👋 {{ current_user.name }}</h1>
+            <div class="flex gap-6 mt-4">
+                <div class="bg-white/20 rounded-lg p-4 flex-1">
+                  <div class="text-sm opacity-80">Level</div>
+                  <div class="text-3xl font-bold">⭐ <p class="text-white">{{ user.level }}</p></div>
+                </div>
+                <div class="bg-white/20 rounded-lg p-4 flex-1">
+                  <div class="text-sm opacity-80">Points</div>
+                  <div class="text-3xl font-bold">💎 <p>{{ user.points }}</p></div>
+                </div>
+                <div class="bg-white/20 rounded-lg p-4 flex-1">
+                  <div class="text-sm opacity-80">Repairs Done</div>
+                  <div class="text-3xl font-bold">🔧 <p>{{ user.repairs_completed }}</p></div>
+                </div>
+            </div>
+        </div>
+
       </div>
 
     </div>
@@ -176,23 +194,6 @@
 
     </div>
 
-    <div class="bg-gradient-to-r from-blue-600 to-blue-800 text-white rounded-xl p-6 mb-6 shadow-lg">
-            <h1 class="text-3xl font-bold mb-2">👋 {{ user.username }}</h1>
-            <div class="flex gap-6 mt-4">
-                <div class="bg-white/20 rounded-lg p-4 flex-1">
-                    <div class="text-sm opacity-80">Level</div>
-                    <div class="text-3xl font-bold">⭐ {{ user.level }}</div>
-                </div>
-                <div class="bg-white/20 rounded-lg p-4 flex-1">
-                    <div class="text-sm opacity-80">Points</div>
-                    <div class="text-3xl font-bold">💎 {{ user.points }}</div>
-                </div>
-                <div class="bg-white/20 rounded-lg p-4 flex-1">
-                    <div class="text-sm opacity-80">Repairs Done</div>
-                    <div class="text-3xl font-bold">🔧 {{ user.repairs_completed }}</div>
-                </div>
-            </div>
-        </div>
 
         <!-- Progress to next badge -->
         {% if next_badge %}
@@ -230,6 +231,28 @@
 
 </main>
 
+<!-- DELETE MODAL -->
+<div id="deleteModal" class="hidden fixed inset-0 bg-black/70 flex items-center justify-center z-50">
+  <div class="bg-[#0e3a63] border border-red-500/40 rounded-xl p-6 w-full max-w-md text-center">
+    <h2 class="text-2xl font-bold text-red-400 mb-3">Delete Account?</h2>
+    <p class="text-gray-300 mb-4">Enter your password and type DELETE to confirm.</p>
+    <form method="POST" action="/delete_account" id="deleteForm" class="space-y-4">
+
+      <input type="hidden" name="csrf_token" value="{{ csrf_token() }}" />
+      <!-- Password Input -->
+      <input type="password" name="password" placeholder="Enter password" required class="w-full p-2 rounded bg-[#0b2c4d] border border-white/10 text-white" />
+      
+      <!-- Confirmation Input -->
+      <input type="text" name="confirmation" placeholder='Type "DELETE" to confirm' required class="w-full p-2 rounded bg-[#0b2c4d] border border-white/10 text-white" />
+
+      <div class="flex gap-4 justify-center">
+        <button type="button" onclick="closeDeleteModal()" class="px-4 py-2 rounded bg-gray-700 hover:bg-gray-600">Cancel</button>
+        <button id="deleteBtn" type="submit" class="px-4 py-2 rounded bg-red-500 hover:bg-red-600 font-bold flex items-center gap-2">
+          <span id="btnText">Delete</span>
+          <svg id="spinner" class="hidden w-5 h-5 animate-spin" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+            <circle class="opacity-25" cx="12" cy="12" r="10" stroke="white" stroke-width="4"></circle>
+            <path class="opacity-75" fill="white" d="M4 12a8 8 0 018-8v4a4 4 0 00-4 4H4z"></path>
+          </svg>
 
 
 <!-- ================= UPLOAD MODAL ================= -->
