@@ -13,6 +13,11 @@
         .glass {
             backdrop-filter: blur(10px);
             background: rgba(11, 44, 77, 0.6);
+            transition: 0.3s ease;
+        }
+
+        .glass:hover {
+            box-shadow: 0 0 30px rgba(111, 183, 255, 0.2);
         }
 
         .soft-glow {
@@ -40,17 +45,19 @@
 
                 <div class="bg-[#0e3a63] border border-[#6fb7ff]/20 p-4 rounded-lg">
                     <p class="text-xs text-gray-300">Name</p>
-                    <p class="font-semibold">{{ user.Name }}</p>
+                    <p class="font-semibold">{{ current_user.name }}</p>
                 </div>
 
                 <div class="bg-[#0e3a63] border border-[#6fb7ff]/20 p-4 rounded-lg">
                     <p class="text-xs text-gray-300">Email</p>
-                    <p class="font-semibold">{{ user.Email }}</p>
+                    <p class="font-semibold">{{ current_user.email }}</p>
                 </div>
 
                 <div class="bg-[#0e3a63] border border-[#6fb7ff]/20 p-4 rounded-lg">
                     <p class="text-xs text-gray-300">Address</p>
-                    <p class="font-semibold">{{ user.Address }}</p>
+                    <p class="font-semibold">
+                        {{ current_user.address or "No address set" }}
+                    </p>
                 </div>
 
             </div>
@@ -60,28 +67,38 @@
         <!-- RIGHT SIDE -->
         <div class="glass border border-[#6fb7ff]/30 rounded-2xl p-6 soft-glow">
 
-            <!-- FLASH -->
-            {% with messages = get_flashed_messages(with_categories=true) %}
-                {% if messages %}
-                    {% for category, message in messages %}
-                        <div class="mb-4 p-3 rounded text-center font-semibold
-                            {% if category == 'success' %}
-                                bg-green-500 text-white
-                            {% else %}
-                                bg-red-500 text-white
-                            {% endif %}">
-                            {{ message }}
-                        </div>
-                    {% endfor %}
-                {% endif %}
-            {% endwith %}
+        {% with messages = get_flashed_messages(with_categories=true) %}
+  {% if messages %}
+    <div class="fixed top-5 right-5 z-50 space-y-3 w-80">
+
+      {% for category, message in messages %}
+
+        <div class="
+          px-4 py-3 rounded-lg shadow-lg text-sm font-semibold
+          animate-fade-in
+          {% if category == 'success' %}
+            bg-green-500 text-white
+          {% else %}
+            bg-red-500 text-white
+          {% endif %}
+        ">
+          {{ message }}
+        </div>
+
+      {% endfor %}
+
+    </div>
+  {% endif %}
+{% endwith %}
 
             <h2 class="text-2xl font-bold mb-6 border-b border-[#6fb7ff]/30 pb-3">
                 Edit Profile
             </h2>
 
+            <!-- FORM -->
             <form action="/profile/update" method="POST" class="space-y-5">
 
+                <!-- CSRF TOKEN -->
                 <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
 
                 <!-- NAME -->
@@ -89,8 +106,8 @@
                     <label class="text-sm text-gray-300">Name</label>
                     <input 
                         type="text"
-                        name="full_name"
-                        value="{{ user.Name }}"
+                        name="name"
+                        value="{{ current_user.name }}"
                         class="w-full mt-1 p-3 rounded-lg bg-[#0e3a63] border border-[#6fb7ff]/30 focus:border-[#6fb7ff] outline-none"
                         required
                     >
@@ -102,7 +119,7 @@
                     <input 
                         type="email"
                         name="email"
-                        value="{{ user.Email }}"
+                        value="{{ current_user.email }}"
                         class="w-full mt-1 p-3 rounded-lg bg-[#0e3a63] border border-[#6fb7ff]/30 focus:border-[#6fb7ff] outline-none"
                         required
                     >
@@ -114,7 +131,7 @@
                     <input 
                         type="text"
                         name="address"
-                        value="{{ user.Address }}"
+                        value="{{ current_user.address }}"
                         class="w-full mt-1 p-3 rounded-lg bg-[#0e3a63] border border-[#6fb7ff]/30 focus:border-[#6fb7ff] outline-none"
                     >
                 </div>

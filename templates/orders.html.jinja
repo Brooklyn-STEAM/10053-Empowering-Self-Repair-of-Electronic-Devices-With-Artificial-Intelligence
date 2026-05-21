@@ -31,12 +31,16 @@
 
         <div>
           <p class="text-xs text-gray-300">ORDER PLACED</p>
-          <p class="font-semibold">{{ order.created_at }}</p>
+          <p class="font-semibold">
+            {{ order.created_at }}
+          </p>
         </div>
 
         <div>
           <p class="text-xs text-gray-300">TOTAL</p>
-          <p class="font-semibold">${{ "%.2f"|format(order.total_amount) }}</p>
+          <p class="font-semibold">
+            ${{ "%.2f"|format(order.total_amount) }}
+          </p>
         </div>
 
         <div>
@@ -66,7 +70,11 @@
 
           <div class="w-20 h-20 bg-[#0a2238] rounded overflow-hidden flex items-center justify-center">
             {% if item.image %}
-              <img src="{{ item.image }}" class="w-full h-full object-cover">
+              <img 
+                src="{{ item.image }}" 
+                alt="{{ item.name }}" 
+                class="w-full h-full object-cover"
+              >
             {% else %}
               <span class="text-xs text-gray-400">No Image</span>
             {% endif %}
@@ -78,7 +86,7 @@
           </div>
 
           <div class="font-bold">
-            ${{ "%.2f"|format(item.price) }}
+            ${{ "%.2f"|format(item.price * item.quantity) }}
           </div>
 
         </div>
@@ -98,7 +106,13 @@
 
             {% for t in order.tracking %}
 
-            <div class="min-w-[220px] bg-[#0e3a63] border border-[#1f4f7a] rounded-lg p-3">
+            <div class="min-w-[220px] p-3 rounded-lg border
+              {% if t.status == order.current_status %}
+                border-green-400 shadow-md bg-[#0e3a63]
+              {% else %}
+                border-[#1f4f7a] bg-[#0e3a63]
+              {% endif %}
+            ">
 
               <p class="font-semibold
                 {% if t.status == order.current_status %}
@@ -110,7 +124,7 @@
               </p>
 
               <p class="text-sm text-gray-300">
-                📍 {{ t.location if t.location else 'N/A' }}
+                📍 {{ t.location or 'N/A' }}
               </p>
 
               <p class="text-xs text-gray-400">
@@ -128,7 +142,9 @@
           </div>
 
         {% else %}
-          <p class="text-sm text-gray-400">No tracking available yet.</p>
+          <p class="text-sm text-gray-400 italic">
+            Tracking will appear once your order ships.
+          </p>
         {% endif %}
 
       </div>

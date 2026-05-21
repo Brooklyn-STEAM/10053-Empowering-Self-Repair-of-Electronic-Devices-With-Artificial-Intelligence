@@ -1,23 +1,34 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8" />
+  <meta charset="UTF-8"/>
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
   <title>{{ product['Name'] }}</title>
 
   <script src="https://cdn.tailwindcss.com"></script>
-  <link href="/static/style.css" rel="stylesheet" />
-  <link rel="icon" href="/static/products/Blueprint Logo.png" type="image" />
+
+  <link href="/static/style.css" rel="stylesheet"/>
+  <link rel="icon" href="/static/products/Blueprint Logo.png" type="image"/>
+
+  <!-- CSRF TOKEN -->
+  <meta name="csrf-token" content="{{ csrf_token() }}">
 
   <style>
     @keyframes fadeIn {
-      from { opacity: 0; transform: translateY(10px); }
-      to { opacity: 1; transform: translateY(0); }
+      from {
+        opacity: 0;
+        transform: translateY(10px);
+      }
+      to {
+        opacity: 1;
+        transform: translateY(0);
+      }
     }
 
-    .fade-in { animation: fadeIn 0.5s ease forwards; }
+    .fade-in {
+      animation: fadeIn 0.5s ease forwards;
+    }
 
-    /* BLUEPRINT GREEN FLASH TOAST */
     .toast {
       animation: fadeIn 0.3s ease forwards;
     }
@@ -29,7 +40,7 @@
 {% include "components/ai_chat.html.jinja" %}
 {% include "components/navbar.html.jinja" %}
 
-<!-- FLASH CONTAINER -->
+<!-- FLASH -->
 <div id="flash-container" class="fixed top-5 right-5 z-[9999] space-y-3"></div>
 
 <main class="flex-grow px-4 py-8 lg:py-10">
@@ -39,159 +50,285 @@
   <!-- IMAGE -->
   <div class="bg-gradient-to-b from-[#0e3a63] to-[#0b2c4d]
               border border-[#6fb7ff]/30 rounded-2xl p-5 fade-in">
-    <div class="relative overflow-hidden rounded-xl bg-[#081f38] flex items-center justify-center h-[360px]">
-      <img src="{{ product['Image'] }}" class="max-h-full max-w-full object-contain" />
+
+    <div class="relative overflow-hidden rounded-xl bg-[#081f38]
+                flex items-center justify-center h-[360px]">
+
+      <img src="{{ product['Image'] }}"
+           class="max-h-full max-w-full object-contain"/>
+
     </div>
   </div>
 
-  <!-- INFO -->
+  <!-- PRODUCT INFO -->
   <div class="space-y-6 fade-in">
-    <h1 class="text-3xl font-bold">{{ product['Name'] }}</h1>
-    <p class="text-3xl text-[#6fb7ff] font-bold">${{ product['Price'] }}</p>
+
+    <h1 class="text-3xl font-bold">
+      {{ product['Name'] }}
+    </h1>
+
+    <p class="text-3xl text-[#6fb7ff] font-bold">
+      ${{ product['Price'] }}
+    </p>
 
     <div class="bg-[#0e3a63] p-6 rounded-xl">
       {{ product['Description'] }}
     </div>
 
     <!-- ADD TO CART -->
-    <form method="POST" action="/cart/{{ product['ID'] }}/add_to_cart"
+    <form method="POST"
+          action="/cart/{{ product['ID'] }}/add_to_cart"
           class="bg-[#0e3a63] p-6 rounded-xl space-y-4">
 
-          <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+      <input type="hidden"
+             name="csrf_token"
+             value="{{ csrf_token() }}">
 
+      <input type="number"
+             name="quantity"
+             value="1"
+             min="1"
+             class="w-24 bg-[#0b2c4d] border border-[#6fb7ff]
+                    text-center rounded-md p-2"/>
 
-      <input type="number" name="quantity" value="1" min="1"
-             class="w-24 bg-[#0b2c4d] border border-[#6fb7ff] text-center rounded-md p-2" />
-      <button class="w-full bg-[#6fb7ff] text-[#0b2c4d] font-bold py-3 rounded-lg">
+      <button class="w-full bg-[#6fb7ff] text-[#0b2c4d]
+                     font-bold py-3 rounded-lg">
+
         Add to Cart
+
       </button>
     </form>
-  </div>
 
+  </div>
 </div>
 
 <!-- REVIEWS -->
 <div class="max-w-4xl mx-auto mt-20">
 
-  <h2 class="text-3xl font-bold text-center mb-8 border-b border-[#6fb7ff] pb-4">
+  <h2 class="text-3xl font-bold text-center mb-8
+             border-b border-[#6fb7ff] pb-4">
+
     Customer Reviews
+
   </h2>
 
   <!-- REVIEW FORM -->
   {% if current_user.is_authenticated %}
+
   <div class="bg-[#0e3a63] p-6 rounded-xl mb-10">
-    <form method="POST" action="/product/{{ product['ID'] }}/review">
 
-      <input type="number" name="rating" min="1" max="5" value="5"
-             class="w-full mb-4 p-2 rounded bg-[#0b2c4d] border border-[#6fb7ff]" />
+    <form method="POST"
+          action="/product/{{ product['ID'] }}/review">
 
-      <textarea name="comment" rows="4"
-                class="w-full mb-4 p-2 rounded bg-[#0b2c4d] border border-[#6fb7ff]"></textarea>
+      <input type="hidden"
+             name="csrf_token"
+             value="{{ csrf_token() }}">
 
-      <button class="bg-[#6fb7ff] text-[#0b2c4d] px-4 py-2 rounded font-bold">
+      <input type="number"
+             name="rating"
+             min="1"
+             max="5"
+             value="5"
+             class="w-full mb-4 p-2 rounded
+                    bg-[#0b2c4d] border border-[#6fb7ff]"/>
+
+      <textarea name="comment"
+                rows="4"
+                class="w-full mb-4 p-2 rounded
+                       bg-[#0b2c4d] border border-[#6fb7ff]"></textarea>
+
+      <button class="bg-[#6fb7ff] text-[#0b2c4d]
+                     px-4 py-2 rounded font-bold">
+
         Submit Review
+
       </button>
+
     </form>
   </div>
+
   {% endif %}
 
   <!-- REVIEW LIST -->
   <div class="space-y-6">
+
     {% for x in reviews %}
-    <div id="review-{{ x['ID'] }}" class="bg-[#0e3a63] p-6 rounded-xl border border-[#6fb7ff]/40">
+
+    <div id="review-{{ x['ID'] }}"
+         class="bg-[#0e3a63] p-6 rounded-xl
+                border border-[#6fb7ff]/40">
 
       <div class="flex justify-between">
-        <p class="font-bold">{{ x["Name"] }}</p>
-        <p class="text-xs text-gray-400">{{ x["Timestamp"].strftime('%m/%d/%Y') }}</p>
+
+        <p class="font-bold">
+          {{ x["Name"] }}
+        </p>
+
+        <p class="text-xs text-gray-400">
+          {{ x["Timestamp"].strftime('%m/%d/%Y') }}
+        </p>
+
       </div>
 
+      <!-- STARS -->
       <div class="review-stars-{{ x['ID'] }} text-yellow-400 mb-2">
+
         {% for i in range(1, 6) %}
-          {% if i <= x['Ratings'] %}★{% else %}☆{% endif %}
+          {% if i <= x['Ratings'] %}
+            ★
+          {% else %}
+            ☆
+          {% endif %}
         {% endfor %}
+
       </div>
 
-      <p class="review-text-{{ x['ID'] }} text-gray-200">{{ x["Comment"] }}</p>
+      <!-- COMMENT -->
+      <p class="review-text-{{ x['ID'] }} text-gray-200">
+        {{ x["Comment"] }}
+      </p>
 
       {% if current_user.is_authenticated and x["UserID"]|int == current_user.id|int %}
+
       <div class="flex gap-2 mt-3">
 
-        <button onclick='openEditModal({{ x["ID"] }}, {{ x["Ratings"] }}, {{ x["Comment"]|tojson }})'
-                class="px-3 py-1 bg-[#6fb7ff] text-[#0b2c4d] rounded font-bold">
+        <!-- EDIT -->
+        <button
+          onclick='openEditModal(
+            {{ x["ID"] }},
+            {{ x["Ratings"] }},
+            {{ x["Comment"]|tojson }}
+          )'
+
+          class="px-3 py-1 bg-[#6fb7ff]
+                 text-[#0b2c4d] rounded font-bold">
+
           Edit
+
         </button>
 
-        <button onclick='openDeleteModal({{ product["ID"] }}, {{ x["ID"] }})'
-                class="px-3 py-1 bg-red-500 text-white rounded font-bold">
+        <!-- DELETE -->
+        <button
+          onclick='openDeleteModal(
+            {{ product["ID"] }},
+            {{ x["ID"] }}
+          )'
+
+          class="px-3 py-1 bg-red-500
+                 text-white rounded font-bold">
+
           Delete
+
         </button>
 
       </div>
+
       {% endif %}
+
     </div>
+
     {% endfor %}
+
   </div>
 </div>
 
 </main>
 
 <!-- EDIT MODAL -->
-<div id="editModal" class="hidden fixed inset-0 bg-black/60 flex items-center justify-center">
-  <div class="bg-[#0e3a63] p-6 rounded-xl w-[400px]">
-    <input type="hidden" id="modal-id" />
+<div id="editModal"
+     class="hidden fixed inset-0 bg-black/60
+            flex items-center justify-center z-50">
 
-    <input id="modal-rating" type="number" min="1" max="5"
-           class="w-full mb-3 p-2 bg-[#0b2c4d] border border-[#6fb7ff]" />
+  <div class="bg-[#0e3a63] p-6 rounded-xl w-[400px]">
+
+    <input type="hidden" id="modal-id"/>
+
+    <input id="modal-rating"
+           type="number"
+           min="1"
+           max="5"
+
+           class="w-full mb-3 p-2
+                  bg-[#0b2c4d]
+                  border border-[#6fb7ff]"/>
 
     <textarea id="modal-comment"
-              class="w-full p-2 bg-[#0b2c4d] border border-[#6fb7ff] mb-3"></textarea>
+              class="w-full p-2
+                     bg-[#0b2c4d]
+                     border border-[#6fb7ff]
+                     mb-3"></textarea>
 
     <button id="saveEditBtn"
-            class="bg-[#6fb7ff] text-[#0b2c4d] px-4 py-2 rounded font-bold w-full">
+            class="bg-[#6fb7ff] text-[#0b2c4d]
+                   px-4 py-2 rounded
+                   font-bold w-full">
+
       Save
+
     </button>
 
-    <button onclick="closeEdit()" class="text-gray-300 mt-2 w-full">
+    <button onclick="closeEdit()"
+            class="text-gray-300 mt-2 w-full">
+
       Cancel
+
     </button>
+
   </div>
 </div>
 
 <!-- DELETE MODAL -->
-<div id="deleteModal" class="hidden fixed inset-0 bg-black/60 flex items-center justify-center">
+<div id="deleteModal"
+     class="hidden fixed inset-0 bg-black/60
+            flex items-center justify-center z-50">
+
   <div class="bg-[#0e3a63] p-6 rounded-xl">
-    <p class="mb-4">Delete this review?</p>
+
+    <p class="mb-4">
+      Delete this review?
+    </p>
 
     <button id="confirmDeleteBtn"
-            class="bg-red-500 text-white px-4 py-2 rounded w-full">
+            class="bg-red-500 text-white
+                   px-4 py-2 rounded w-full">
+
       Delete
+
     </button>
 
-    <button onclick="closeDeleteModal()" class="text-gray-300 mt-2 w-full">
+    <button onclick="closeDeleteModal()"
+            class="text-gray-300 mt-2 w-full">
+
       Cancel
+
     </button>
+
   </div>
 </div>
 
-<!-- FLASH + JS -->
 <script>
+
 document.addEventListener("DOMContentLoaded", () => {
 
-  /* =========================
-     FLASH MESSAGES (GREEN BLUEPRINT STYLE)
-  ========================= */
-  const flashContainer = document.getElementById("flash-container");
+  const flashContainer =
+    document.getElementById("flash-container");
 
+  const csrfToken =
+    document.querySelector('meta[name="csrf-token"]')
+    .getAttribute("content");
+
+  /* FLASH MESSAGE */
   function showFlash(message, category = "success") {
 
     const div = document.createElement("div");
 
     div.className = `
-      toast px-5 py-3 rounded-xl shadow-lg font-bold text-sm
-      border transition duration-300
+      toast px-5 py-3 rounded-xl shadow-lg
+      font-bold text-sm border transition duration-300
       ${category === "error"
         ? "bg-red-600 text-white border-red-400"
-        : "bg-[#0f5e3a] text-[#b6ffd6] border-[#2aff9a]"}
+        : "bg-[#0f5e3a] text-[#b6ffd6] border-[#2aff9a]"
+      }
     `;
 
     div.innerText = message;
@@ -199,9 +336,14 @@ document.addEventListener("DOMContentLoaded", () => {
     flashContainer.appendChild(div);
 
     setTimeout(() => {
+
       div.style.opacity = "0";
       div.style.transform = "translateY(-10px)";
-      setTimeout(() => div.remove(), 300);
+
+      setTimeout(() => {
+        div.remove();
+      }, 300);
+
     }, 3000);
   }
 
@@ -209,87 +351,154 @@ document.addEventListener("DOMContentLoaded", () => {
   {% with messages = get_flashed_messages(with_categories=true) %}
     {% if messages %}
       {% for category, message in messages %}
-        showFlash({{ message }}, "{{ category }}");
+        showFlash({{ message|tojson }}, "{{ category }}");
       {% endfor %}
     {% endif %}
   {% endwith %}
 
+  /* =========================
+     EDIT REVIEW
+  ========================= */
 
-  /* EDIT */
   window.openEditModal = function(id, rating, comment) {
-    document.getElementById("editModal").classList.remove("hidden");
+
+    document.getElementById("editModal")
+      .classList.remove("hidden");
+
     document.getElementById("modal-id").value = id;
     document.getElementById("modal-rating").value = rating;
     document.getElementById("modal-comment").value = comment;
   };
 
   window.closeEdit = function() {
-    document.getElementById("editModal").classList.add("hidden");
+
+    document.getElementById("editModal")
+      .classList.add("hidden");
   };
 
-  document.getElementById("saveEditBtn").addEventListener("click", async () => {
+  document.getElementById("saveEditBtn")
+    .addEventListener("click", async () => {
 
-    const id = document.getElementById("modal-id").value;
-    const rating = document.getElementById("modal-rating").value;
-    const comment = document.getElementById("modal-comment").value;
+    const id =
+      document.getElementById("modal-id").value;
 
-    const res = await fetch(/edit_review/${id}, {
+    const rating =
+      document.getElementById("modal-rating").value;
+
+    const comment =
+      document.getElementById("modal-comment").value;
+
+    const res = await fetch(`/edit_review/${id}`, {
+
       method: "POST",
-      headers: {"Content-Type": "application/x-www-form-urlencoded"},
-      body: rating=${rating}&comment=${encodeURIComponent(comment)}
+
+      headers: {
+        "Content-Type":
+          "application/x-www-form-urlencoded",
+
+        "X-CSRFToken": csrfToken
+      },
+
+      body:
+        `rating=${rating}&comment=${encodeURIComponent(comment)}`
     });
 
     const data = await res.json();
 
     if (data.success) {
-      document.querySelector(.review-text-${id}).textContent = comment;
+
+      document.querySelector(
+        `.review-text-${id}`
+      ).textContent = comment;
 
       let stars = "";
+
       for (let i = 1; i <= 5; i++) {
         stars += i <= rating ? "★" : "☆";
       }
-      document.querySelector(.review-stars-${id}).innerHTML = stars;
+
+      document.querySelector(
+        `.review-stars-${id}`
+      ).innerHTML = stars;
 
       closeEdit();
+
       showFlash("Review updated!");
+
     } else {
-      showFlash("Failed to update review", "error");
+
+      showFlash(
+        "Failed to update review",
+        "error"
+      );
     }
   });
 
+  /* =========================
+     DELETE REVIEW
+  ========================= */
 
-  /* DELETE */
   let deleteTarget = null;
 
   window.openDeleteModal = function(productId, reviewId) {
-    deleteTarget = { productId, reviewId };
-    document.getElementById("deleteModal").classList.remove("hidden");
+
+    deleteTarget = {
+      productId,
+      reviewId
+    };
+
+    document.getElementById("deleteModal")
+      .classList.remove("hidden");
   };
 
   window.closeDeleteModal = function() {
-    document.getElementById("deleteModal").classList.add("hidden");
+
+    document.getElementById("deleteModal")
+      .classList.add("hidden");
   };
 
-  document.getElementById("confirmDeleteBtn").addEventListener("click", async () => {
+  document.getElementById("confirmDeleteBtn")
+    .addEventListener("click", async () => {
 
-    const { productId, reviewId } = deleteTarget;
+    const {
+      productId,
+      reviewId
+    } = deleteTarget;
 
-    const res = await fetch(/delete_review/${productId}/${reviewId}, {
-      method: "POST"
-    });
+    const res = await fetch(
+      `/delete_review/${productId}/${reviewId}`,
+      {
+        method: "POST",
+
+        headers: {
+          "X-CSRFToken": csrfToken
+        }
+      }
+    );
 
     const data = await res.json();
 
     if (data.success) {
-      document.getElementById(review-${reviewId}).remove();
+
+      document.getElementById(
+        `review-${reviewId}`
+      ).remove();
+
       closeDeleteModal();
+
       showFlash("Review deleted!");
+
     } else {
-      showFlash("Failed to delete review", "error");
+
+      showFlash(
+        "Failed to delete review",
+        "error"
+      );
     }
   });
 
 });
+
 </script>
 
 </body>

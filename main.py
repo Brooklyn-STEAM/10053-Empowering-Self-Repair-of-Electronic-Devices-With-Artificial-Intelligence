@@ -13,6 +13,11 @@ from anthropic import Anthropic
 from openai import OpenAI
 from werkzeug.security import generate_password_hash, check_password_hash
 from flask_wtf import CSRFProtect
+import base64
+import uuid
+import os
+
+UPLOAD_FOLDER = os.path.join("static", "uploads")
 from werkzeug.utils import secure_filename
 
 app = Flask(__name__)
@@ -962,12 +967,11 @@ def clear_chat():
 @app.route("/profile")
 @login_required
 def profile():
-    """User profile page with Stats and Badges"""
-    
-    user = get_user(current_user.id)
-    connection = connect_db()
-    cursor = connection.cursor()
-    
+    """User profile page with stats + badges"""
+
+    connection = None
+    cursor = None
+
     try:
         with connection.cursor() as cursor:
             cursor.execute("SELECT Name, points, repairs_completed, level FROM User WHERE ID = %s", (current_user.id,))
@@ -986,35 +990,44 @@ def profile():
                                next_badge=next_badge, 
                                progress_percent=progress_percent)
     finally:
-        connection.close()
+        if cursor:
+            cursor.close()
+        if connection:
+            connection.close()
+
+
+# --------------------------------------------------
+
+@app.route("/edit_profile")
+@login_required
+def edit_profile():
+    return render_template("edit_profile.html.jinja")
+
+
+# --------------------------------------------------
 
 @app.route("/profile/update", methods=["POST"])
 @login_required
 @limiter.limit("3 per minute")
 def update_profile():
-    name = re.sub(r'\s+', ' ', request.form.get("full_name", "").strip()).title()
-    email = request.form.get("email", "").strip()
+
+    print("ROUTE HIT")
+    print("FORM DATA:", request.form)
+
+    name = request.form.get("name", "").strip()
+    email = request.form.get("email", "").strip().lower()
     address = request.form.get("address", "").strip()
 
-    connection = connect_db()
-    cursor = connection.cursor(pymysql.cursors.DictCursor)
+    if not name or not email:
+        flash("Name and email are required.", "error")
+        return redirect("/edit_profile")
+
+    connection = None
+    cursor = None
 
     try:
-        cursor.execute(
-            "SELECT Name, Email, Address FROM User WHERE ID=%s",
-            (current_user.id,)
-        )
-
-        old_user = cursor.fetchone()
-
-        if old_user:
-            if (
-                old_user["Name"] == name and
-                old_user["Email"] == email and
-                old_user["Address"] == address
-            ):
-                flash("No changes detected", "error")
-                return redirect("/edit_profile")
+        connection = connect_db()
+        cursor = connection.cursor()
 
         cursor.execute("""
             UPDATE User
@@ -1024,39 +1037,90 @@ def update_profile():
 
         connection.commit()
 
-        flash("Profile updated successfully!", "profile_success")
+        flash("Profile updated successfully!", "success")
+        return redirect("/profile")
 
-    except pymysql.err.IntegrityError:
-        connection.rollback()
-        flash("Email already exists", "error")
+    except Exception as e:
+        print("UPDATE ERROR:", repr(e))
+        if connection:
+            connection.rollback()
+
+        flash("An error occurred while updating your profile.", "error")
+        return redirect("/edit_profile")
 
     finally:
-        cursor.close()
-        connection.close()
+        if cursor:
+            cursor.close()
+        if connection:
+            connection.close()
 
-    return redirect("/profile")
 
-@app.route("/edit_profile")
+# --------------------------------------------------
+
+@app.route("/upload_profile_pic", methods=["POST"])
 @login_required
-def edit_profile():
-    user = get_user(current_user.id)
-    return render_template("edit_profile.html.jinja", user=user)
+def upload_profile_pic():
 
-def get_user(user_id):
-    connection = connect_db()
-    cursor = connection.cursor(pymysql.cursors.DictCursor)
+    connection = None
+    cursor = None
 
-    cursor.execute(
-        "SELECT * FROM User WHERE ID = %s",
-        (user_id,)
-    )
+    try:
+        data = request.get_json()
 
-    user = cursor.fetchone()
+        if not data or "image" not in data:
+            return jsonify({"success": False, "error": "No image provided"}), 400
 
-    cursor.close()
-    connection.close()
+        image_data = data["image"]
 
-    return user
+        if "," not in image_data:
+            return jsonify({"success": False, "error": "Invalid image format"}), 400
+
+        header, encoded = image_data.split(",", 1)
+
+        binary_data = base64.b64decode(encoded)
+
+        os.makedirs(UPLOAD_FOLDER, exist_ok=True)
+
+        filename = f"{uuid.uuid4().hex}.jpg"
+        filepath = os.path.join(UPLOAD_FOLDER, filename)
+
+        with open(filepath, "wb") as f:
+            f.write(binary_data)
+
+        image_url = f"/static/uploads/{filename}"
+
+        connection = connect_db()
+        cursor = connection.cursor()
+
+        cursor.execute("""
+            UPDATE User
+            SET Profile_pic = %s
+            WHERE ID = %s
+        """, (image_url, current_user.id))
+
+        connection.commit()
+
+        if cursor.rowcount == 0:
+            return jsonify({"success": False, "error": "User not found"}), 400
+
+        return jsonify({
+            "success": True,
+            "url": image_url
+        })
+
+    except Exception as e:
+        print("UPLOAD ERROR:", repr(e))
+
+        return jsonify({
+            "success": False,
+            "error": str(e)
+        }), 500
+
+    finally:
+        if cursor:
+            cursor.close()
+        if connection:
+            connection.close()
 
 @app.route("/orders")
 @login_required
@@ -1166,6 +1230,8 @@ def delete_account():
     try:
         password = request.form.get("password", "").strip()
 
+        print("FORM DATA:", request.form)
+
         if not password:
             flash("Password required.", "error")
             return redirect("/profile")
@@ -1178,32 +1244,29 @@ def delete_account():
         cursor = connection.cursor()
 
         user_id = current_user.id
-        print("🔍 Deleting user:", user_id)
+        print("Deleting user:", user_id)
 
-        # Begin transaction
-        connection.begin()
-
-        # Delete user only; cascades will handle related records
         cursor.execute("DELETE FROM User WHERE ID = %s", (user_id,))
-
         connection.commit()
+
+        logout_user()
+
+        flash("Account deleted successfully.", "success")
+        return redirect("/")
 
     except Exception as e:
         if connection:
             connection.rollback()
 
-        print("❌ DELETE ERROR:", e)
+        print("DELETE ERROR:", e)
         flash("Error deleting account.", "error")
         return redirect("/profile")
+
     finally:
         if cursor:
             cursor.close()
         if connection:
             connection.close()
-
-    logout_user()
-    flash("Account deleted successfully.", "success")
-    return redirect("/")
 
 @app.route("/map", methods=["GET"])
 def map():
