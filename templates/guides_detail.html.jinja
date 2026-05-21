@@ -8,8 +8,8 @@
     <link rel="icon" href="/static/products/Blueprint Logo.png" type="image">
 
     <!-- 🔽 NEW: Expose the guide ID for the AI assistant -->
-    <meta name="guide-id" content="{{ guide.ID }}">
-
+    <meta name="guide_id" content="{{ guide['ID'] }}">
+    <meta name="csrf-token" content="{{ csrf_token() }}">
     <script src="https://cdn.jsdelivr.net/npm/@tailwindcss/browser@4"></script>
 </head>
 
@@ -24,10 +24,67 @@
       <div>
           <iframe loading="lazy" class="w-full h-185" src="{{ url_for('static', filename=guide['PDF_Path']) }}"></iframe>
       </div>
+
+    <div class="mt-5 w-67 ml-5 mb-5 flex items-center">
+    {% if not guide_completed %}
+      <button id="completeRepairBtn" 
+        onclick="completeRepair()"
+        class="bg-green-600 hover:bg-green-700 text-white font-bold py-3 px-6 rounded-lg shadow-lg">
+        ✅ Mark Repair as Complete
+    </button>
+    {% else %}
+      <div class="bg-yellow-100 text-yellow-800 font-medium p-4 rounded-lg">
+        You've already completed this repair.
+      </div>
+    {% endif %}
+    </div>
   </main>
 
     <!-- FOOTER -->
     {% include "components/footer.html.jinja" %}
 </div>
+
+
+<script>
+    async function completeRepair() {
+        const guideId = document.querySelector('meta[name="guide_id"]').content;
+        
+        try {
+            const res = await fetch('/complete_repair', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'X-CSRFToken': document.querySelector('meta[name="csrf-token"]').content
+                    },
+                body: JSON.stringify({guide_id: guideId})
+            });
+            
+            const data = await res.json();
+            
+            if (data.already_done) {
+                alert("You've already completed this repair!");
+                return;
+            }
+            
+            if (data.success) {
+                let message = `🎉 Repair Complete!\n\n+${data.points_earned} points!\nTotal: ${data.total_points} points\nLevel: ${data.level}`;
+                
+                if (data.new_badges && data.new_badges.length > 0) {
+                    message += "\n\n🏅 NEW BADGES EARNED:";
+                    data.new_badges.forEach(b => {
+                        message += `\n${b.icon} ${b.name} - ${b.description}`;
+                    });
+                }
+                
+                alert(message);
+                window.location.href = '/profile';
+            } else {
+                alert(data.error || "Something went wrong");
+            }
+        } catch (err) {
+            alert("Error: " + err.message);
+        }
+    }
+</script>
 </body>
 </html>

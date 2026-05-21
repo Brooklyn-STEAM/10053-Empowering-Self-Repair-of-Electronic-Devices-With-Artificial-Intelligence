@@ -294,7 +294,11 @@ document.addEventListener("DOMContentLoaded", () => {
                 body: formData
             });
 
-            if (!res.ok) throw new Error("Server error");
+            if (!res.ok) {
+                const errorText = await res.text();
+                console.error(errorText);
+                throw new Error(errorText);
+            }
 
             const data = await res.json();
             thinkingDiv.remove();

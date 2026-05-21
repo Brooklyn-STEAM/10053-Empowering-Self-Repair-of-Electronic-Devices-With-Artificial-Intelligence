@@ -3,6 +3,7 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  
   <title>Profile</title>
   <script src="https://cdn.tailwindcss.com"></script>
   <link href="/static/style.css" rel="stylesheet" />
@@ -102,6 +103,25 @@
           <p class="text-xs text-gray-400">Status</p>
           <p class="font-semibold text-green-400">Active</p>
         </div>
+
+        <div class="bg-[#0b2c4d] p-3 rounded border-2 border-white/30">
+                    <h1 class="text-3xl font-bold mb-2">👋 {{ current_user.name }}</h1>
+            <div class="flex gap-6 mt-4">
+                <div class="bg-white/20 rounded-lg p-4 flex-1">
+                  <div class="text-sm opacity-80">Level</div>
+                  <div class="text-3xl font-bold">⭐ <p class="text-white">{{ user.level }}</p></div>
+                </div>
+                <div class="bg-white/20 rounded-lg p-4 flex-1">
+                  <div class="text-sm opacity-80">Points</div>
+                  <div class="text-3xl font-bold">💎 <p>{{ user.points }}</p></div>
+                </div>
+                <div class="bg-white/20 rounded-lg p-4 flex-1">
+                  <div class="text-sm opacity-80">Repairs Done</div>
+                  <div class="text-3xl font-bold">🔧 <p>{{ user.repairs_completed }}</p></div>
+                </div>
+            </div>
+        </div>
+
       </div>
     </div>
 
@@ -128,23 +148,6 @@
       </div>
     </div>
 
-    <div class="bg-gradient-to-r from-blue-600 to-blue-800 text-white rounded-xl p-6 mb-6 shadow-lg">
-            <h1 class="text-3xl font-bold mb-2">👋 {{ user.username }}</h1>
-            <div class="flex gap-6 mt-4">
-                <div class="bg-white/20 rounded-lg p-4 flex-1">
-                    <div class="text-sm opacity-80">Level</div>
-                    <div class="text-3xl font-bold">⭐ {{ user.level }}</div>
-                </div>
-                <div class="bg-white/20 rounded-lg p-4 flex-1">
-                    <div class="text-sm opacity-80">Points</div>
-                    <div class="text-3xl font-bold">💎 {{ user.points }}</div>
-                </div>
-                <div class="bg-white/20 rounded-lg p-4 flex-1">
-                    <div class="text-sm opacity-80">Repairs Done</div>
-                    <div class="text-3xl font-bold">🔧 {{ user.repairs_completed }}</div>
-                </div>
-            </div>
-        </div>
 
         <!-- Progress to next badge -->
         {% if next_badge %}
@@ -188,6 +191,8 @@
     <h2 class="text-2xl font-bold text-red-400 mb-3">Delete Account?</h2>
     <p class="text-gray-300 mb-4">Enter your password and type DELETE to confirm.</p>
     <form method="POST" action="/delete_account" id="deleteForm" class="space-y-4">
+
+      <input type="hidden" name="csrf_token" value="{{ csrf_token() }}" />
       <!-- Password Input -->
       <input type="password" name="password" placeholder="Enter password" required class="w-full p-2 rounded bg-[#0b2c4d] border border-white/10 text-white" />
       
