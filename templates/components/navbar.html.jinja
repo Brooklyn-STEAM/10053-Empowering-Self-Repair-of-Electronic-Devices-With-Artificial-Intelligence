@@ -40,6 +40,7 @@
         <a href="/browse" class="nav-link hover:text-[#6fb7ff] transition">Product</a>
         <a href="/cart" class="nav-link hover:text-[#6fb7ff] transition">Cart</a>
         <a href="/map" class="nav-link hover:text-[#6fb7ff] transition">Map</a>
+        <a href="/cost_calculator" class="nav-link hover:text-[#6fb7ff] transition">Cost Calculator</a>
 
         <div class="relative">
           {% if current_user.is_authenticated %}
@@ -87,8 +88,7 @@
     <div id="mobileSearch" class="hidden lg:hidden mt-2 pb-2">
       <form method="get" action="/search">
       <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
-        <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
-
+      
         <input
           class="w-full h-9 px-3 rounded-lg text-sm border-2 border-gray-300 focus:outline-none"
           type="search"
@@ -123,6 +123,7 @@
   <a href="/cart" class="block">Cart</a>
   <a href="/repairs" class="block">Repairs</a>
   <a href="/map" class="block">Map</a>
+  <a href="/cost_calculator" class="block">Cost Calculator</a>
 
 </div>
 
