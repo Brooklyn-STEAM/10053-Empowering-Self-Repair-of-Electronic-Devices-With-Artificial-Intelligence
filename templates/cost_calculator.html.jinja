@@ -1,0 +1,122 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Cost Calculator</title>
+
+    <link href="/static/style.css" rel="stylesheet">
+    <link rel="icon" href="/static/products/Blueprint Logo.png" type="image">
+    <script src="https://cdn.tailwindcss.com"></script>
+</head>
+
+<body class="min-h-screen flex flex-col bg-[#0b2c4d] text-[#d6ecff] font-[Inter]">
+
+<div id="mainContent"
+     class="flex flex-col flex-grow transition-all duration-300"
+     style="margin-right: 0;"> 
+
+    {% include "components/ai_chat.html.jinja" %}
+    {% include "components/navbar.html.jinja" %}
+    <main class="flex-grow px-3 py-6 lg:px-7">
+<div class="max-w-2xl mx-auto">
+    <h1 class="text-4xl font-bold text-center mb-2">💰 Repair Cost Calculator</h1>
+    <p class="text-center text-gray-600 mb-6">Compare DIY vs Shop vs Replacement</p>
+    
+    <div class="bg-white rounded-xl shadow p-6 mb-6">
+        <label class="block mb-2 text-black font-semibold">📱 Device Type:</label>
+        <select id="device" class="w-full border rounded text-black p-2 mb-4">
+            <option value="iphone">iPhone</option>
+            <option value="android">Android Phone</option>
+            <option value="ipad">iPad / Tablet</option>
+            <option value="laptop">Laptop</option>
+        </select>
+        
+        <label class="block mb-2 text-black font-semibold">🔧 Issue:</label>
+        <select id="issue" class="w-full border rounded text-black p-2 mb-4">
+            <option value="screen">Cracked Screen</option>
+            <option value="battery">Battery Replacement</option>
+            <option value="charging">Charging Port</option>
+            <option value="camera">Camera</option>
+            <option value="speaker">Speaker/Audio</option>
+            <option value="water">Water Damage</option>
+        </select>
+        
+        <label class="block mb-2 text-black font-semibold">💵 New Device Cost ($):</label>
+        <input type="number" id="newCost" value="800" min="3" max="10000" class="w-full border rounded text-black p-2 mb-4">
+        
+        <button onclick="calculate()" class="w-full bg-blue-600 hover:bg-blue-700 text-white font-bold py-3 rounded-lg">Calculate</button>
+    </div>
+    
+    <div id="results" class="hidden">
+        <div class="grid grid-cols-1 md:grid-cols-3 gap-4 mb-6">
+            <div class="bg-green-100 border-2 border-green-500 rounded-xl p-4 text-center">
+                <div class="text-4xl mb-2">🔧</div>
+                <div class="font-bold text-black text-lg">DIY Repair</div>
+                <div class="text-3xl font-bold text-green-700" id="diyCost">$0</div>
+                <div class="text-sm text-gray-600 mt-2" id="diyTime"></div>
+            </div>
+            <div class="bg-yellow-100 border-2 border-yellow-500 rounded-xl p-4 text-center">
+                <div class="text-4xl mb-2">🏪</div>
+                <div class="font-bold text-black text-lg">Repair Shop</div>
+                <div class="text-3xl font-bold text-yellow-700" id="shopCost">$0</div>
+                <div class="text-sm text-gray-600 mt-2">Professional</div>
+            </div>
+            <div class="bg-red-100 border-2 border-red-500 rounded-xl p-4 text-center">
+                <div class="text-4xl mb-2">🆕</div>
+                <div class="font-bold text-black text-lg">Replace</div>
+                <div class="text-3xl font-bold text-red-700" id="replaceCost">$0</div>
+                <div class="text-sm text-gray-600 mt-2">Brand new</div>
+            </div>
+        </div>
+        
+        <div class="bg-white rounded-xl text-black shadow p-6 mb-4">
+            <h3 class="text-xl text-black font-bold mb-2">💡 Recommendation</h3>
+            <p id="recommendation" class="text-lg"></p>
+        </div>
+        
+        <div class="bg-green-50 border-2 border-green-300 text-black rounded-xl p-6">
+            <h3 class="text-xl text-black font-bold mb-2">🌍 Environmental Impact</h3>
+            <p id="ecoImpact"></p>
+        </div>
+    </div>
+</div>
+</main>
+    {% include "components/footer.html.jinja" %}
+</div>
+
+
+<script>
+const COSTS = {
+    iphone: { screen: {diy: 80, shop: 250, time: "1-2 hrs"}, battery: {diy: 40, shop: 90, time: "30 min"}, charging: {diy: 25, shop: 100, time: "45 min"}, camera: {diy: 60, shop: 150, time: "1 hr"}, speaker: {diy: 30, shop: 100, time: "45 min"}, water: {diy: 50, shop: 200, time: "2 hrs"} },
+    android: { screen: {diy: 70, shop: 200, time: "1-2 hrs"}, battery: {diy: 30, shop: 80, time: "30 min"}, charging: {diy: 20, shop: 80, time: "45 min"}, camera: {diy: 50, shop: 130, time: "1 hr"}, speaker: {diy: 25, shop: 90, time: "45 min"}, water: {diy: 40, shop: 180, time: "2 hrs"} },
+    ipad: { screen: {diy: 100, shop: 300, time: "2 hrs"}, battery: {diy: 50, shop: 120, time: "1 hr"}, charging: {diy: 30, shop: 120, time: "1 hr"}, camera: {diy: 70, shop: 170, time: "1.5 hrs"}, speaker: {diy: 35, shop: 110, time: "1 hr"}, water: {diy: 60, shop: 250, time: "3 hrs"} },
+    laptop: { screen: {diy: 150, shop: 400, time: "2-3 hrs"}, battery: {diy: 80, shop: 180, time: "1 hr"}, charging: {diy: 40, shop: 150, time: "1 hr"}, camera: {diy: 50, shop: 130, time: "1 hr"}, speaker: {diy: 40, shop: 120, time: "1 hr"}, water: {diy: 100, shop: 350, time: "3+ hrs"} }
+};
+
+function calculate() {
+    const device = document.getElementById('device').value;
+    const issue = document.getElementById('issue').value;
+    const newCost = parseInt(document.getElementById('newCost').value) || 800;
+    const data = COSTS[device][issue];
+    
+    document.getElementById('diyCost').textContent = '$' + data.diy;
+    document.getElementById('shopCost').textContent = '$' + data.shop;
+    document.getElementById('replaceCost').textContent = '$' + newCost;
+    document.getElementById('diyTime').textContent = '⏱ ' + data.time;
+    
+    const diySave = newCost - data.diy;
+    const shopSave = newCost - data.shop;
+    let rec = '';
+    if (data.diy < newCost * 0.3) rec = `✅ <strong>DIY is the best choice!</strong> Save $${diySave} (${Math.round(diySave/newCost*100)}% savings) by repairing it yourself.`;
+    else if (data.shop < newCost * 0.5) rec = `🏪 <strong>Take it to a shop.</strong> Save $${shopSave} vs buying new.`;
+    else rec = `🆕 <strong>Consider replacement.</strong> Repair costs are too close to a new device.`;
+    document.getElementById('recommendation').innerHTML = rec;
+    
+    document.getElementById('ecoImpact').innerHTML = `By repairing instead of replacing, you save approximately <strong>70 kg of CO₂ emissions</strong> and prevent <strong>1 device worth of e-waste</strong> from landfills. 🌱`;
+    
+    document.getElementById('results').classList.remove('hidden');
+}
+</script>
+</body>
+</html>

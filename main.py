@@ -477,6 +477,11 @@ def phone_guides():
 
     return render_template("phone_guides.html.jinja", guides=result)
 
+@limiter.limit("25 per minute")
+@app.route('/cost_calculator')
+def cost_calculator():
+    return render_template('cost_calculator.html.jinja')
+
 @app.route("/about_us")
 def about_us():
     return render_template("about_us.html.jinja")
