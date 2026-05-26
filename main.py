@@ -484,9 +484,15 @@ def submit_repair():
     import time
     ts = int(time.time())
     
-    # Save the files securely
-    before_path = f"repairs/{user_id}_{ts}_before_{before_img.filename}"
-    after_path = f"repairs/{user_id}_{ts}_after_{after_img.filename}"
+    # 1. Sanitize the filenames so they are safe to use
+    safe_before_filename = secure_filename(before_img.filename)
+    safe_after_filename = secure_filename(after_img.filename)
+    
+    # 2. Use the safe variables in your path strings
+    before_path = f"repairs/{user_id}_{ts}_before_{safe_before_filename}"
+    after_path = f"repairs/{user_id}_{ts}_after_{safe_after_filename}"
+    
+    # 3. Save the files
     before_img.save(f"static/{before_path}")
     after_img.save(f"static/{after_path}")
     
