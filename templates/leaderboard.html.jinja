@@ -1,0 +1,52 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Leaderboard</title>
+
+    <link href="/static/style.css" rel="stylesheet">
+    <link rel="icon" href="/static/products/Blueprint Logo.png" type="image">
+    <script src="https://cdn.jsdelivr.net/npm/@tailwindcss/browser@4"></script>
+
+    
+</head>
+
+<body class="min-h-screen flex flex-col text-sm lg:text-xl bg-[#0b2c4d] text-[#d6ecff]">
+    <div id="mainContent" class="flex flex-col flex-grow transition-all duration-300 " 
+    style ="margin-right: 0;">
+
+        {% include "components/navbar.html.jinja" %}
+        <main class="flex-grow">
+                <h1 class="text-4xl font-bold mt-3 text-center mb-6">🏆 Top Repairers</h1>
+                <div class="rounded-xl shadow w-full max-w-4xl border-2 border-gray-600 bg-white mx-auto overflow-hidden">
+                    {% for user in users %}
+                    <div class="flex items-center p-4 border-b {% if loop.index == 1 %}bg-yellow-50{% elif loop.index == 2 %}bg-gray-100{% elif loop.index == 3 %}bg-orange-50{% endif %}">
+                        <div class="text-3xl font-bold w-16 text-center">
+                            {% if loop.index == 1 %}🥇
+                            {% elif loop.index == 2 %}🥈
+                            {% elif loop.index == 3 %}🥉
+                            {% else %}#{{ loop.index }}
+                            {% endif %}
+                        </div>
+                        <div class="flex-1 ml-4">
+                            <div class="font-bold text-lg">{{ user.username }}</div>
+                            <div class="text-sm text-gray-500">Level {{ user.level }} • {{ user.repairs_completed }} repairs</div>
+                            <button>
+                                <div class="text-sm text-gray-500 underline hover:text-blue-600"> View repairs </div>
+                            </button>
+                        </div>
+                        <div class="text-2xl font-bold text-blue-600">💎 {{ user.points }}</div>
+                    </div>
+                    {% endfor %}
+                </div>
+                <span class="block text-center mb-4">
+                <a href="/profile" class="block text-center mt-6 bg-blue-600 text-white py-3 rounded-lg hover:bg-blue-700 inline-block bg-blue-600 px-4 py-2">
+                    ← Back to Profile
+                </a>
+                </span>
+        </main>
+        {% include "components/footer.html.jinja" %}
+    </div>
+</body>
+</html>

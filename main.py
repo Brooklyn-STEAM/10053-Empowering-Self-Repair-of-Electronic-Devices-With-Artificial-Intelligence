@@ -1,28 +1,32 @@
+from email.mime import image
 import os
 from flask import Flask, render_template, request, flash, redirect, abort, url_for, session, jsonify
 from flask_login import LoginManager, login_user, logout_user, login_required, current_user
 from flask_limiter import Limiter
 from flask_limiter.util import get_remote_address
-import pymysql, re, sqlite3, mysql.connector, secrets, hashlib
+import pymysql, re, sqlite3, mysql.connector, secrets, hashlib, pdfplumber, uuid
 from dynaconf import Dynaconf
+from scipy import stats
 from ai_agent import run_agent
 from datetime import datetime, timedelta
 from anthropic import Anthropic
-import re
 from openai import OpenAI
-import sqlite3
-import pdfplumber
 from werkzeug.security import generate_password_hash, check_password_hash
 from flask_wtf import CSRFProtect
+import base64
+import uuid
+import os
 
+UPLOAD_FOLDER = os.path.join("static", "uploads")
+from werkzeug.utils import secure_filename
 
 app = Flask(__name__)
 csrf = CSRFProtect(app)
 
 config = Dynaconf(settings_file =["settings.toml", ".env"])
 
-client = OpenAI(api_key=config.get("OPENAI_API_KEY"))
-client = Anthropic(api_key=config.get("ANTHROPIC_API_KEY"))
+#client = OpenAI(api_key=config.get("OPENAI_API_KEY"))
+#client = Anthropic(api_key=config.get("ANTHROPIC_API_KEY"))
 
 app.secret_key = config.secret_key
 
@@ -77,7 +81,7 @@ def load_user(user_id):
 def connect_db():
     conn = pymysql.connect(
         host="db.steamcenter.tech",
-        user = config.USER,
+        user = config.user,
         password = config.password,
         database="blueprint",
         autocommit= True,
@@ -346,6 +350,114 @@ def logout():
 
     return redirect("/")
 
+# ============================================
+# GAMIFICATION SYSTEM
+# ============================================
+
+BADGES = [
+    {"name": "First Steps", "icon": "🌱", "description": "Complete your first repair", "requirement": 1},
+    {"name": "Handy Helper", "icon": "🔧", "description": "Complete 5 repairs", "requirement": 5},
+    {"name": "Repair Pro", "icon": "⚡", "description": "Complete 10 repairs", "requirement": 10},
+    {"name": "Master Fixer", "icon": "🏆", "description": "Complete 25 repairs", "requirement": 25},
+    {"name": "Eco Warrior", "icon": "🌍", "description": "Save the planet - 50 repairs", "requirement": 50},
+    {"name": "Legend", "icon": "👑", "description": "100 repairs completed", "requirement": 100},
+]
+
+POINTS_PER_REPAIR = 100
+
+def check_and_award_badges(user_id, repairs_completed):
+    """Award any new badges the user qualifies for"""
+    connection = connect_db()
+    cursor = connection.cursor()
+    new_badges = []
+    try:
+        with connection.cursor() as cursor:
+            # Get already earned badges
+            cursor.execute("SELECT badge_name FROM User_badges WHERE user_id = %s", (user_id,))
+            earned = {row['badge_name'] for row in cursor.fetchall()}
+            
+            # Check each badge
+            for badge in BADGES:
+                if badge['name'] not in earned and repairs_completed >= badge['requirement']:
+                    cursor.execute(
+                        "INSERT INTO User_badges (user_id, badge_name, badge_icon, badge_description) VALUES (%s, %s, %s, %s)",
+                        (user_id, badge['name'], badge['icon'], badge['description'])
+                    )
+                    new_badges.append(badge)
+            connection.commit()
+    finally:
+        connection.close()
+    return new_badges
+
+
+@app.route('/complete_repair', methods=['POST'])
+@login_required
+def complete_repair():
+    """Mark a repair as completed and award points/badges"""
+    user_id = current_user.id
+    guide_id = request.json.get('guide_id')
+    
+    if not guide_id:
+        return jsonify({"error": "Guide ID required"}), 400
+    
+    connection = connect_db()
+    try:
+        with connection.cursor() as cursor:
+            # Check if already completed (prevent farming points)
+            cursor.execute(
+                "SELECT 1 FROM completed_repairs WHERE user_id = %s AND guide_id = %s",
+                (user_id, guide_id)
+            )
+            if cursor.fetchone():
+                return jsonify({"already_done": True, "success": False, "message": "Repair already completed."})
+
+            # Log completion
+            cursor.execute(
+                "INSERT INTO completed_repairs (user_id, guide_id) VALUES (%s, %s)",
+                (user_id, guide_id)
+            )
+            
+            # Update user stats
+            cursor.execute(
+                "UPDATE User SET points = points + %s, repairs_completed = repairs_completed + 1, level = FLOOR((repairs_completed + 1) / 5) + 1 WHERE ID = %s",
+                (POINTS_PER_REPAIR, user_id)
+            )
+            
+            # Get updated stats
+            cursor.execute("SELECT points, repairs_completed, level FROM User WHERE ID = %s", (user_id,))
+            stats = cursor.fetchone()
+            print(stats)
+            print(type(stats))
+            connection.commit()
+            
+            # Check for new badges
+            new_badges = check_and_award_badges(user_id, stats['repairs_completed'])
+            
+            return jsonify({
+                "success": True,
+                "points_earned": POINTS_PER_REPAIR,
+                "total_points": stats['points'],
+                "repairs_completed": stats['repairs_completed'],
+                "level": stats['level'],
+                "new_badges": new_badges
+            })
+    finally:
+        connection.close()
+
+
+@app.route('/leaderboard')
+def leaderboard():
+    """Top 10 users by points"""
+    connection = connect_db()
+    try:
+        with connection.cursor(pymysql.cursors.DictCursor) as cursor:
+            cursor.execute("SELECT Name AS username, points, repairs_completed, level FROM `User` ORDER BY points DESC LIMIT 10")
+            top_user = cursor.fetchall()
+        return render_template('leaderboard.html.jinja', users=top_user)
+    finally:
+        connection.close()
+
+
 @app.route("/repairs")
 def repair_page():
 
@@ -364,6 +476,11 @@ def phone_guides():
     connection.close()
 
     return render_template("phone_guides.html.jinja", guides=result)
+
+@limiter.limit("25 per minute")
+@app.route('/cost_calculator')
+def cost_calculator():
+    return render_template('cost_calculator.html.jinja')
 
 @app.route("/about_us")
 def about_us():
@@ -535,12 +652,20 @@ def guide_detail(id):
     cursor.execute("SELECT * FROM `RepairGuides` WHERE ID = %s", (id,))
     guide = cursor.fetchone()
 
+    guide_completed = False
+    if current_user.is_authenticated:
+        cursor.execute(
+            "SELECT 1 FROM completed_repairs WHERE user_id = %s AND guide_id = %s",
+            (current_user.id, id)
+        )
+        guide_completed = cursor.fetchone() is not None
+
     connection.close()
 
     if guide is None:
         return "Guide not found", 404
 
-    return render_template('guides_detail.html.jinja', guide=guide)
+    return render_template('guides_detail.html.jinja', guide=guide, guide_completed=guide_completed)
 
 @app.route('/repair-item/<int:id>')
 def repair_item_detail(id):
@@ -765,7 +890,7 @@ def checkout():
 def thank_you():
     return render_template("thank_you.html.jinja")
 
-#@limiter.limit("10 per hour")
+@limiter.limit("100 per hour")
 @csrf.exempt
 @app.route('/ai-help', methods=['POST'])
 def ai_help():
@@ -791,14 +916,19 @@ def ai_help():
         image_path = None  # ✅ Track image path
         
         if image:
-            os.makedirs("static/uploads", exist_ok=True)
-            image_path = f"static/uploads/{image.filename}"
+            os.makedirs("temp_uploads", exist_ok=True)
+            filename = secure_filename(image.filename)
+            unique_filename = f"{uuid.uuid4()}_{filename}"
+            image_path = os.path.join("temp_uploads", unique_filename)
             image.save(image_path)
             if not user_input:
                 user_input = "Please analyze this image and tell me what's wrong with the device."
 
         if "chat_history" not in session:
             session["chat_history"] = []
+
+            # Keep only last 20 messages
+            session["chat_history"] = session["chat_history"][-20:]
 
         # Save user message (note if image was uploaded)
         display_message = user_input
@@ -842,35 +972,67 @@ def clear_chat():
 @app.route("/profile")
 @login_required
 def profile():
-    user = get_user(current_user.id)
-    return render_template("profile.html.jinja", user=user)
+    """User profile page with stats + badges"""
+
+    connection = None
+    cursor = None
+
+    try:
+        with connection.cursor() as cursor:
+            cursor.execute("SELECT Name, points, repairs_completed, level FROM User WHERE ID = %s", (current_user.id,))
+            user = cursor.fetchone()
+            
+            cursor.execute("SELECT badge_name, badge_icon, badge_description, earned_at FROM User_badges WHERE user_id = %s ORDER BY earned_at DESC", (current_user.id,))
+            badges = cursor.fetchall()
+        
+        # Calculate progress to next badge
+        next_badge = next((b for b in BADGES if b['requirement'] > user['repairs_completed']), None)
+        progress_percent = (user['repairs_completed'] / next_badge['requirement'] * 100) if next_badge else 100
+        
+        return render_template("profile.html.jinja", user=user, 
+                               badges=badges,
+                               all_badges=BADGES,
+                               next_badge=next_badge, 
+                               progress_percent=progress_percent)
+    finally:
+        if cursor:
+            cursor.close()
+        if connection:
+            connection.close()
+
+
+# --------------------------------------------------
+
+@app.route("/edit_profile")
+@login_required
+def edit_profile():
+    return render_template("edit_profile.html.jinja")
+
+
+# --------------------------------------------------
 
 @app.route("/profile/update", methods=["POST"])
 @login_required
+@limiter.limit("3 per minute")
 def update_profile():
-    name = re.sub(r'\s+', ' ', request.form.get("full_name", "").strip()).title()
-    email = request.form.get("email", "").strip()
+
+    print("ROUTE HIT")
+    print("FORM DATA:", request.form)
+
+    name = request.form.get("name", "").strip()
+    email = request.form.get("email", "").strip().lower()
     address = request.form.get("address", "").strip()
 
-    connection = connect_db()
-    cursor = connection.cursor(pymysql.cursors.DictCursor)
+    if not name or not email:
+        flash("Name and email are required.", "error")
+        return redirect("/edit_profile")
+
+    connection = None
+    cursor = None
 
     try:
-        cursor.execute(
-            "SELECT Name, Email, Address FROM User WHERE ID=%s",
-            (current_user.id,)
-        )
-
-        old_user = cursor.fetchone()
-
-        if old_user:
-            if (
-                old_user["Name"] == name and
-                old_user["Email"] == email and
-                old_user["Address"] == address
-            ):
-                flash("No changes detected", "error")
-                return redirect("/edit_profile")
+        connection = connect_db()
+        cursor = connection.cursor()
 
         cursor.execute("""
             UPDATE User
@@ -880,39 +1042,90 @@ def update_profile():
 
         connection.commit()
 
-        flash("Profile updated successfully!", "profile_success")
+        flash("Profile updated successfully!", "success")
+        return redirect("/profile")
 
-    except pymysql.err.IntegrityError:
-        connection.rollback()
-        flash("Email already exists", "error")
+    except Exception as e:
+        print("UPDATE ERROR:", repr(e))
+        if connection:
+            connection.rollback()
+
+        flash("An error occurred while updating your profile.", "error")
+        return redirect("/edit_profile")
 
     finally:
-        cursor.close()
-        connection.close()
+        if cursor:
+            cursor.close()
+        if connection:
+            connection.close()
 
-    return redirect("/profile")
 
-@app.route("/edit_profile")
+# --------------------------------------------------
+
+@app.route("/upload_profile_pic", methods=["POST"])
 @login_required
-def edit_profile():
-    user = get_user(current_user.id)
-    return render_template("edit_profile.html.jinja", user=user)
+def upload_profile_pic():
 
-def get_user(user_id):
-    connection = connect_db()
-    cursor = connection.cursor(pymysql.cursors.DictCursor)
+    connection = None
+    cursor = None
 
-    cursor.execute(
-        "SELECT * FROM User WHERE ID = %s",
-        (user_id,)
-    )
+    try:
+        data = request.get_json()
 
-    user = cursor.fetchone()
+        if not data or "image" not in data:
+            return jsonify({"success": False, "error": "No image provided"}), 400
 
-    cursor.close()
-    connection.close()
+        image_data = data["image"]
 
-    return user
+        if "," not in image_data:
+            return jsonify({"success": False, "error": "Invalid image format"}), 400
+
+        header, encoded = image_data.split(",", 1)
+
+        binary_data = base64.b64decode(encoded)
+
+        os.makedirs(UPLOAD_FOLDER, exist_ok=True)
+
+        filename = f"{uuid.uuid4().hex}.jpg"
+        filepath = os.path.join(UPLOAD_FOLDER, filename)
+
+        with open(filepath, "wb") as f:
+            f.write(binary_data)
+
+        image_url = f"/static/uploads/{filename}"
+
+        connection = connect_db()
+        cursor = connection.cursor()
+
+        cursor.execute("""
+            UPDATE User
+            SET Profile_pic = %s
+            WHERE ID = %s
+        """, (image_url, current_user.id))
+
+        connection.commit()
+
+        if cursor.rowcount == 0:
+            return jsonify({"success": False, "error": "User not found"}), 400
+
+        return jsonify({
+            "success": True,
+            "url": image_url
+        })
+
+    except Exception as e:
+        print("UPLOAD ERROR:", repr(e))
+
+        return jsonify({
+            "success": False,
+            "error": str(e)
+        }), 500
+
+    finally:
+        if cursor:
+            cursor.close()
+        if connection:
+            connection.close()
 
 @app.route("/orders")
 @login_required
@@ -1022,6 +1235,8 @@ def delete_account():
     try:
         password = request.form.get("password", "").strip()
 
+        print("FORM DATA:", request.form)
+
         if not password:
             flash("Password required.", "error")
             return redirect("/profile")
@@ -1034,32 +1249,29 @@ def delete_account():
         cursor = connection.cursor()
 
         user_id = current_user.id
-        print("🔍 Deleting user:", user_id)
+        print("Deleting user:", user_id)
 
-        # Begin transaction
-        connection.begin()
-
-        # Delete user only; cascades will handle related records
         cursor.execute("DELETE FROM User WHERE ID = %s", (user_id,))
-
         connection.commit()
+
+        logout_user()
+
+        flash("Account deleted successfully.", "success")
+        return redirect("/")
 
     except Exception as e:
         if connection:
             connection.rollback()
 
-        print("❌ DELETE ERROR:", e)
+        print("DELETE ERROR:", e)
         flash("Error deleting account.", "error")
         return redirect("/profile")
+
     finally:
         if cursor:
             cursor.close()
         if connection:
             connection.close()
-
-    logout_user()
-    flash("Account deleted successfully.", "success")
-    return redirect("/")
 
 @app.route("/map", methods=["GET"])
 def map():

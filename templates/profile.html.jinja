@@ -1,128 +1,231 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
+
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+
   <title>Profile</title>
+
   <script src="https://cdn.tailwindcss.com"></script>
+
   <link href="/static/style.css" rel="stylesheet" />
   <link rel="icon" href="/static/products/Blueprint Logo.png" />
 
+  <!-- CSRF TOKEN -->
+  <meta name="csrf-token" content="{{ csrf_token() }}">
+
+  <!-- Cropper -->
+  <link rel="stylesheet"
+        href="https://cdn.jsdelivr.net/npm/cropperjs@1.6.2/dist/cropper.min.css">
+
+  <script src="https://cdn.jsdelivr.net/npm/cropperjs@1.6.2/dist/cropper.min.js"></script>
+
   <style>
+
+    @keyframes fadeIn {
+      from { opacity: 0; transform: translateY(10px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+
+    .toast {
+      animation: fadeIn 0.3s ease forwards;
+    }
+
     .glass {
       backdrop-filter: blur(10px);
       background: rgba(11, 44, 77, 0.6);
     }
+
     .soft-glow {
       box-shadow: 0 0 25px rgba(111, 183, 255, 0.12);
     }
-    .hover-lift {
-      transition: 0.25s ease;
-    }
-    .hover-lift:hover {
-      transform: translateY(-4px);
-    }
+
     .avatar {
-      width: 70px;
-      height: 70px;
+      width: 95px;
+      height: 95px;
       border-radius: 50%;
+      overflow: hidden;
       background: #6fb7ff;
-      color: #0b2c4d;
       display: flex;
       align-items: center;
       justify-content: center;
+      position: relative;
+      cursor: pointer;
+      font-size: 2rem;
       font-weight: bold;
-      font-size: 22px;
+      color: #0b2c4d;
     }
-    .toast {
-      position: fixed;
-      bottom: 20px;
-      right: 20px;
-      background: #0e3a63;
-      border: 1px solid rgba(111,183,255,0.4);
-      padding: 12px 16px;
-      border-radius: 12px;
-      display: none;
+
+    .avatar img {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
     }
+
+    .avatar-overlay {
+      position: absolute;
+      inset: 0;
+      background: rgba(0,0,0,0.45);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: white;
+      opacity: 0;
+      transition: 0.2s;
+      font-size: 0.9rem;
+    }
+
+    .avatar:hover .avatar-overlay {
+      opacity: 1;
+    }
+
   </style>
+
 </head>
+
 <body class="min-h-screen flex flex-col bg-[#0b2c4d] text-[#d6ecff]">
 
 {% include "components/navbar.html.jinja" %}
 
-<main class="flex-grow px-6 lg:px-20 py-10">
+<!-- FLASH CONTAINER -->
+<div id="flash-container"
+     class="fixed top-5 right-5 z-[9999] space-y-3">
+</div>
 
-  <!-- FLASH MESSAGES -->
-  {% with messages = get_flashed_messages(with_categories=true) %}
-    {% if messages %}
-      <div class="mb-6 space-y-2">
-        {% for category, message in messages %}
-          <div class="p-3 rounded
-              {% if category == 'error' %}
-                  bg-red-500/20 text-red-300 border border-red-500/40
-              {% else %}
-                  bg-green-500/20 text-green-300 border border-green-500/40
-              {% endif %}">
-            {{ message }}
-          </div>
-        {% endfor %}
-      </div>
-    {% endif %}
-  {% endwith %}
+<main class="flex-grow px-6 lg:px-20 py-10">
 
   <!-- HEADER -->
   <div class="text-center mb-10">
+
     <div class="flex justify-center mb-4">
-      <div class="avatar">
-        {{ current_user.name[0]|upper }}
+
+      <div class="avatar" onclick="openUploadModal()">
+
+        {% if user['profile_pic'] %}
+          <img src="{{ user['profile_pic'] }}?t={{ user['id'] }}" id="avatarImg">
+          <span id="avatarText" class="hidden">{{ user['name'][0]|upper }}</span>
+        {% else %}
+          <span id="avatarText">{{ user['name'][0]|upper }}</span>
+        {% endif %}
+
+        <div class="avatar-overlay">Change</div>
+
       </div>
+
     </div>
-    <h1 class="text-4xl font-bold border-b border-dashed border-[#6fb7ff]/40 inline-block pb-2">
-      Hey {{ current_user.name }}!
-    </h1>
-    <p class="text-gray-300 mt-3">Manage your account and activity</p>
+
+    <h1 class="text-4xl font-bold">Hey {{ user['name'] }}!</h1>
+    <p class="text-gray-300">Manage your account</p>
+
   </div>
 
   <!-- GRID -->
   <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
 
-    <!-- LEFT -->
+    <!-- ACCOUNT -->
     <div class="glass p-6 rounded-xl border border-[#6fb7ff]/30 soft-glow">
-      <h2 class="text-xl mb-4 border-b border-[#6fb7ff]/30 pb-2">Account Info</h2>
-      <div class="space-y-4">
-        <div class="bg-[#0b2c4d] p-3 rounded border border-white/10">
-          <p class="text-xs text-gray-400">Name</p>
-          <p class="font-semibold">{{ current_user.name }}</p>
+
+      <h2 class="text-xl mb-4">Account Info</h2>
+
+      <div class="space-y-3">
+
+        <div class="p-3 bg-[#0b2c4d] rounded">
+          Name: {{ user['name'] }}
         </div>
-        <div class="bg-[#0b2c4d] p-3 rounded border border-white/10">
-          <p class="text-xs text-gray-400">Email</p>
-          <p class="font-semibold">{{ current_user.email }}</p>
+
+        <div class="p-3 bg-[#0b2c4d] rounded">
+          Email: {{ user['email'] }}
         </div>
-        <div class="bg-[#0b2c4d] p-3 rounded border border-white/10">
-          <p class="text-xs text-gray-400">Status</p>
-          <p class="font-semibold text-green-400">Active</p>
+
+        <div class="bg-[#0b2c4d] p-3 rounded border-2 border-white/30">
+                    <h1 class="text-3xl font-bold mb-2">👋 {{ current_user.name }}</h1>
+            <div class="flex gap-6 mt-4">
+                <div class="bg-white/20 rounded-lg p-4 flex-1">
+                  <div class="text-sm opacity-80">Level</div>
+                  <div class="text-3xl font-bold">⭐ <p class="text-white">{{ user.level }}</p></div>
+                </div>
+                <div class="bg-white/20 rounded-lg p-4 flex-1">
+                  <div class="text-sm opacity-80">Points</div>
+                  <div class="text-3xl font-bold">💎 <p>{{ user.points }}</p></div>
+                </div>
+                <div class="bg-white/20 rounded-lg p-4 flex-1">
+                  <div class="text-sm opacity-80">Repairs Done</div>
+                  <div class="text-3xl font-bold">🔧 <p>{{ user.repairs_completed }}</p></div>
+                </div>
+            </div>
         </div>
+
       </div>
+
     </div>
 
-    <!-- RIGHT -->
+    <!-- ACTIONS -->
     <div class="lg:col-span-2 glass p-6 rounded-xl border border-[#6fb7ff]/30 soft-glow">
-      <h2 class="text-xl mb-4 border-b border-[#6fb7ff]/30 pb-2">Actions</h2>
-      <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
-        <a href="/edit_profile" class="bg-[#6fb7ff] text-[#0b2c4d] p-5 rounded-xl font-bold text-center hover-lift">
-          ⚙️ Edit Profile
+
+      <h2 class="text-xl mb-4">Actions</h2>
+
+      <div class="grid grid-cols-2 gap-4">
+
+        <a href="/edit_profile"
+           class="p-5 bg-[#6fb7ff] text-[#0b2c4d] font-bold rounded text-center">
+          Edit Profile
         </a>
-        <a href="/orders" class="bg-[#0b2c4d] border border-[#6fb7ff]/30 p-5 rounded-xl text-center hover-lift">
-          📦 My Orders
+
+        <a href="/orders"
+           class="p-5 bg-[#0b2c4d] border border-[#6fb7ff]/30 rounded text-center">
+          Orders
         </a>
-        <button onclick="openDeleteModal()" class="bg-[#0b2c4d] border border-red-500/40 text-red-400 p-5 rounded-xl font-bold hover-lift hover:bg-red-500 hover:text-white">
-          🗑 Delete Account
+
+        <button onclick="openDeleteModal()"
+                class="p-5 bg-[#0b2c4d] border border-red-500 text-red-400 rounded">
+          Delete Account
         </button>
-        <a href="/browse" class="bg-[#0b2c4d] border border-[#6fb7ff]/30 p-5 rounded-xl text-center hover-lift">
-          🛒 Shop
+
+        <a href="/browse"
+           class="p-5 bg-[#0b2c4d] border border-[#6fb7ff]/30 rounded text-center">
+          Shop
         </a>
+         <a href="/leaderboard" class="bg-[#0b2c4d] border border-[#6fb7ff]/30 p-5 rounded-xl text-center hover-lift">
+            🏆 View Leaderboard
+        </a>
+
       </div>
+
     </div>
+
+
+        <!-- Progress to next badge -->
+        {% if next_badge %}
+        <div class="bg-white rounded-xl p-6 mb-6 shadow">
+            <h2 class="text-xl font-bold mb-3">🎯 Next Badge: {{ next_badge.icon }} {{ next_badge.name }}</h2>
+            <p class="text-gray-600 mb-3">{{ next_badge.description }}</p>
+            <div class="w-full bg-gray-200 rounded-full h-4">
+                <div class="bg-blue-600 h-4 rounded-full transition-all" style="width: {{ progress_percent }}%"></div>
+            </div>
+            <p class="text-sm text-gray-500 mt-2">{{ user.repairs_completed }} / {{ next_badge.requirement }} repairs</p>
+        </div>
+        {% endif %}
+
+        <!-- All Badges -->
+        <div class="bg-white rounded-xl p-6 shadow">
+            <h2 class="text-2xl font-bold mb-4">🏅 Badges</h2>
+            <div class="grid grid-cols-2 md:grid-cols-3 gap-4">
+                {% for badge in all_badges %}
+                    {% set earned = badges | selectattr('badge_name', 'equalto', badge.name) | list %}
+                    <div class="border-2 rounded-lg p-4 text-center {% if earned %}bg-yellow-50 border-yellow-400{% else %}bg-gray-50 border-gray-300 opacity-50{% endif %}">
+                        <div class="text-5xl mb-2">{{ badge.icon }}</div>
+                        <div class="font-bold">{{ badge.name }}</div>
+                        <div class="text-xs text-gray-600 mt-1">{{ badge.description }}</div>
+                        {% if earned %}
+                            <div class="text-xs text-green-600 mt-2 font-bold">✅ EARNED</div>
+                        {% else %}
+                            <div class="text-xs text-gray-400 mt-2">🔒 Locked</div>
+                        {% endif %}
+                    </div>
+                {% endfor %}
+            </div>
+        </div>
 
   </div>
 
@@ -134,6 +237,8 @@
     <h2 class="text-2xl font-bold text-red-400 mb-3">Delete Account?</h2>
     <p class="text-gray-300 mb-4">Enter your password and type DELETE to confirm.</p>
     <form method="POST" action="/delete_account" id="deleteForm" class="space-y-4">
+
+      <input type="hidden" name="csrf_token" value="{{ csrf_token() }}" />
       <!-- Password Input -->
       <input type="password" name="password" placeholder="Enter password" required class="w-full p-2 rounded bg-[#0b2c4d] border border-white/10 text-white" />
       
@@ -148,62 +253,223 @@
             <circle class="opacity-25" cx="12" cy="12" r="10" stroke="white" stroke-width="4"></circle>
             <path class="opacity-75" fill="white" d="M4 12a8 8 0 018-8v4a4 4 0 00-4 4H4z"></path>
           </svg>
-        </button>
-      </div>
-    </form>
+
+
+<!-- ================= UPLOAD MODAL ================= -->
+<div id="uploadModal"
+     class="hidden fixed inset-0 bg-black/70 flex items-center justify-center z-50">
+
+  <div class="bg-[#0b2c4d] p-6 rounded-xl w-[90%] max-w-md">
+
+    <h2 class="text-xl mb-4">Update Profile Picture</h2>
+
+    <input type="file" id="fileInput" accept="image/*" class="mb-4 w-full">
+
+    <div class="w-full h-[300px] bg-[#081f36] rounded flex items-center justify-center overflow-hidden mb-4">
+      <img id="cropImage" class="hidden max-w-full max-h-full" />
+    </div>
+
+    <div class="flex justify-end gap-2">
+
+      <button onclick="closeUploadModal()"
+              class="px-4 py-2 bg-gray-600 rounded">
+        Cancel
+      </button>
+
+      <button onclick="uploadCropped()"
+              class="px-4 py-2 bg-[#6fb7ff] text-black font-bold rounded">
+        Save
+      </button>
+
+    </div>
+
   </div>
 </div>
 
-<!-- TOAST -->
-<div id="toast" class="toast">Loading...</div>
+ <!-- DELETE MODAL -->
+<div id="deleteModal"
+     class="hidden fixed inset-0 bg-black/70 flex items-center justify-center z-50">
 
+  <div class="bg-[#0b2c4d] p-6 rounded-xl w-[90%] max-w-md">
+
+    <h2 class="text-xl font-bold mb-3">Delete Account?</h2>
+
+    <p class="text-gray-300 mb-4">
+      Enter your password to permanently delete your account.
+    </p>
+
+    <form method="POST" action="/delete_account" class="space-y-4">
+
+      <!-- CSRF -->
+      <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+
+      <!-- PASSWORD -->
+      <input type="password"
+             name="password"
+             placeholder="Password"
+             required
+             class="w-full px-4 py-2 bg-[#081f36] border border-[#6fb7ff] rounded text-white">
+
+      <div class="flex justify-end gap-2">
+
+        <button type="button"
+                onclick="closeDeleteModal()"
+                class="px-4 py-2 bg-gray-600 rounded">
+          Cancel
+        </button>
+
+        <button type="submit"
+                class="px-4 py-2 bg-red-500 text-white font-bold rounded">
+          Delete
+        </button>
+
+      </div>
+
+    </form>
+
+  </div>
+</div>
+
+<!-- ================= SCRIPT ================= -->
 <script>
-function openDeleteModal() {
-  document.getElementById("deleteModal").classList.remove("hidden");
-  // Optionally, focus on the first input
-  document.querySelector("#deleteForm input[name='password']").focus();
-}
 
-function closeDeleteModal() {
-  document.getElementById("deleteModal").classList.add("hidden");
-  document.getElementById("deleteBtn").disabled = false;
-  document.getElementById("btnText").textContent = "Delete";
-  document.getElementById("spinner").classList.add("hidden");
-  // Clear inputs
-  document.querySelector("#deleteForm input[name='password']").value = "";
-  document.querySelector("#deleteForm input[name='confirmation']").value = "";
-}
+window.addEventListener("load", () => {
 
-// Form validation before submission
-document.getElementById("deleteForm").addEventListener("submit", function (e) {
-  const confirmationInput = document.querySelector("input[name='confirmation']");
-  if (confirmationInput.value.trim().toUpperCase() !== "DELETE") {
-    e.preventDefault();
-    alert('Please type "DELETE" to confirm.');
-    return;
+  let cropper = null;
+
+  const csrf = document.querySelector('meta[name="csrf-token"]').getAttribute("content");
+  const flashContainer = document.getElementById("flash-container");
+
+  function showFlash(message, category="success") {
+
+    const div = document.createElement("div");
+
+    div.className = `toast px-5 py-3 rounded-xl shadow-lg font-bold text-sm border
+      ${category === "error"
+        ? "bg-red-600 text-white border-red-400"
+        : "bg-[#0f5e3a] text-[#b6ffd6] border-[#2aff9a]"}`;
+
+    div.innerText = message;
+
+    flashContainer.appendChild(div);
+
+    setTimeout(() => {
+      div.style.opacity = "0";
+      div.style.transform = "translateY(-10px)";
+      setTimeout(() => div.remove(), 300);
+    }, 3000);
   }
 
-  // Show loading state
-  const btn = document.getElementById("deleteBtn");
-  const text = document.getElementById("btnText");
-  const spinner = document.getElementById("spinner");
+  /* FLASH FROM FLASK */
+  {% with messages = get_flashed_messages(with_categories=true) %}
+    {% for category, message in messages %}
+      showFlash({{ message|tojson }}, "{{ category }}");
+    {% endfor %}
+  {% endwith %}
 
-  btn.disabled = true;
-  text.textContent = "Deleting...";
-  spinner.classList.remove("hidden");
+  /* ================= UPLOAD ================= */ 
+
+  window.openUploadModal = () =>
+    document.getElementById("uploadModal").classList.remove("hidden");
+
+  window.closeUploadModal = () => {
+    document.getElementById("uploadModal").classList.add("hidden");
+    if (cropper) cropper.destroy();
+    cropper = null;
+    document.getElementById("fileInput").value = "";
+  };
+
+  document.getElementById("fileInput").addEventListener("change", (e) => {
+
+    const file = e.target.files[0];
+    if (!file) return;
+
+    const reader = new FileReader();
+
+    reader.onload = (event) => {
+
+      const img = document.getElementById("cropImage");
+      img.src = event.target.result;
+      img.classList.remove("hidden");
+
+      if (cropper) cropper.destroy();
+
+      cropper = new Cropper(img, {
+        aspectRatio: 1,
+        viewMode: 1
+      });
+
+    };
+
+    reader.readAsDataURL(file);
+  });
+
+  window.uploadCropped = () => {
+
+    const canvas = cropper.getCroppedCanvas({ width: 300, height: 300 });
+    const image = canvas.toDataURL("image/jpeg", 0.9);
+
+    fetch("/upload_profile_pic", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        "X-CSRFToken": csrf
+      },
+      body: JSON.stringify({ image })
+    })
+
+    .then(r => r.json())
+    .then(data => {
+      if (data.success) {
+        showFlash("Profile updated!");
+
+        document.getElementById("avatarImg").src =
+          data.url + "?t=" + Date.now();
+
+        closeUploadModal();
+      } else {
+        showFlash(data.error, "error");
+      }
+    });
+
+  };
+
+  /* ================= DELETE ================= */
+
+  window.openDeleteModal = () =>
+    document.getElementById("deleteModal").classList.remove("hidden");
+
+  window.closeDeleteModal = () =>
+    document.getElementById("deleteModal").classList.add("hidden");
+
+  window.confirmDelete = () => {
+
+    fetch("/delete_account", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        "X-CSRFToken": csrf
+      }
+    })
+
+    .then(r => r.json())
+    .then(data => {
+
+      if (data.success) {
+        window.location.href = "/logout";
+      } else {
+        showFlash("Delete failed", "error");
+      }
+
+    });
+
+  };
+
 });
 
-// Close modal on ESC key
-document.addEventListener("keydown", function(e) {
-  if (e.key === "Escape") closeDeleteModal();
-});
-
-// Close modal when clicking outside
-document.getElementById("deleteModal").addEventListener("click", function(e) {
-  if (e.target === this) closeDeleteModal();
-});
 </script>
 
 {% include "components/footer.html.jinja" %}
+
 </body>
 </html>

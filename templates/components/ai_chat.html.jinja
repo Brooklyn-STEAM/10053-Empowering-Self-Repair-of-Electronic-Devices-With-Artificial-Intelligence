@@ -247,13 +247,17 @@ document.addEventListener("DOMContentLoaded", () => {
         });
     }
 
+    let aiBusy = false;
     async function sendMsg() {
+        if (aiBusy) return;
+
         try {
             const fileInput = document.getElementById("imageUpload");
             const msg = msgInput.value.trim();
             const file = fileInput && fileInput.files ? fileInput.files[0] : null;
 
             if (!msg && !file) return;
+            aiBusy = true;
 
             let guideId = null;
             const metaGuide = document.querySelector('meta[name="guide-id"]');
@@ -283,12 +287,18 @@ document.addEventListener("DOMContentLoaded", () => {
             msgInput.value = "";
             if (fileInput) fileInput.value = "";
 
+            sendBtn.disabled = true;
+            msgInput.disabled = true;
             const res = await fetch("/ai-help", {
                 method: "POST",
                 body: formData
             });
 
-            if (!res.ok) throw new Error("Server error");
+            if (!res.ok) {
+                const errorText = await res.text();
+                console.error(errorText);
+                throw new Error(errorText);
+            }
 
             const data = await res.json();
             thinkingDiv.remove();
@@ -298,8 +308,14 @@ document.addEventListener("DOMContentLoaded", () => {
             document.getElementById("chatBox").appendChild(aiMsgDiv);
 
             await revealMessage(aiMsgDiv, data.reply);
+            aiBusy = false;
+            sendBtn.disabled = false;
+            msgInput.disabled = false;
 
         } catch (err) {
+            aiBusy = false;
+            sendBtn.disabled = false;
+            msgInput.disabled = false;
             console.error(err);
             const chatBox = document.getElementById("chatBox");
             const lastChild = chatBox.lastChild;
