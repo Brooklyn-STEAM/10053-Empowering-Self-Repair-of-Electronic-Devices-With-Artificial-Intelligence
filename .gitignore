@@ -9,3 +9,10 @@ uploads
 
 profile_pics
 static/repairs/
+
+package-lock.json
+
+package.json
+
+node_modules
+

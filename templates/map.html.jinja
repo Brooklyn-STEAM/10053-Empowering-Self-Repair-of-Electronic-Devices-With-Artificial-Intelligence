@@ -133,20 +133,23 @@ h1 {
     <script>
         var map = L.map('map').setView([40.6987909591662, -73.97121363208167], 13);
         var markers = []; // Store all markers
+        var userMarkers = []; // Store only user search markers
+        var routingControl = null; // Store routing control
 
-        var osm = L.tileLayer('https://api.maptiler.com/maps/dataviz-v4/{z}/{x}/{y}.png?key=HWne2349v5WDLtpgx5BN', {
+        L.tileLayer('https://{s}.basemaps.cartocdn.com/rastertiles/voyager/{z}/{x}/{y}{r}.png',
+        {
             maxZoom: 19,
-            attribution: '<a href="https://www.maptiler.com/copyright/" target="_blank">&copy; MapTiler </a> <a href="https://www.openstreetmap.org/copyright/" target="_blank">&copy; OpenStreetMap contributors</a>'
+        attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
         }).addTo(map);
 
-        function clearMarkers() {
-            markers.forEach(marker => map.removeLayer(marker));
-            markers = [];
+        function clearUserMarkers() {
+            userMarkers.forEach(marker => map.removeLayer(marker));
+            userMarkers = [];
         }
 
-        function addMarker(lat, lng, name) {
+        function addUserMarker(lat, lng, name) {
             var marker = L.marker([lat, lng]).addTo(map).bindPopup(name);
-            markers.push(marker);
+            userMarkers.push(marker);
         }
 
         var sidebar = L.control.sidebar({
@@ -169,9 +172,10 @@ h1 {
 
         var centers = {{ centers | tojson }};
         centers.forEach(function(center) {
-            L.marker([center.lat, center.lng])
+            var marker = L.marker([center.lat, center.lng])
                 .addTo(map)
                 .bindPopup( center.name + "<br><br>" + center.address + "<br><br>" + "<img src='" + center.image + "' alt='" + center.name + "' class='w-full h-48 object-cover mt-2 rounded'>");
+                markers.push(marker); // Store repair center markers
 
         });
 
@@ -186,8 +190,12 @@ h1 {
                             var lon = data[0].lon;
                             map.setView([lat, lon], 13);
                             
-                            clearMarkers(); // Clear previous markers BEFORE adding new ones
-                            addMarker(lat, lon, "Search Location");
+                            clearUserMarkers(); // Clear previous user markers
+                            if (routingControl) {
+                                map.removeControl(routingControl); // Remove previous routing
+                            }
+                            
+                            addUserMarker(lat, lon, "Search Location");
                             
                             // Find closest center to user's location
                             var closestCenter = centers[0];
@@ -200,7 +208,7 @@ h1 {
                                 }
                             });
                             
-                            L.Routing.control({
+                            routingControl = L.Routing.control({
                                 waypoints: [
                                     L.latLng(lat, lon),
                                     L.latLng(closestCenter.lat, closestCenter.lng)
@@ -226,7 +234,13 @@ h1 {
         return btn;
     }
 
-    map.on('click', function(e) {
+        
+        map.on('click', function(e) {
+        clearUserMarkers(); // Clear previous user markers
+        if (routingControl) {
+            map.removeControl(routingControl); // Remove previous routing
+        }
+
         var container = L.DomUtil.create('div'),
             startBtn = createButton('Starting from this location', container);
 
@@ -248,7 +262,7 @@ h1 {
             }
         });
 
-        L.Routing.control({
+        routingControl = L.Routing.control({
             waypoints: [
                 L.latLng(e.latlng.lat, e.latlng.lng),
                 L.latLng(closestCenter.lat, closestCenter.lng)
