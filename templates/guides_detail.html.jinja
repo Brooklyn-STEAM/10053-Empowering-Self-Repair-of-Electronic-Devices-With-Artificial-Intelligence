@@ -7,83 +7,195 @@
     <link href="/static/style.css" rel="stylesheet">
     <link rel="icon" href="/static/products/Blueprint Logo.png" type="image">
 
-    <!-- 🔽 NEW: Expose the guide ID for the AI assistant -->
     <meta name="guide_id" content="{{ guide['ID'] }}">
     <meta name="csrf-token" content="{{ csrf_token() }}">
+    
     <script src="https://cdn.jsdelivr.net/npm/@tailwindcss/browser@4"></script>
+    <style>
+        #repairFlash {
+            position: fixed;
+            top: 1rem;
+            right: 1rem;
+            z-index: 60;
+            max-width: 320px;
+            padding: 1rem 1.25rem;
+            border-radius: 0.75rem;
+            background: rgba(16, 185, 129, 0.95);
+            color: white;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.2);
+            opacity: 0;
+            transform: translateY(-10px);
+            transition: opacity 0.25s ease, transform 0.25s ease;
+            pointer-events: none;
+        }
+        #repairFlash.show {
+            opacity: 1;
+            transform: translateY(0);
+            pointer-events: auto;
+        }
+    </style>
 </head>
 
-
 <body class="min-h-screen flex flex-col text-sm lg:text-xl">
-<div id="mainContent" class="transition-all duration-300" style="margin-right: 0; flex-grow flex flex-col">
+<div id="mainContent" class="transition-all duration-300" style="margin-right: 0; flex-grow: 1; display: flex; flex-direction: column;">
 
-{% include "components/ai_chat.html.jinja" %}
+    {% include "components/ai_chat.html.jinja" %}
     {% include "components/navbar.html.jinja" %}
 
-  <main class="flex-grow">
-      <div>
-          <iframe loading="lazy" class="w-full h-185" src="{{ url_for('static', filename=guide['PDF_Path']) }}"></iframe>
-      </div>
+    <main class="flex-grow">
+        <div>
+            <iframe loading="lazy" class="w-full h-185" src="{{ url_for('static', filename=guide['PDF_Path']) }}"></iframe>
+        </div>
 
-    <div class="mt-5 w-67 ml-5 mb-5 flex items-center">
-    {% if not guide_completed %}
-      <button id="completeRepairBtn" 
-        onclick="completeRepair()"
-        class="bg-green-600 hover:bg-green-700 text-white font-bold py-3 px-6 rounded-lg shadow-lg">
-        ✅ Mark Repair as Complete
-    </button>
-    {% else %}
-      <div class="bg-yellow-100 text-yellow-800 font-medium p-4 rounded-lg">
-        You've already completed this repair.
-      </div>
-    {% endif %}
-    </div>
-  </main>
+        <div id="repairFlash" class="hidden"></div>
+        
+        <div class="mt-5 w-67 ml-5 mb-5 flex items-center">
+        {% if current_user.is_authenticated %}
+            {% if not guide_completed %}
+            <button onclick="document.getElementById('repairModal').classList.remove('hidden')"
+                class="bg-green-600 hover:bg-green-700 text-white font-bold py-3 px-6 rounded-lg shadow-lg">
+                ✅ Mark Repair as Complete
+            </button>
+            {% else %}
+            <div class="bg-yellow-100 text-yellow-800 font-medium p-4 rounded-lg">
+                You've already completed this repair.
+            </div>
+            {% endif %}
+        {% else %}
+            <a href="/login" class="bg-blue-600 hover:bg-blue-700 text-white font-bold py-3 px-6 rounded-lg shadow-lg">
+                Log in to track your repairs
+            </a>
+        {% endif %}
+        </div>
 
-    <!-- FOOTER -->
+        <div id="repairModal" class="hidden fixed inset-0 bg-black/60 z-50 flex items-center justify-center p-4">
+            <div class="bg-white/90 backdrop-blur-md rounded-xl p-6 max-w-lg w-full max-h-[90vh] overflow-y-auto shadow-2xl">
+                <h2 class="text-2xl font-bold mb-4">📸 Submit Your Repair</h2>
+                <form id="repairForm">
+                    
+                    <div class="mb-4">
+                        <label class="block mb-2 font-semibold">Before Picture:</label>
+                        <label class="flex flex-col items-center justify-center w-full h-24 border-2 border-dashed border-gray-400 rounded-lg cursor-pointer bg-gray-50/50 hover:bg-gray-200/60 transition-colors">
+                            <div class="flex flex-col items-center justify-center mt-2">
+                                <span class="text-2xl">📸</span>
+                                <p class="text-sm text-gray-600 font-semibold mt-1" id="before-filename">Click to select image</p>
+                            </div>
+                            <input type="file" name="before_image" accept="image/*" required class="hidden" 
+                                   onchange="document.getElementById('before-filename').textContent = this.files[0].name">
+                        </label>
+                    </div>
+                    
+                    <div class="mb-4">
+                        <label class="block mb-2 font-semibold">After Picture:</label>
+                        <label class="flex flex-col items-center justify-center w-full h-24 border-2 border-dashed border-gray-400 rounded-lg cursor-pointer bg-gray-50/50 hover:bg-gray-200/60 transition-colors">
+                            <div class="flex flex-col items-center justify-center mt-2">
+                                <span class="text-2xl">✨</span>
+                                <p class="text-sm text-gray-600 font-semibold mt-1" id="after-filename">Click to select image</p>
+                            </div>
+                            <input type="file" name="after_image" accept="image/*" required class="hidden" 
+                                   onchange="document.getElementById('after-filename').textContent = this.files[0].name">
+                        </label>
+                    </div>
+                    
+                    <label class="block mb-2 font-semibold">What was easy?</label>
+                    <textarea name="easy_parts" rows="2" class="w-full border border-gray-300 bg-white/80 rounded p-2 mb-4 focus:ring-2 focus:ring-green-500 focus:outline-none" placeholder="e.g., Removing the back cover..."></textarea>
+                    
+                    <label class="block mb-2 font-semibold">What was difficult?</label>
+                    <textarea name="difficult_parts" rows="2" class="w-full border border-gray-300 bg-white/80 rounded p-2 mb-4 focus:ring-2 focus:ring-green-500 focus:outline-none" placeholder="e.g., Disconnecting the battery cable..."></textarea>
+                    
+                    <div class="flex gap-2">
+                        <button type="button" onclick="document.getElementById('repairModal').classList.add('hidden')" class="flex-1 bg-gray-300 hover:bg-gray-400 font-semibold py-2 rounded transition-colors">Cancel</button>
+                        <button type="submit" class="flex-1 bg-green-600 hover:bg-green-700 text-white font-semibold py-2 rounded transition-colors">Submit</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </main>
+
     {% include "components/footer.html.jinja" %}
 </div>
 
-
 <script>
-    async function completeRepair() {
-        const guideId = document.querySelector('meta[name="guide_id"]').content;
+    // Handle form submission
+    document.getElementById('repairForm').addEventListener('submit', async (e) => {
+        e.preventDefault();
         
+        // Disable submit button to prevent double submissions
+        const submitBtn = e.target.querySelector('button[type="submit"]');
+        submitBtn.disabled = true;
+        submitBtn.textContent = 'Submitting...';
+
+        const fd = new FormData(e.target);
+        fd.append('guide_id', document.querySelector('meta[name="guide_id"]').content);
+
         try {
-            const res = await fetch('/complete_repair', {
+            // Note: The URL here is '/submit-repair', make sure your Python route matches this exactly!
+            const res = await fetch('/submit_repair', {
                 method: 'POST',
                 headers: {
-                    'Content-Type': 'application/json',
                     'X-CSRFToken': document.querySelector('meta[name="csrf-token"]').content
-                    },
-                body: JSON.stringify({guide_id: guideId})
+                },
+                body: fd
             });
             
             const data = await res.json();
             
             if (data.already_done) {
                 alert("You've already completed this repair!");
+                resetModal(submitBtn);
                 return;
             }
             
             if (data.success) {
-                let message = `🎉 Repair Complete!\n\n+${data.points_earned} points!\nTotal: ${data.total_points} points\nLevel: ${data.level}`;
+                // Hide modal on success
+                document.getElementById('repairModal').classList.add('hidden');
                 
+                // Handle Badge Logs
                 if (data.new_badges && data.new_badges.length > 0) {
-                    message += "\n\n🏅 NEW BADGES EARNED:";
+                    let badgeMessage = "\n\n🏅 NEW BADGES EARNED:";
                     data.new_badges.forEach(b => {
-                        message += `\n${b.icon} ${b.name} - ${b.description}`;
+                        badgeMessage += `\n${b.icon} ${b.name}`;
                     });
+                    console.log(badgeMessage);
                 }
                 
-                alert(message);
-                window.location.href = '/profile';
+                // Show the nice UI flash notification
+                showFlash(data.points_earned, data.total_points || 'N/A', data.level);
+                
+                // Redirect after flash finishes
+                setTimeout(() => window.location.href = '/profile', 2400);
             } else {
-                alert(data.error || "Something went wrong");
+                alert(data.error || "Something went wrong processing your submission.");
+                resetModal(submitBtn);
             }
         } catch (err) {
             alert("Error: " + err.message);
+            resetModal(submitBtn);
         }
+    });
+
+    // Helper to reset modal button state if there's an error
+    function resetModal(btn) {
+        btn.disabled = false;
+        btn.textContent = 'Submit';
+    }
+
+    // Custom Flash Notification
+    function showFlash(points, total, level) {
+        const flash = document.getElementById('repairFlash');
+        flash.innerHTML = `
+            <div class="font-bold text-lg mb-2">🎉 Repair Complete!</div>
+            <div class="text-sm">+${points} points!</div>
+            <div class="text-sm">Total: ${total} points</div>
+            <div class="text-sm">Level: ${level}</div>
+        `;
+        flash.classList.remove('hidden');
+        flash.classList.add('show');
+
+        setTimeout(() => {
+            flash.classList.remove('show');
+            setTimeout(() => flash.classList.add('hidden'), 250);
+        }, 2000);
     }
 </script>
 </body>

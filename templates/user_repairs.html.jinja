@@ -1,0 +1,22 @@
+<!DOCTYPE html>
+<html>
+<head><title>{{ user.username }}'s Repairs</title><script src="https://cdn.tailwindcss.com"></script></head>
+<body class="bg-gray-100 min-h-screen p-6">
+<div class="max-w-4xl mx-auto">
+    <h1 class="text-3xl font-bold mb-6">🔧 {{ user.username }}'s Repair History</h1>
+    {% for r in repairs %}
+    <div class="bg-white rounded-xl shadow p-6 mb-4">
+        <h3 class="text-xl font-bold mb-3">{{ r.guide_name or 'Repair' }}</h3>
+        <div class="grid grid-cols-2 gap-4 mb-4">
+            <div><p class="font-semibold mb-1">Before:</p><img src="/static/{{ r.before_image }}" class="rounded w-full"></div>
+            <div><p class="font-semibold mb-1">After:</p><img src="/static/{{ r.after_image }}" class="rounded w-full"></div>
+        </div>
+        {% if r.easy_parts %}<p><strong>✅ Easy:</strong> {{ r.easy_parts }}</p>{% endif %}
+        {% if r.difficult_parts %}<p><strong>⚠️ Hard:</strong> {{ r.difficult_parts }}</p>{% endif %}
+        <p class="text-xs text-gray-500 mt-2">{{ r.created_at }}</p>
+    </div>
+    {% else %}<p>No repairs yet.</p>{% endfor %}
+    <a href="/leaderboard" class="block text-center bg-blue-600 text-white py-3 rounded-lg">← Back</a>
+</div>
+</body>
+</html>

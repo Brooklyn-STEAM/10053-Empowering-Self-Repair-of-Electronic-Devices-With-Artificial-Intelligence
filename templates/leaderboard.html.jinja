@@ -30,10 +30,12 @@
                             {% endif %}
                         </div>
                         <div class="flex-1 ml-4">
-                            <div class="font-bold text-lg">{{ user.username }}</div>
-                            <div class="text-sm text-gray-500">Level {{ user.level }} • {{ user.repairs_completed }} repairs</div>
+                            <div class="font-bold text-lg">{{ user['username'] }}</div>
+                            <div class="text-sm text-gray-500">Level {{ user['level'] }} • {{ user['repairs_completed'] }} repairs</div>
                             <button>
-                                <div class="text-sm text-gray-500 underline hover:text-blue-600"> View repairs </div>
+                                <div class="text-sm text-gray-500 underline hover:text-blue-600"> 
+                                    <a href="/user_repairs/{{ user['ID'] }}">View repairs </a>
+                                </div>
                             </button>
                         </div>
                         <div class="text-2xl font-bold text-blue-600">💎 {{ user.points }}</div>

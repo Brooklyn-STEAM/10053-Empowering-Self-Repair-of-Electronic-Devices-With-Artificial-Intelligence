@@ -107,8 +107,9 @@ def index():
 
     return render_template("homepage.html.jinja", guides=result)
 
-@limiter.limit("5 per minute; 20 per hour")
+
 @app.route("/login", methods=["POST", "GET"])
+@limiter.limit("5 per minute; 20 per hour")
 def login_page():
 
     if request.method == "POST":
@@ -152,8 +153,9 @@ def login_page():
 
     return render_template("login.html.jinja")
 
-@limiter.limit("3 per minute; 10 per hour")
+
 @app.route("/signup", methods=["POST", "GET"])
+@limiter.limit("3 per minute; 10 per hour")
 def signup_page():
 
     if request.method == "POST":
@@ -458,6 +460,108 @@ def leaderboard():
         connection.close()
 
 
+@app.route('/submit_repair', methods=['POST'])
+@login_required
+def submit_repair():
+    # Safely check for the user depending on how your auth is set up
+    if not current_user or not current_user.is_authenticated:
+        return jsonify({"error": "Login required"}), 401
+    
+    # It's safer to use current_user.id if using Flask-Login, 
+    # but we'll use session.get() safely based on your original code
+    user_id = session.get('user_id') or current_user.id
+    
+    guide_id = request.form.get('guide_id')
+    before_img = request.files.get('before_image')
+    after_img = request.files.get('after_image')
+    easy = request.form.get('easy_parts', '')
+    difficult = request.form.get('difficult_parts', '')
+    
+    if not all([guide_id, before_img, after_img]):
+        return jsonify({"error": "Missing fields"}), 400
+    
+    os.makedirs("static/repairs", exist_ok=True)
+    import time
+    ts = int(time.time())
+    
+    # 1. Sanitize the filenames so they are safe to use
+    safe_before_filename = secure_filename(before_img.filename)
+    safe_after_filename = secure_filename(after_img.filename)
+    
+    # 2. Use the safe variables in your path strings
+    before_path = f"repairs/{user_id}_{ts}_before_{safe_before_filename}"
+    after_path = f"repairs/{user_id}_{ts}_after_{safe_after_filename}"
+    
+    # 3. Save the files
+    before_img.save(f"static/{before_path}")
+    after_img.save(f"static/{after_path}")
+    
+    conn = connect_db()
+    try:
+        with conn.cursor() as cursor:
+            # Check duplicate
+            cursor.execute("SELECT id FROM completed_repairs WHERE user_id=%s AND guide_id=%s", (user_id, guide_id))
+            if cursor.fetchone():
+                return jsonify({"already_done": True})
+            
+            # Insert into repair_showcases
+            cursor.execute("INSERT INTO repair_showcases (user_id, guide_id, before_image, after_image, easy_parts, difficult_parts) VALUES (%s,%s,%s,%s,%s,%s)",
+                (user_id, guide_id, before_path, after_path, easy, difficult))
+                
+            # Insert into completed_repairs
+            cursor.execute("INSERT INTO completed_repairs (user_id, guide_id) VALUES (%s, %s)", (user_id, guide_id))
+            
+            # Update user stats
+            cursor.execute("UPDATE User SET points = points + %s, repairs_completed = repairs_completed + 1, level = FLOOR((repairs_completed + 1)/5) + 1 WHERE ID = %s",
+                (POINTS_PER_REPAIR, user_id))
+                
+            # Fetch new stats to return to frontend
+            cursor.execute("SELECT points, repairs_completed, level FROM User WHERE ID = %s", (user_id,))
+            stats = cursor.fetchone()
+            
+            conn.commit()
+            
+        # Check badges outside the DB transaction block but before closing connection
+        new_badges = check_and_award_badges(user_id, stats['repairs_completed'])
+        
+        return jsonify({
+            "success": True, 
+            "points_earned": POINTS_PER_REPAIR, 
+            "total_points": stats['points'], 
+            "level": stats['level'], 
+            "new_badges": new_badges
+        })
+    except Exception as e:
+        # Good practice to catch unexpected SQL errors in development
+        print(f"Database error: {e}")
+        return jsonify({"error": "A database error occurred"}), 500
+    finally:
+        conn.close()
+
+
+@app.route('/user_repairs/<int:user_id>')
+def user_repairs(user_id):
+    conn = connect_db()
+    try:
+        with conn.cursor() as cursor:
+            cursor.execute("SELECT username FROM users WHERE id = %s", (user_id,))
+            user = cursor.fetchone()
+            
+            cursor.execute("""
+                SELECT rs.*, g.Name as guide_name 
+                FROM repair_showcases rs 
+                LEFT JOIN guides g ON rs.guide_id = g.id 
+                WHERE rs.user_id = %s 
+                ORDER BY rs.created_at DESC
+            """, (user_id,))
+            repairs = cursor.fetchall()
+            
+        return render_template('user_repairs.html.jinja', user=user, repairs=repairs)
+    finally:
+        conn.close()
+
+
+
 @app.route("/repairs")
 def repair_page():
 
@@ -477,8 +581,9 @@ def phone_guides():
 
     return render_template("phone_guides.html.jinja", guides=result)
 
-@limiter.limit("25 per minute")
+
 @app.route('/cost_calculator')
+@limiter.limit("25 per minute")
 def cost_calculator():
     return render_template('cost_calculator.html.jinja')
 
@@ -500,8 +605,9 @@ def products():
     return render_template("individual_products.html.jinja", products=products)
 
 
-@limiter.limit("30 per minute")
+
 @app.route("/search", methods=["GET"])
+@limiter.limit("30 per minute")
 def search():
     query = request.args.get("q", "").strip()
     connection = connect_db()
@@ -890,9 +996,10 @@ def checkout():
 def thank_you():
     return render_template("thank_you.html.jinja")
 
+
+@app.route('/ai-help', methods=['POST'])
 @limiter.limit("100 per hour")
 @csrf.exempt
-@app.route('/ai-help', methods=['POST'])
 def ai_help():
    
     try:
@@ -974,12 +1081,15 @@ def clear_chat():
 def profile():
     """User profile page with stats + badges"""
 
-    connection = None
+    connection = connect_db()
     cursor = None
 
     try:
         with connection.cursor() as cursor:
-            cursor.execute("SELECT Name, points, repairs_completed, level FROM User WHERE ID = %s", (current_user.id,))
+            cursor.execute(
+                "SELECT ID AS id, Name AS name, Email AS email, profile_pic, points, repairs_completed, level FROM User WHERE ID = %s",
+                (current_user.id,)
+            )
             user = cursor.fetchone()
             
             cursor.execute("SELECT badge_name, badge_icon, badge_description, earned_at FROM User_badges WHERE user_id = %s ORDER BY earned_at DESC", (current_user.id,))
