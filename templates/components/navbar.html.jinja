@@ -88,7 +88,7 @@
     <div id="mobileSearch" class="hidden lg:hidden mt-2 pb-2">
       <form method="get" action="/search">
       <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
-      
+
         <input
           class="w-full h-9 px-3 rounded-lg text-sm border-2 border-gray-300 focus:outline-none"
           type="search"
@@ -124,6 +124,7 @@
   <a href="/repairs" class="block">Repairs</a>
   <a href="/map" class="block">Map</a>
   <a href="/cost_calculator" class="block">Cost Calculator</a>
+  <a href="/logout" class="block text-red-600 font-bold hover:bg-red-600 hover:text-white">Logout</a>
 
 </div>
 
