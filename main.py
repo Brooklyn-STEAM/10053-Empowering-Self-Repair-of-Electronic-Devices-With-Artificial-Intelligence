@@ -6,6 +6,7 @@ from flask_limiter import Limiter
 from flask_limiter.util import get_remote_address
 import pymysql, re, sqlite3, mysql.connector, secrets, hashlib, pdfplumber, uuid
 from dynaconf import Dynaconf
+from dotenv import load_dotenv
 from scipy import stats
 from ai_agent import run_agent
 from datetime import datetime, timedelta
@@ -14,28 +15,37 @@ from openai import OpenAI
 from werkzeug.security import generate_password_hash, check_password_hash
 from flask_wtf import CSRFProtect
 import base64
+import imghdr
 import uuid
 import os
 
 UPLOAD_FOLDER = os.path.join("static", "uploads")
+ALLOWED_IMAGE_EXTENSIONS = {"png", "jpg", "jpeg", "gif", "bmp", "webp"}
+MAX_UPLOAD_SIZE = 5 * 1024 * 1024  # 5MB
 from werkzeug.utils import secure_filename
 
 app = Flask(__name__)
 csrf = CSRFProtect(app)
 
-config = Dynaconf(settings_file =["settings.toml", ".env"])
+# Load .env into os.environ so os.environ.get works reliably in development
+load_dotenv()
 
-#client = OpenAI(api_key=config.get("OPENAI_API_KEY"))
-#client = Anthropic(api_key=config.get("ANTHROPIC_API_KEY"))
+config = Dynaconf(settings_file=["settings.toml", ".env"])
 
-app.secret_key = config.secret_key
+# client = OpenAI(api_key=config.get("OPENAI_API_KEY") or os.environ.get("OPENAI_API_KEY"))
+# client = Anthropic(api_key=config.get("ANTHROPIC_API_KEY") or os.environ.get("ANTHROPIC_API_KEY"))
+
+app.secret_key = config.get("secret_key") or os.environ.get("SECRET_KEY") or os.urandom(24)
 
 app.config.update(
-    SESSION_COOKIE_SECURE=False,  # Set to True in production with HTTPS
+    SESSION_COOKIE_SECURE=(os.environ.get("FLASK_ENV") == "production"),
     SESSION_COOKIE_HTTPONLY=True,
-    SESSION_COOKIE_SAMESITE='Lax',
+    SESSION_COOKIE_SAMESITE='Strict',
     PERMANENT_SESSION_LIFETIME=3600  # 1 hour
 )
+
+if os.environ.get("FLASK_ENV") == "production":
+    app.config["PREFERRED_URL_SCHEME"] = "https"
 
 limiter = Limiter(
     app=app,
@@ -78,16 +88,60 @@ def load_user(user_id):
     return User(result)
 
 
+def _resolve_config_value(*keys):
+    """Return the first configured value from environment or Dynaconf for the given keys."""
+    for k in keys:
+        v = os.environ.get(k)
+        if v:
+            return v.strip().strip('"').strip("'")
+    for k in keys:
+        try:
+            v = config.get(k)
+        except Exception:
+            v = None
+        if v:
+            return str(v).strip().strip('"').strip("'")
+    return None
+
+
 def connect_db():
+    db_user = _resolve_config_value("DB_USER", "USER", "user")
+    db_password = _resolve_config_value("DB_PASSWORD", "password", "PASSWORD")
+    db_host = _resolve_config_value("DB_HOST", "HOST") or "db.steamcenter.tech"
+    db_name = _resolve_config_value("DB_NAME", "DATABASE", "DB_NAME") or "blueprint"
+
+    if not db_user or not db_password:
+        # Fail fast with a helpful message (do not include secrets)
+        raise RuntimeError("Database credentials not configured. Set DB_USER and DB_PASSWORD in your .env or environment.")
+
     conn = pymysql.connect(
-        host="db.steamcenter.tech",
-        user = config.user,
-        password = config.password,
-        database="blueprint",
-        autocommit= True,
-        cursorclass= pymysql.cursors.DictCursor
+        host=db_host,
+        user=db_user,
+        password=db_password,
+        database=db_name,
+        autocommit=True,
+        cursorclass=pymysql.cursors.DictCursor,
     )
     return conn
+
+
+def is_allowed_image_file(file_storage):
+    if not file_storage or not file_storage.filename:
+        return False
+
+    filename = secure_filename(file_storage.filename)
+    if "." not in filename:
+        return False
+
+    extension = filename.rsplit('.', 1)[1].lower()
+    if extension not in ALLOWED_IMAGE_EXTENSIONS:
+        return False
+
+    header = file_storage.read(512)
+    file_storage.seek(0)
+    file_type = imghdr.what(None, header)
+    return file_type in {"png", "jpeg", "gif", "bmp", "webp"}
+
 
 def hash_token(token: str) -> str:
     return hashlib.sha256(token.encode()).hexdigest()
@@ -143,8 +197,8 @@ def login_page():
             flash("Invalid email or password.", "error")
             return render_template("login.html.jinja")
 
-        # ✅ success
-        session.pop("has_seen_greeting", None)
+        # Regenerate session state after login to prevent fixation attacks
+        session.clear()
         login_user(User(result))
         session["has_seen_greeting"] = False
 
@@ -159,11 +213,11 @@ def login_page():
 def signup_page():
 
     if request.method == "POST":
-        name = request.form["full_name"]
-        email = request.form["email"]
+        name = request.form["full_name"].strip()
+        email = request.form["email"].strip().lower()
         password = request.form["password"]
         confirm_password = request.form["confirm_password"]
-        address = request.form["address"]
+        address = request.form["address"].strip()
 
         if password != confirm_password:
             flash("Passwords do not match", "error")
@@ -235,11 +289,9 @@ def forgot_password():
 
                 connection.commit()
 
-                # TEMPORARY: print link in terminal
-                print(f"""
-                    RESET LINK:
-                    http://127.0.0.1:5000/reset_password/{token}
-                                    """)
+                # In production, send password reset links by email instead of logging them.
+                # Avoid exposing tokens in logs.
+                pass
 
         finally:
             if cursor:
@@ -428,8 +480,6 @@ def complete_repair():
             # Get updated stats
             cursor.execute("SELECT points, repairs_completed, level FROM User WHERE ID = %s", (user_id,))
             stats = cursor.fetchone()
-            print(stats)
-            print(type(stats))
             connection.commit()
             
             # Check for new badges
@@ -453,7 +503,7 @@ def leaderboard():
     connection = connect_db()
     try:
         with connection.cursor(pymysql.cursors.DictCursor) as cursor:
-            cursor.execute("SELECT Name AS username, points, repairs_completed, level FROM `User` ORDER BY points DESC LIMIT 10")
+            cursor.execute("SELECT ID, Name AS username, points, repairs_completed, level FROM `User` ORDER BY points DESC LIMIT 10")
             top_user = cursor.fetchall()
         return render_template('leaderboard.html.jinja', users=top_user)
     finally:
@@ -479,7 +529,16 @@ def submit_repair():
     
     if not all([guide_id, before_img, after_img]):
         return jsonify({"error": "Missing fields"}), 400
-    
+
+    for image in (before_img, after_img):
+        image.seek(0, 2)
+        size = image.tell()
+        image.seek(0)
+        if size > MAX_UPLOAD_SIZE:
+            return jsonify({"error": "Each image must be under 5MB."}), 400
+        if not is_allowed_image_file(image):
+            return jsonify({"error": "Only valid image files are allowed."}), 400
+
     os.makedirs("static/repairs", exist_ok=True)
     import time
     ts = int(time.time())
@@ -531,9 +590,7 @@ def submit_repair():
             "level": stats['level'], 
             "new_badges": new_badges
         })
-    except Exception as e:
-        # Good practice to catch unexpected SQL errors in development
-        print(f"Database error: {e}")
+    except Exception:
         return jsonify({"error": "A database error occurred"}), 500
     finally:
         conn.close()
@@ -541,26 +598,92 @@ def submit_repair():
 
 @app.route('/user_repairs/<int:user_id>')
 def user_repairs(user_id):
+
     conn = connect_db()
+
     try:
-        with conn.cursor() as cursor:
-            cursor.execute("SELECT username FROM users WHERE id = %s", (user_id,))
+        with conn.cursor(pymysql.cursors.DictCursor) as cursor:
+
+            # Get user info (alias DB columns to match template keys)
+            cursor.execute(
+                "SELECT ID, Name AS name, Email, Address, points, repairs_completed, level FROM User WHERE ID = %s",
+                (user_id,)
+            )
+
             user = cursor.fetchone()
-            
+
+            if not user:
+                return "User not found", 404
+
+            # Get repairs
             cursor.execute("""
-                SELECT rs.*, g.Name as guide_name 
-                FROM repair_showcases rs 
-                LEFT JOIN guides g ON rs.guide_id = g.id 
-                WHERE rs.user_id = %s 
-                ORDER BY rs.created_at DESC
+                SELECT
+                    repair_showcases.*,
+                    RepairGuides.Name AS guide_name,
+                    RepairItems.Name AS device_name,
+                    RepairItems.Image AS device_image
+
+                FROM repair_showcases
+
+                LEFT JOIN RepairGuides
+                    ON repair_showcases.guide_id = RepairGuides.ID
+
+                LEFT JOIN RepairItems
+                    ON RepairGuides.Repair_Item_ID = RepairItems.ID
+
+                WHERE repair_showcases.user_id = %s
+
+                ORDER BY repair_showcases.created_at DESC
             """, (user_id,))
+
             repairs = cursor.fetchall()
-            
-        return render_template('user_repairs.html.jinja', user=user, repairs=repairs)
+
+        return render_template(
+            'user_repairs.html.jinja',
+            user=user,
+            repairs=repairs
+        )
+
     finally:
         conn.close()
 
+@app.route('/repair_showcase/<int:repair_id>')
+def repair_showcase(repair_id):
 
+    conn = connect_db()
+
+    try:
+        with conn.cursor(pymysql.cursors.DictCursor) as cursor:
+
+            cursor.execute("""
+                SELECT
+                    repair_showcases.*,
+                    RepairGuides.Name AS guide_name,
+                    User.name AS username
+
+                FROM repair_showcases
+
+                LEFT JOIN RepairGuides
+                    ON repair_showcases.guide_id = RepairGuides.ID
+
+                LEFT JOIN User
+                    ON repair_showcases.user_id = User.ID
+
+                WHERE repair_showcases.id = %s
+            """, (repair_id,))
+
+            repair = cursor.fetchone()
+
+            if not repair:
+                return "Repair not found", 404
+
+        return render_template(
+            "repair_showcase.html.jinja",
+            repair=repair
+        )
+
+    finally:
+        conn.close()
 
 @app.route("/repairs")
 def repair_page():
@@ -855,10 +978,9 @@ def update_quantity(product_id):
     except ValueError:
         flash("Invalid quantity.", "error")
 
-    except Exception as e:
+    except Exception:
         if connection:
             connection.rollback()
-        print(e)
         flash("Error updating quantity.", "error")
 
     finally:
@@ -889,10 +1011,9 @@ def remove_from_cart(product_id):
 
         flash("Item removed from cart.", "cart_success")
 
-    except Exception as e:
+    except Exception:
         if connection:
             connection.rollback()
-        print(e)
         flash("Error removing item from cart.", "error")
 
     finally:
@@ -999,7 +1120,6 @@ def thank_you():
 
 @app.route('/ai-help', methods=['POST'])
 @limiter.limit("100 per hour")
-@csrf.exempt
 def ai_help():
    
     try:
@@ -1011,13 +1131,14 @@ def ai_help():
         image = request.files.get("image")
 
         if image:
-            # Limit to 5MB
-            image.seek(0, 2)  # Seek to end
+            image.seek(0, 2)
             size = image.tell()
-            image.seek(0)  # Reset
-            if size > 5 * 1024 * 1024:
+            image.seek(0)
+            if size > MAX_UPLOAD_SIZE:
                 return jsonify({"reply": "⚠️ Image too large. Please upload under 5MB."}), 400
-            
+            if not is_allowed_image_file(image):
+                return jsonify({"reply": "⚠️ Invalid image file."}), 400
+
         guide_id = request.form.get("guide_id")
         
         image_path = None  # ✅ Track image path
@@ -1058,9 +1179,9 @@ def ai_help():
             "reply": result.get("summary", str(result))
         })
 
-    except Exception as e:
+    except Exception:
         return jsonify({
-            "reply": f"Server error: {str(e)}"
+            "reply": "Server error: please try again later."
         }), 500
 
 @app.route('/chat-history', methods=['GET'])
@@ -1126,9 +1247,6 @@ def edit_profile():
 @limiter.limit("3 per minute")
 def update_profile():
 
-    print("ROUTE HIT")
-    print("FORM DATA:", request.form)
-
     name = request.form.get("name", "").strip()
     email = request.form.get("email", "").strip().lower()
     address = request.form.get("address", "").strip()
@@ -1156,7 +1274,6 @@ def update_profile():
         return redirect("/profile")
 
     except Exception as e:
-        print("UPDATE ERROR:", repr(e))
         if connection:
             connection.rollback()
 
@@ -1194,9 +1311,17 @@ def upload_profile_pic():
 
         binary_data = base64.b64decode(encoded)
 
+        if len(binary_data) > MAX_UPLOAD_SIZE:
+            return jsonify({"success": False, "error": "Image is too large. Please upload under 5MB."}), 400
+
+        image_type = imghdr.what(None, binary_data)
+        if image_type not in {"jpeg", "png", "gif", "bmp", "webp"}:
+            return jsonify({"success": False, "error": "Invalid image format."}), 400
+
         os.makedirs(UPLOAD_FOLDER, exist_ok=True)
 
-        filename = f"{uuid.uuid4().hex}.jpg"
+        extension = "jpg" if image_type == "jpeg" else image_type
+        filename = f"{uuid.uuid4().hex}.{extension}"
         filepath = os.path.join(UPLOAD_FOLDER, filename)
 
         with open(filepath, "wb") as f:
@@ -1223,12 +1348,10 @@ def upload_profile_pic():
             "url": image_url
         })
 
-    except Exception as e:
-        print("UPLOAD ERROR:", repr(e))
-
+    except Exception:
         return jsonify({
             "success": False,
-            "error": str(e)
+            "error": "An error occurred while uploading the image."
         }), 500
 
     finally:
@@ -1345,8 +1468,6 @@ def delete_account():
     try:
         password = request.form.get("password", "").strip()
 
-        print("FORM DATA:", request.form)
-
         if not password:
             flash("Password required.", "error")
             return redirect("/profile")
@@ -1359,7 +1480,6 @@ def delete_account():
         cursor = connection.cursor()
 
         user_id = current_user.id
-        print("Deleting user:", user_id)
 
         cursor.execute("DELETE FROM User WHERE ID = %s", (user_id,))
         connection.commit()
@@ -1369,11 +1489,10 @@ def delete_account():
         flash("Account deleted successfully.", "success")
         return redirect("/")
 
-    except Exception as e:
+    except Exception:
         if connection:
             connection.rollback()
 
-        print("DELETE ERROR:", e)
         flash("Error deleting account.", "error")
         return redirect("/profile")
 

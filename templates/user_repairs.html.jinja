@@ -1,22 +1,109 @@
 <!DOCTYPE html>
-<html>
-<head><title>{{ user.username }}'s Repairs</title><script src="https://cdn.tailwindcss.com"></script></head>
-<body class="bg-gray-100 min-h-screen p-6">
-<div class="max-w-4xl mx-auto">
-    <h1 class="text-3xl font-bold mb-6">🔧 {{ user.username }}'s Repair History</h1>
-    {% for r in repairs %}
-    <div class="bg-white rounded-xl shadow p-6 mb-4">
-        <h3 class="text-xl font-bold mb-3">{{ r.guide_name or 'Repair' }}</h3>
-        <div class="grid grid-cols-2 gap-4 mb-4">
-            <div><p class="font-semibold mb-1">Before:</p><img src="/static/{{ r.before_image }}" class="rounded w-full"></div>
-            <div><p class="font-semibold mb-1">After:</p><img src="/static/{{ r.after_image }}" class="rounded w-full"></div>
-        </div>
-        {% if r.easy_parts %}<p><strong>✅ Easy:</strong> {{ r.easy_parts }}</p>{% endif %}
-        {% if r.difficult_parts %}<p><strong>⚠️ Hard:</strong> {{ r.difficult_parts }}</p>{% endif %}
-        <p class="text-xs text-gray-500 mt-2">{{ r.created_at }}</p>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{{ user['name'] }}'s Repairs</title>
+
+    <script src="https://cdn.tailwindcss.com"></script>
+</head>
+
+<body class="min-h-screen flex flex-col bg-[#0b2c4d] text-[#d6ecff] font-[Inter]">
+
+<div id="mainContent"
+     class="flex flex-col flex-grow transition-all duration-300"
+     style="margin-right: 0;">
+
+    {% include "components/navbar.html.jinja" %}
+
+<main class="flex-grow">
+<div class="max-w-5xl mx-auto">
+
+    <!-- HEADER -->
+    <div class="mb-10">
+
+        <h1 class="text-4xl font-bold mt-3">
+            🔧 {{ user['name'] }}'s Repairs
+        </h1>
+
+        <p class="text-blue-200">
+            Completed Repairs: {{ user['repairs_completed'] }}
+        </p>
+
     </div>
-    {% else %}<p>No repairs yet.</p>{% endfor %}
-    <a href="/leaderboard" class="block text-center bg-blue-600 text-white py-3 rounded-lg">← Back</a>
+
+    <!-- REPAIR GRID -->
+    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+
+        {% for r in repairs %}
+
+        <a href="/repair_showcase/{{ r['id'] }}"
+           class="bg-[#163d63]
+                  rounded-2xl
+                  p-6
+                  hover:ring-2
+                  hover:ring-[#6fb7ff]
+                  transition">
+
+            <div class="mb-4">
+                {% if r['device_image'] %}
+                <div class="bg-white rounded-lg mb-3 p-2 flex items-center justify-center h-48">
+                    <img src="{{ r['device_image'] }}" alt="{{ r['device_name'] }}" class="max-w-full max-h-full object-contain">
+                </div>
+                {% endif %}
+
+                <h2 class="text-xl font-bold mb-2">
+                    📱 {{ r['device_name'] or 'Unknown Device' }}
+                </h2>
+
+                <h3 class="text-lg font-semibold text-blue-300">
+                    {{ r['guide_name'] or 'Repair' }}
+                </h3>
+
+            </div>
+
+            <p class="text-blue-200 mb-4">
+                Click to view repair showcase
+            </p>
+
+            <p class="text-sm text-gray-300">
+                {{ r['created_at'] }}
+            </p>
+
+        </a>
+
+        {% endfor %}
+
+    </div>
+
+    {% if not repairs %}
+
+    <div class="text-center mt-20">
+
+        <h2 class="text-2xl font-bold mb-3">
+            No repairs uploaded yet
+        </h2>
+
+    </div>
+
+    {% endif %}
+
+    <!-- BACK -->
+    <div class="mt-10">
+
+        <a href="/leaderboard"
+           class="bg-blue-600 hover:bg-blue-700 px-6 py-3 rounded-xl font-bold">
+
+            ← Back to Leaderboard
+
+        </a>
+
+    </div>
+
 </div>
+</main>
+{%include "components/footer.html.jinja" %}
+</div>
+
 </body>
 </html>
