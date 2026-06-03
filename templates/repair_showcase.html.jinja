@@ -38,8 +38,8 @@
                         Before
                     </h2>
 
-                    <img src="/static/{{ repair['before_image'] }}"
-                        class="rounded-2xl w-full">
+                    <img src="{{ url_for('static', filename=repair['before_image']) }}"
+                        class="rounded w-full h-100 object-contain shadow-md" alt="Before repair">
                 </div>
 
                 <div>
@@ -47,8 +47,8 @@
                         After
                     </h2>
 
-                    <img src="/static/{{ repair['after_image'] }}"
-                        class="rounded-2xl w-full">
+                    <img src="{{ url_for('static', filename=repair['after_image']) }}"
+                        class="rounded w-full h-100 object-contain shadow-md" alt="After repair">
                 </div>
 
             </div>
