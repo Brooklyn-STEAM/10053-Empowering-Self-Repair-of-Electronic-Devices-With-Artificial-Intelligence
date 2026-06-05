@@ -4,6 +4,7 @@ from flask import Flask, render_template, request, flash, redirect, abort, url_f
 from flask_login import LoginManager, login_user, logout_user, login_required, current_user
 from flask_limiter import Limiter
 from flask_limiter.util import get_remote_address
+from flask_mail import Mail, Message
 import pymysql, re, sqlite3, mysql.connector, secrets, hashlib, pdfplumber, uuid
 from dynaconf import Dynaconf
 from dotenv import load_dotenv
@@ -17,7 +18,7 @@ from flask_wtf import CSRFProtect
 import base64
 import imghdr
 import uuid
-import os
+from werkzeug.exceptions import TooManyRequests
 
 UPLOAD_FOLDER = os.path.join("static", "uploads")
 ALLOWED_IMAGE_EXTENSIONS = {"png", "jpg", "jpeg", "gif", "bmp", "webp"}
@@ -31,6 +32,16 @@ csrf = CSRFProtect(app)
 load_dotenv()
 
 config = Dynaconf(settings_file=["settings.toml", ".env"])
+
+# Flask-Mail Configuration
+app.config['MAIL_SERVER'] = os.environ.get('MAIL_SERVER') or 'sandbox.smtp.mailtrap.io'
+app.config['MAIL_PORT'] = int(os.environ.get('MAIL_PORT') or 587)
+app.config['MAIL_USE_TLS'] = os.environ.get('MAIL_USE_TLS') == 'True' or True
+app.config['MAIL_USERNAME'] = os.environ.get('MAIL_USERNAME') or config.get('MAIL_USERNAME')
+app.config['MAIL_PASSWORD'] = os.environ.get('MAIL_PASSWORD') or config.get('MAIL_PASSWORD')
+app.config['MAIL_DEFAULT_SENDER'] = os.environ.get('MAIL_DEFAULT_SENDER') or config.get('MAIL_DEFAULT_SENDER') or 'noreply@blueprint-repair.com'
+
+mail = Mail(app)
 
 # client = OpenAI(api_key=config.get("OPENAI_API_KEY") or os.environ.get("OPENAI_API_KEY"))
 # client = Anthropic(api_key=config.get("ANTHROPIC_API_KEY") or os.environ.get("ANTHROPIC_API_KEY"))
@@ -146,6 +157,33 @@ def is_allowed_image_file(file_storage):
 def hash_token(token: str) -> str:
     return hashlib.sha256(token.encode()).hexdigest()
 
+
+def send_password_reset_email(recipient_email, user_name, reset_token):
+    """
+    Send a password reset email to the user with a secure reset link.
+    Safe for production: token is hashed in DB, link sent via email only.
+    """
+    try:
+        reset_url = url_for('reset_password', token=reset_token, _external=True)
+        
+        msg = Message(
+            subject='BluePrint: Reset Your Password',
+            recipients=[recipient_email],
+            html=render_template(
+                'emails/reset_password.html.jinja',
+                user_name=user_name,
+                reset_url=reset_url,
+                expiry_hours=1
+            )
+        )
+        
+        mail.send(msg)
+        return True
+    except Exception as e:
+        print(f"Failed to send password reset email: {e}")
+        return False
+
+
 @app.route("/")
 def index():
     
@@ -163,7 +201,7 @@ def index():
 
 
 @app.route("/login", methods=["POST", "GET"])
-@limiter.limit("5 per minute; 20 per hour")
+@limiter.limit("10 per minute; 20 per hour")
 def login_page():
 
     if request.method == "POST":
@@ -289,9 +327,12 @@ def forgot_password():
 
                 connection.commit()
 
-                # In production, send password reset links by email instead of logging them.
-                # Avoid exposing tokens in logs.
-                pass
+                # Send password reset email
+                send_password_reset_email(
+                    recipient_email=email,
+                    user_name=user.get('Name', 'User'),
+                    reset_token=token
+                )
 
         finally:
             if cursor:
@@ -852,6 +893,14 @@ def submit_review(product_id):
 @app.errorhandler(404)
 def page_not_found(e):
     return render_template("404.html.jinja"), 404
+
+@app.errorhandler(429)
+def ratelimit_handler(e):
+
+    return render_template(
+        "429.html.jinja",
+        message="Too many requests. Please wait a minute before trying again."
+    ), 429
 
 @app.route("/cart")
 @login_required
