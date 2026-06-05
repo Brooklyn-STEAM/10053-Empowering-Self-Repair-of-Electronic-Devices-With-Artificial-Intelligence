@@ -6,7 +6,7 @@ Flask-WTF==1.1.1
 WTForms==3.0.1
 PyMySQL==1.1.0
 mysql-connector-python==8.2.0
-python-dotenv==1.0.0
+python-dotenv==1.2.2
 Werkzeug==2.3.7
 Dynaconf==3.2.0
 langchain==0.1.0
