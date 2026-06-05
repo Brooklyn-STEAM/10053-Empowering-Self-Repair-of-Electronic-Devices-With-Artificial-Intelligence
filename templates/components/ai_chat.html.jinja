@@ -185,7 +185,13 @@ async function loadChatHistory() {
 
 async function clearChat() {
     try {
-        await fetch('/clear-chat', { method: 'POST' });
+        const csrfToken = document.querySelector('meta[name="csrf-token"]')?.getAttribute('content') || '';
+        await fetch('/clear-chat', { 
+            method: 'POST',
+            headers: {
+                'X-CSRFToken': csrfToken
+            }
+        });
         document.getElementById("chatBox").innerHTML = "";
     } catch (err) {
         console.error("Failed to clear chat:", err);
@@ -289,8 +295,13 @@ document.addEventListener("DOMContentLoaded", () => {
 
             sendBtn.disabled = true;
             msgInput.disabled = true;
+            
+            const csrfToken = document.querySelector('meta[name="csrf-token"]')?.getAttribute('content') || '';
             const res = await fetch("/ai-help", {
                 method: "POST",
+                headers: {
+                    'X-CSRFToken': csrfToken
+                },
                 body: formData
             });
 

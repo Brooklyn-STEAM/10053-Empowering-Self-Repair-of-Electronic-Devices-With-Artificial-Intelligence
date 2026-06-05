@@ -38,8 +38,10 @@
                         Before
                     </h2>
 
-                    <img src="{{ url_for('static', filename=repair['before_image']) }}"
-                        class="rounded w-full h-100 object-contain shadow-md" alt="Before repair">
+                    <div class="bg-gray-800 rounded-lg overflow-hidden shadow-md flex items-center justify-center" style="aspect-ratio: 4/3;">
+                        <img src="{{ url_for('static', filename=repair['before_image']) }}"
+                            class="w-full h-full object-contain" alt="Before repair">
+                    </div>
                 </div>
 
                 <div>
@@ -47,8 +49,10 @@
                         After
                     </h2>
 
-                    <img src="{{ url_for('static', filename=repair['after_image']) }}"
-                        class="rounded w-full h-100 object-contain shadow-md" alt="After repair">
+                    <div class="bg-gray-800 rounded-lg overflow-hidden shadow-md flex items-center justify-center" style="aspect-ratio: 4/3;">
+                        <img src="{{ url_for('static', filename=repair['after_image']) }}"
+                            class="w-full h-full object-contain" alt="After repair">
+                    </div>
                 </div>
 
             </div>
