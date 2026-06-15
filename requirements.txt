@@ -7,7 +7,7 @@ WTForms==3.0.1
 PyMySQL==1.1.0
 mysql-connector-python==8.2.0
 python-dotenv==1.0.0
-Werkzeug==2.3.7
+Werkzeug==3.1.6
 Dynaconf==3.2.0
 langchain==0.1.0
 langchain-community==0.0.1
